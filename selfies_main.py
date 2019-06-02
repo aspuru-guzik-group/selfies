@@ -1,17 +1,41 @@
 # =============================================================================
 # 
 # SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-# Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
-# 
+#               v0.1.0, 01. June 2019
+# by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
+#
+# SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
+# robust representation of semantically constrained graphs. It is based on a Chomsky
+# type-2 grammar, augmented with two self-referencing functions. A main objective is
+# to use SELFIES as direct input into machine learning models, in particular
+# in generative models, for the generation of outputs with high validity.
+#
+# The code presented here is a concrete application of SELIFES in chemistry, for
+# the robust representation of molecule. We show the encoding and decoding of three
+# molecules from various databases, and the generation of a new, random molecule
+# with high semantical and syntactical validity.
+#
 # This file contains the encoder (SMILES -> SELFIES) and decoder (SELFIES -> SMILES),
 # as well as an example for creating random SELFIES.
 # 
+#
+# fully tested with Python 3.7.1 on
+#     - 134.000 molecules at QM9 database (https://www.nature.com/articles/sdata201422)
+#     - 250.000 molecues from the ZINC database (https://en.wikipedia.org/wiki/ZINC_database)
+#     - 72 million molecules from PubChem (https://pubchem.ncbi.nlm.nih.gov/)
+#     - 50.000 molecules for organic solar cells (https://www.sciencedirect.com/science/article/pii/S2542435117301307)
+#     - 1 million molecules from organic chemical reactions (https://pubs.rsc.org/en/content/articlehtml/2018/sc/c8sc02339e)
+#
+# supported:
+# - Python 3.7.2
+# - Python 3.7.1
+# - Python 3.6.8
+# - Python 3.6.7
+# - Python 2.7.15
+#
+#
 # For comments, bug reports or feature ideas, please send an email to
 # mario.krenn@utoronto.ca and alan@aspuru.com
-#
-# v1.0, 01.06.2019
-#
-# 
 # =============================================================================
 
 from random import randint
@@ -19,7 +43,7 @@ from selfies_fcts import make_brackets_around_atoms, reconfigure_smiles_numbers1
 
 def selfies_encoder(smiles,PrintErrorMessage=True):
     try:
-        preselfies1=make_brackets_around_atoms(smiles)         # Itemize Atoms
+        preselfies1=make_brackets_around_atoms(smiles)        # Itemize Atoms
         preselfies2=reconfigure_smiles_numbers1(preselfies1)  # Unique Ringsymbols
         preselfies3=reconfigure_smiles_numbers2(preselfies2)  # Rings as relative distance
         selfies=smiles_to_selfies(preselfies3)                # Create selfies
@@ -35,7 +59,7 @@ def selfies_decoder(selfies,PrintErrorMessage=True):
     smiles=-1
     if selfies!=-1:
         try:
-            presmiles1=selfies_to_smiles(selfies)    # Runs Grammar Rules
+            presmiles1=selfies_to_smiles(selfies)     # Runs Grammar Rules
             smiles=insert_rings_to_smiles(presmiles1) # Inserts Rings
         except  ValueError as err:
             if PrintErrorMessage:
@@ -46,6 +70,7 @@ def selfies_decoder(selfies,PrintErrorMessage=True):
     return smiles
     
 
+# Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
 selfies1=selfies_encoder(test_molecule1)
 smiles1=selfies_decoder(selfies1)
