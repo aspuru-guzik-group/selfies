@@ -1,6 +1,9 @@
 import math
 
-def make_brackets_around_atoms(smiles): # first function in the encoder: All atoms are itemized via brackets. 
+
+
+
+def _make_brackets_around_atoms(smiles): # first function in the encoder: All atoms are itemized via brackets. 
                                         # for example: C1=CO1O -> [C]1[=C][O][O]. 
                                         # Meaning that bond information is treated as part of the atom, to ensure semantical validity
                                         # Brackets define an element of the alphabet, and for each of them there is a rule vector in the grammar.
@@ -49,16 +52,16 @@ def make_brackets_around_atoms(smiles): # first function in the encoder: All ato
                 current_new_smiles+=pre_symbol+smiles[ii]
                 ii+=1
             else:
-                raise ValueError('make_brackets_around_atoms: Unknown symbol in the string.')
+                raise ValueError('_make_brackets_around_atoms: Unknown symbol in the string.')
 
         else:
-            raise ValueError('make_brackets_around_atoms: Unknown symbol in the string.')
+            raise ValueError('_make_brackets_around_atoms: Unknown symbol in the string.')
     return current_new_smiles
 
 
 
 
-def reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
+def _reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
     # list of unique identifiers, for purpose of speed, this list is hardcoded
     available_nums=['@$aa','@$ab','@$ac','@$ad','@$ae','@$af','@$ag','@$ah','@$ai','@$aj','@$ak','@$al','@$am','@$an','@$ao','@$ap','@$aq','@$ar','@$as','@$at','@$au','@$av','@$aw','@$ax','@$ay','@$az','@$ba','@$bb','@$bc','@$bd','@$be','@$bf','@$bg','@$bh','@$bi','@$bj','@$bk','@$bl','@$bm','@$bn','@$bo','@$bp','@$bq','@$br','@$bs','@$bt','@$bu','@$bv','@$bw','@$bx','@$by','@$bz','@$ca','@$cb','@$cc','@$cd','@$ce','@$cf','@$cg','@$ch','@$ci','@$cj','@$ck','@$cl','@$cm','@$cn','@$co','@$cp','@$cq','@$cr','@$cs','@$ct','@$cu','@$cv','@$cw','@$cx','@$cy','@$cz','@$da','@$db','@$dc','@$dd','@$de','@$df','@$dg','@$dh','@$di','@$dj','@$dk','@$dl','@$dm','@$dn','@$do','@$dp','@$dq','@$dr','@$ds','@$dt','@$du','@$dv']
     all_smiles=smiles.split('.')
@@ -91,7 +94,7 @@ def reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
         loop_count=0
         while cc<len(current_smiles_empty): # replace all rings with a unique identifier
             if cc<0:
-                raise ValueError('reconfigure_smiles_numbers1: Malformed ring.')
+                raise ValueError('_reconfigure_smiles_numbers1: Malformed ring.')
             letter=current_smiles_empty[cc]            
             if letter=='%':
                 current_num=current_smiles_empty[cc:cc+3]
@@ -104,14 +107,14 @@ def reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
             cc+=1
             loop_count+=1
             if loop_count>10000:
-                raise ValueError('reconfigure_smiles_numbers1: Malformed ring.')
+                raise ValueError('_reconfigure_smiles_numbers1: Malformed ring.')
         all_smiles_new=all_smiles_new+'.'+current_smiles
         
     return all_smiles_new[1:]
 
 
 
-def reconfigure_smiles_numbers2(smiles): # pairs of unique identifiers will be transformed into symbols which referes to the relative distance between them. all of them are of the form '%NNN'
+def _reconfigure_smiles_numbers2(smiles): # pairs of unique identifiers will be transformed into symbols which referes to the relative distance between them. all of them are of the form '%NNN'
     available_nums=['@$aa','@$ab','@$ac','@$ad','@$ae','@$af','@$ag','@$ah','@$ai','@$aj','@$ak','@$al','@$am','@$an','@$ao','@$ap','@$aq','@$ar','@$as','@$at','@$au','@$av','@$aw','@$ax','@$ay','@$az','@$ba','@$bb','@$bc','@$bd','@$be','@$bf','@$bg','@$bh','@$bi','@$bj','@$bk','@$bl','@$bm','@$bn','@$bo','@$bp','@$bq','@$br','@$bs','@$bt','@$bu','@$bv','@$bw','@$bx','@$by','@$bz','@$ca','@$cb','@$cc','@$cd','@$ce','@$cf','@$cg','@$ch','@$ci','@$cj','@$ck','@$cl','@$cm','@$cn','@$co','@$cp','@$cq','@$cr','@$cs','@$ct','@$cu','@$cv','@$cw','@$cx','@$cy','@$cz','@$da','@$db','@$dc','@$dd','@$de','@$df','@$dg','@$dh','@$di','@$dj','@$dk','@$dl','@$dm','@$dn','@$do','@$dp','@$dq','@$dr','@$ds','@$dt','@$du','@$dv']
     all_smiles=smiles.split('.')
     all_smiles_new=''
@@ -135,7 +138,7 @@ def reconfigure_smiles_numbers2(smiles): # pairs of unique identifiers will be t
                 elif len(str_ring_size)==3:
                     ring_sizeSymbol='%'+str_ring_size
                 else:
-                    raise ValueError('reconfigure_smiles_numbers2: Very long ring is not implemented.') # Rings larger than 999 Elements cannot be translated (can easily be extended if necessary)
+                    raise ValueError('_reconfigure_smiles_numbers2: Very long ring is not implemented.') # Rings larger than 999 Elements cannot be translated (can easily be extended if necessary)
                     
                 current_smiles=current_smiles[0:find_num_1]+current_smiles[find_num_1+4:find_num_2]+ring_sizeSymbol+current_smiles[find_num_2+4:]
             else:
@@ -146,14 +149,14 @@ def reconfigure_smiles_numbers2(smiles): # pairs of unique identifiers will be t
     return all_smiles_new[1:]
   
     
-def cumsum(int_list,cum_offset=0): # cumulative sum, without numpy (such that we dont need to include numpy at all)
+def _cumsum(int_list,cum_offset=0): # cumulative sum, without numpy (such that we dont need to include numpy at all)
     cum_list=[cum_offset]
     for x in int_list:
         cum_list.append(cum_list[-1]+x)
     return cum_list[1:]
     
 
-def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
+def _smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
     # the start_alphabet is used by Ring and Branch functions for evaluating numbers. i.e. [epsilon] stands for 0, [Ring1] stands for 1, ...
     # these functions use base 20, for example when a ring of size 5 is produces, it is [Ring1]N, where N='[Branch1_2]'. This alphabet is independent of the alphabet that is used for the whole derivation (which is defined in the main-file).
     # that means, it could happen that symbols of SELFIES, that are not part of the main alphabet (for example, my_alphabet in selfies_main.py), are still used in order to represent numbers. If necessary, here there is slight potential to reduce the number of elements of the alphabet.
@@ -197,9 +200,9 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
 
                 else:
                     if current_num<2:
-                        raise ValueError('smiles_to_selfies: Malformed Ring.')                    
+                        raise ValueError('_smiles_to_selfies: Malformed Ring.')                    
                     else:
-                        raise ValueError('smiles_to_selfies: Very large ring is not implemented.')
+                        raise ValueError('_smiles_to_selfies: Very large ring is not implemented.')
 
             elif (current_symbol=='=' or current_symbol=='#' or current_symbol=='\\' or current_symbol=='/' or current_symbol=='-') and tmp_smiles[0]=='%':
                 # explicit bond number for ring, for example C1CCC=1C leads to '[C][C][C][C][Expl=Ring1][Ring1][C]', where [Expl=Ring1] shows that it involves an explicit double bond,
@@ -222,9 +225,9 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
 
                 else:
                     if current_num<2:
-                        raise ValueError('smiles_to_selfies: Malformed Ring.')                    
+                        raise ValueError('_smiles_to_selfies: Malformed Ring.')                    
                     else:
-                        raise ValueError('smiles_to_selfies: Very large ring is not implemented.')
+                        raise ValueError('_smiles_to_selfies: Very large ring is not implemented.')
 
             
             elif current_symbol=='(': # branches are derived in a recursive way
@@ -248,7 +251,7 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
                         break
 
                 difference_of_list=[x - y for x, y in zip(open_vec, close_vec)]                
-                layer_of_brackets=cumsum(difference_of_list,1) # using cummulative sum to identify end of bracket
+                layer_of_brackets=_cumsum(difference_of_list,1) # using cummulative sum to identify end of bracket
                 
                 if 0 in layer_of_brackets:
                     sub_smiles=tmp_smiles[0:layer_of_brackets.index(0)]
@@ -258,7 +261,7 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
                     sub_smiles=tmp_smiles
                     tmp_smiles=[]
                     
-                sub_ds=smiles_to_selfies(sub_smiles) # recursive function call, to derive sub-string of SELFIES of branch
+                sub_ds=_smiles_to_selfies(sub_smiles) # recursive function call, to derive sub-string of SELFIES of branch
 
                 current_num=len(sub_ds)-len(sub_ds.replace('[',''))
 
@@ -309,10 +312,10 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
                         else:
                             transitions=transitions+'[Branch3_3]'+ring_symbol1+ring_symbol2+ring_symbol3+sub_ds                
                 else:
-                    raise ValueError('smiles_to_selfies: Very large branch is not implemented (current_num='+str(current_num)+').')
+                    raise ValueError('_smiles_to_selfies: Very large branch is not implemented (current_num='+str(current_num)+').')
             
             else:
-                raise ValueError('smiles_to_selfies: Unknown Symbol')
+                raise ValueError('_smiles_to_selfies: Unknown Symbol')
 
         all_smiles_new=all_smiles_new+'.'+transitions
         
@@ -320,19 +323,19 @@ def smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
       
 
 
-def get_next_selfies_symbol(tmp_ds): # get the next selfies symbol
+def _get_next_selfies_symbol(tmp_ds): # get the next selfies symbol
     next_symbol=''
     tmp_ds_new=tmp_ds
     if len(tmp_ds)<=2:
         return [next_symbol, tmp_ds_new]
     
     if tmp_ds[0]!='[':
-        raise ValueError('get_next_selfies_symbol: Decoding Problem 1: '+tmp_ds)
+        raise ValueError('_get_next_selfies_symbol: Decoding Problem 1: '+tmp_ds)
     
     end_of_symbol=tmp_ds.find(']')
     
     if end_of_symbol==-1:
-        raise ValueError('get_next_selfies_symbol: Decoding Problem 2: '+tmp_ds)
+        raise ValueError('_get_next_selfies_symbol: Decoding Problem 2: '+tmp_ds)
     else:
         next_symbol=tmp_ds[0:end_of_symbol+1]
         tmp_ds_new=tmp_ds_new[end_of_symbol+1:]
@@ -342,8 +345,8 @@ def get_next_selfies_symbol(tmp_ds): # get the next selfies symbol
     
 
 
-def selfies_to_smiles_derive(selfies,smiles):    
-    # Elements of start_alphabet, again, stand for integers (see comments in smiles_to_selfies function for more details)
+def __selfies_to_smiles_derive(selfies,smiles):    
+    # Elements of start_alphabet, again, stand for integers (see comments in _smiles_to_selfies function for more details)
     start_alphabet=['[epsilon]','[Ring1]','[Ring2]','[Branch1_1]','[Branch1_2]','[Branch1_3]','[Branch2_1]','[Branch2_2]','[Branch2_3]','[F]','[O]','[=O]','[N]','[=N]','[#N]','[C]','[=C]','[#C]','[S]','[=S]'];
             
     tmp_ds=selfies.replace('X','Z!') # X will be used as states of the derivation
@@ -354,7 +357,7 @@ def selfies_to_smiles_derive(selfies,smiles):
         before_smiles=smiles[0:next_X] # smiles before the non-terminal
         after_smiles=smiles[next_X+2:] # smiles after the non-terminal
                 
-        [current_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds) # the current selfies symbol gives the rule vector, and the current state indentifies the one specific, current rule.
+        [current_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds) # the current selfies symbol gives the rule vector, and the current state indentifies the one specific, current rule.
         
         # The semantic informations of this set of rules could be significantly extended and more details could be added. Here, we have semantic rules for the most important molecules in organic chemistry, Carbon, Oxygen, Nitrogen, Flour.
         # Other elements get a generic (very weak) restrictions
@@ -364,7 +367,7 @@ def selfies_to_smiles_derive(selfies,smiles):
                 new_smiles_symbol='X0'
             elif current_symbol.find('Ring')>=0 or current_symbol.find('Branch')>=0:    
                 new_smiles_symbol='X0'
-                [_,tmp_ds]=get_next_selfies_symbol(tmp_ds)  # ignore next symbol                 
+                [_,tmp_ds]=_get_next_selfies_symbol(tmp_ds)  # ignore next symbol                 
             elif current_symbol=='[F]':
                 new_smiles_symbol='[F]X1'
             elif current_symbol=='[Cl]':
@@ -400,12 +403,12 @@ def selfies_to_smiles_derive(selfies,smiles):
                 new_smiles_symbol=''
             elif current_symbol.find('Branch')>=0:   
                 new_smiles_symbol='X0'
-                [_,tmp_ds]=get_next_selfies_symbol(tmp_ds)  # ignore next symbol               
+                [_,tmp_ds]=_get_next_selfies_symbol(tmp_ds)  # ignore next symbol               
             elif current_symbol.find('Ring1]')>=0:
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     ring_num=str(start_alphabet.index(next_symbol)+2)
                 else:
@@ -418,13 +421,13 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
             elif current_symbol.find('Ring2]')>=0:
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]                
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     ring_num_1=(start_alphabet.index(next_symbol1)+1)*20
                     ring_num_2=start_alphabet.index(next_symbol2)                
@@ -439,7 +442,7 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol=='[F]':
                 new_smiles_symbol='[F]'
@@ -478,7 +481,7 @@ def selfies_to_smiles_derive(selfies,smiles):
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]                     
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     ring_num=str(start_alphabet.index(next_symbol)+2)
                 else:
@@ -491,14 +494,14 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X1'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol.find('Ring2]')>=0:
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]                      
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     ring_num_1=(start_alphabet.index(next_symbol1)+1)*20
                     ring_num_2=start_alphabet.index(next_symbol2)                
@@ -513,10 +516,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X1'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol=='[Branch1_1]' or current_symbol=='[Branch1_2]' or current_symbol=='[Branch1_3]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -524,17 +527,17 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'
 
             elif current_symbol=='[Branch2_1]' or current_symbol=='[Branch2_2]' or current_symbol=='[Branch2_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -544,19 +547,19 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'
                 
 
             elif current_symbol=='[Branch3_1]' or current_symbol=='[Branch3_2]' or current_symbol=='[Branch3_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -567,10 +570,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
 
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'              
@@ -613,7 +616,7 @@ def selfies_to_smiles_derive(selfies,smiles):
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]                  
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     ring_num=str(start_alphabet.index(next_symbol)+2)
                 else:
@@ -626,14 +629,14 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X2'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol.find('Ring2]')>=0:
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]                    
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     ring_num_1=(start_alphabet.index(next_symbol1)+1)*20
                     ring_num_2=start_alphabet.index(next_symbol2)                
@@ -648,10 +651,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X2'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol=='[Branch1_1]' or current_symbol=='[Branch1_2]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -659,16 +662,16 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X2'
                 
             elif current_symbol=='[Branch1_3]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -676,17 +679,17 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'             
                 
             elif current_symbol=='[Branch2_1]' or current_symbol=='[Branch2_2]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -696,18 +699,18 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X2'
                 
                 
             elif current_symbol=='[Branch2_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -717,10 +720,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'
@@ -728,9 +731,9 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
 
             elif current_symbol=='[Branch3_1]' or current_symbol=='[Branch3_2]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -741,19 +744,19 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X2'
                 
                 
             elif current_symbol=='[Branch3_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -764,10 +767,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'                 
@@ -812,7 +815,7 @@ def selfies_to_smiles_derive(selfies,smiles):
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     ring_num=str(start_alphabet.index(next_symbol)+2)
                 else:
@@ -825,14 +828,14 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X4'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol.find('Ring2]')>=0:
                 pre_symbol=''
                 if current_symbol[1:5]=='Expl': # Explicit Bond Information
                     pre_symbol=current_symbol[5]
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 new_smiles_symbol='X4'
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     ring_num_1=(start_alphabet.index(next_symbol1)+1)*20
@@ -848,10 +851,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 elif len(ring_num)==3:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X4'
                 else:
-                    raise ValueError('selfies_to_smiles_derive: Problem with deriving very long ring.')
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
             elif current_symbol=='[Branch1_1]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -859,16 +862,16 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'
                 
             elif current_symbol=='[Branch1_2]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -876,16 +879,16 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'              
                 
             elif current_symbol=='[Branch1_3]':
-                [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if next_symbol in start_alphabet:
                     branch_num=start_alphabet.index(next_symbol)+1
                 else:
@@ -893,17 +896,17 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X7')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X7')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'
                 
             elif current_symbol=='[Branch2_1]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -913,18 +916,18 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'
                 
 
             elif current_symbol=='[Branch2_2]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -934,18 +937,18 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'            
                 
                 
             elif current_symbol=='[Branch2_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)   
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)   
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*20
                     branch_num2=start_alphabet.index(next_symbol2)
@@ -955,10 +958,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X7')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X7')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'
@@ -967,9 +970,9 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
 
             elif current_symbol=='[Branch3_1]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -980,19 +983,19 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X6')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X6')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'
                 
 
             elif current_symbol=='[Branch3_2]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -1003,19 +1006,19 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X5')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X5')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'         
                 
                 
             elif current_symbol=='[Branch3_3]':
-                [next_symbol1,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol2,tmp_ds]=get_next_selfies_symbol(tmp_ds)
-                [next_symbol3,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
                     branch_num1=(start_alphabet.index(next_symbol1)+1)*400
                     branch_num2=(start_alphabet.index(next_symbol2))*20
@@ -1026,10 +1029,10 @@ def selfies_to_smiles_derive(selfies,smiles):
                 
                 branch_str=''                
                 for bii in range(branch_num):
-                    [next_symbol,tmp_ds]=get_next_selfies_symbol(tmp_ds)
+                    [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                     branch_str+=next_symbol
                     
-                branch_smiles=selfies_to_smiles_derive(branch_str,'X7')
+                branch_smiles=__selfies_to_smiles_derive(branch_str,'X7')
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X4'         
@@ -1194,19 +1197,19 @@ def selfies_to_smiles_derive(selfies,smiles):
 
 
 
-def selfies_to_smiles(selfies): # here we derive molecule by molecule
+def _selfies_to_smiles(selfies): # here we derive molecule by molecule
     all_selfies=selfies.split('.') # the dot symbol characterizes the start of a new, independent molecule
     all_selfies_new=''
 
     for current_smiles in all_selfies:
-        all_selfies_new=all_selfies_new+'.'+selfies_to_smiles_derive(current_smiles,'X0') # derive the current selfies string in selfies_to_smiles_derive (this is a recursive function, and X0 is the starting state of the derivation)
+        all_selfies_new=all_selfies_new+'.'+__selfies_to_smiles_derive(current_smiles,'X0') # derive the current selfies string in __selfies_to_smiles_derive (this is a recursive function, and X0 is the starting state of the derivation)
             
     return all_selfies_new[1:] 
 
 
 
 
-def insert_rings_to_smiles(smiles):
+def _insert_rings_to_smiles(smiles):
     # For simplicity, rings are inserted after the full derivation. However, this does not change anything in the concept of the Grammar.
     
     available_nums=['@$aa','@$ab','@$ac','@$ad','@$ae','@$af','@$ag','@$ah','@$ai','@$aj','@$ak','@$al','@$am','@$an','@$ao','@$ap','@$aq','@$ar','@$as','@$at','@$au','@$av','@$aw','@$ax','@$ay','@$az','@$ba','@$bb','@$bc','@$bd','@$be','@$bf','@$bg','@$bh','@$bi','@$bj','@$bk','@$bl','@$bm','@$bn','@$bo','@$bp','@$bq','@$br','@$bs','@$bt','@$bu','@$bv','@$bw','@$bx','@$by','@$bz','@$ca','@$cb','@$cc','@$cd','@$ce','@$cf','@$cg','@$ch','@$ci','@$cj','@$ck','@$cl','@$cm','@$cn','@$co','@$cp','@$cq','@$cr','@$cs','@$ct','@$cu','@$cv','@$cw','@$cx','@$cy','@$cz','@$da','@$db','@$dc','@$dd','@$de','@$df','@$dg','@$dh','@$di','@$dj','@$dk','@$dl','@$dm','@$dn','@$do','@$dp','@$dq','@$dr','@$ds','@$dt','@$du','@$dv']
@@ -1303,3 +1306,40 @@ def insert_rings_to_smiles(smiles):
     smiles=smiles.replace('%0','%')
 
     return(smiles)
+    
+    
+    
+    
+    
+
+def encoder(smiles,PrintErrorMessage=True): # encodes SMILES -> SELFIES
+    try:
+        preselfies1=_make_brackets_around_atoms(smiles)        # Itemize Atoms
+        preselfies2=_reconfigure_smiles_numbers1(preselfies1)  # Unique Ringsymbols
+        preselfies3=_reconfigure_smiles_numbers2(preselfies2)  # Rings as relative distance
+        selfies=_smiles_to_selfies(preselfies3)                # Create selfies
+    except ValueError as err:
+        if PrintErrorMessage:
+            print(err)
+            print('Could not encode smiles string. Please contact authors.')
+        return -1
+        
+    return selfies
+    
+
+
+
+def decoder(selfies,PrintErrorMessage=True): # decodes SELFIES -> SMILES
+    smiles=-1
+    if selfies!=-1:
+        try:
+            presmiles1=_selfies_to_smiles(selfies)     # Runs Grammar Rules
+            smiles=_insert_rings_to_smiles(presmiles1) # Inserts Rings
+        except  ValueError as err:
+            if PrintErrorMessage:
+                print(err)            
+                print('Could not decode selfies string. Please contact authors.')
+            return -1
+    
+    return smiles
+    
