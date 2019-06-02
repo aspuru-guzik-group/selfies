@@ -38,8 +38,8 @@
 # mario.krenn@utoronto.ca and alan@aspuru.com
 # =============================================================================
 
-from random import randint
-from selfies_fcts import encoder, decoder
+from random  import randint
+from selfies import encoder, decoder
 
 # Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
