@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: selfies
+Version: 0.1.2
+Summary: Self-referencing embedded strings
+Home-page: https://github.com/aspuru-guzik-group/selfies
+Author: Mario Krenn
+Author-email: mario.krenn@utoronto.ca, alan@aspuru.com
+License: UNKNOWN
+Description: # selfies
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown

@@ -1,0 +1,9 @@
+README.md
+setup.py
+selfies/__init__.py
+selfies/selfies_fcts.py
+selfies/selfies_main.py
+selfies.egg-info/PKG-INFO
+selfies.egg-info/SOURCES.txt
+selfies.egg-info/dependency_links.txt
+selfies.egg-info/top_level.txt
