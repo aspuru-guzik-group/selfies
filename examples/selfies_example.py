@@ -1,7 +1,7 @@
 # =============================================================================
 # 
 # SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-#               v0.1.0, 01. June 2019
+#               v0.1.1, 02. June 2019
 # by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
 #
 # SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
