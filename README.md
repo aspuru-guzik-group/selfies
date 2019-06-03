@@ -6,6 +6,8 @@ type-2 grammar, augmented with two self-referencing functions. A main objective 
 to use SELFIES as direct input into machine learning models, in particular
 in generative models, for the generation of outputs with high validity.
 
+See the paper at arXiv: https://arxiv.org/abs/1905.13741
+
 The code presented here is a concrete application of SELFIES in chemistry, for
 the robust representation of molecule. We show the encoding and decoding of three
 molecules from various databases, and the generation of a new, random molecule
