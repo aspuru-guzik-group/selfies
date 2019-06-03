@@ -4,7 +4,7 @@ import math
 
 
 def _make_brackets_around_atoms(smiles): # first function in the encoder: All atoms are itemized via brackets. 
-                                        # for example: C1=CO1O -> [C]1[=C][O][O]. 
+                                        # for example: C1=CO1O -> [C]1[=C][O]1[O]. 
                                         # Meaning that bond information is treated as part of the atom, to ensure semantical validity
                                         # Brackets define an element of the alphabet, and for each of them there is a rule vector in the grammar.
     ii=0
