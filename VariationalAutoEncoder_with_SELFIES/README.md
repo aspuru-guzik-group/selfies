@@ -37,6 +37,10 @@ v0.1.0 -- 04. August 2019
      environment.yml
              shows dependencies
              Particularily important: RDKit and SELFIES (via 'pip install selfies')
+             
+     original\
+             contains the original codes and settings of hyperparameters in the paper
+             Not so easy to adapt to other datasets, so we recommend starting from chemistryVAE.py
     
     
 ### tested at:
