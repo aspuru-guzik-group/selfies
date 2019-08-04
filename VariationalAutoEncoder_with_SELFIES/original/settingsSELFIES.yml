@@ -1,0 +1,23 @@
+data:
+  batch_size: 190
+  cuda_device: 0
+  smiles_file: VAE_dependencies/Datasets/QM9/2RGSMILES_QM9.txt
+  type_of_encoding: 2
+decoder:
+  gru_neurons_num: 100
+  gru_stack_size: 1
+  latent_dimension: 25
+encoder:
+  latent_dimension: 25
+  layer_1d: 100
+  layer_2d: 50
+  layer_3d: 25
+training:
+  KLD_alpha: 3.9914730047188435e-06
+  checkpoint: true
+  latent_dimension: 25
+  lr_dec: 0.002427375401692564
+  lr_enc: 0.002427375401692564
+  num_epochs: 5000
+  sample_num: 1000
+  tensorBoard_graphing: false
