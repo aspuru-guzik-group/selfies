@@ -12,21 +12,24 @@ v0.1.0 -- 04. August 2019
      chemistry framework: RDKit     
      
      
+     chemistryVAE.py
+             main file, includes the model definitions, the training, the representation conversion
+     
      settings.yml
              contains link to data file containing SMILES encoded molecule, and
              hyperparameters of neural network model and training
              
-     get_selfie_and_smiles_encodings_for_dataset
+     chemistryVAE.py: get_selfie_and_smiles_encodings_for_dataset
              generate complete encoding (inclusive alphabet) for SMILES and SELFIES given a data file
                           
-     VAE_encode
+     chemistryVAE.py: VAE_encode
              fully connection, 3 layer neural network - encodes a one-hot representation
              of molecule (in SMILES or SELFIES representation) to latent space
              
-     VAE_decode
+     chemistryVAE.py: VAE_decode
              decodes point in latent space using an RNN
              
-     latent_space_quality
+     chemistryVAE.py: latent_space_quality
              samples points from latent space, decodes them into molecules,
              calculates chemical validity (using RDKit's MolFromSmiles), calculates
              diversity
