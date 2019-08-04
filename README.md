@@ -36,6 +36,8 @@ print('smiles1: '+smiles1+'\n')
 print('equal: '+str(test_molecule1==smiles1)+'\n\n\n')
 ```
 
+- an example of SELFIES in a generative model can be seen in the directory 'VariationalAutoEncoder_with_SELFIES\'. There, SMILES datasets are automatically translated into SELFIES, and used for training of a variational autoencoder (VAE).
+
 ### Python version
 fully tested with Python 3.7.1 on
 - 134.000 molecules at QM9 database (https://www.nature.com/articles/sdata201422)
