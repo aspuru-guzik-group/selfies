@@ -443,7 +443,7 @@ def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
         - longest smiles string
     """
 
-    df = pd.read_csv(file_name_smiles)
+    df = pd.read_csv(filename_data_set_file_smiles)
     smiles_list = np.asanyarray(df.smiles)
     smiles_alphabet=list(set(''.join(smiles_list)))
     largest_smiles_len=len(max(smiles_list, key=len))
