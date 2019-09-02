@@ -1,7 +1,7 @@
 # =============================================================================
 # 
 # SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-#               v0.1.1, 02. June 2019
+#               v0.2.0, 02. September 2019
 # by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
 #
 # SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
@@ -34,12 +34,34 @@
 # - Python 2.7.15
 #
 #
+# versions:
+# 0.2.0 (02.09.2019):
+#       - added:
+#           -> Decoder: added optional argument to restrict nitrogen to 3 bonds. decoder(...,N_restrict=False) to allow for more bonds;
+#                       standard: N_restrict=True
+#           -> Decoder: added optional argument make ring-function bi-local (i.e. confirms bond number at target).
+#                       decoder(...,bilocal_ring_function=False) to not allow bi-local ring function; standard:
+#                       bilocal_ring_function=True. The bi-local ring function will allow validity of >99.99% of random molecules
+#           -> Decoder: made double-bond ring RDKit syntax conform
+#           -> Decoder: added state X5 and X6 for having five and six bonds free
+#       - bug fixes:
+#            -> Decoder+Encoder: allowing for explicit brackets for organic atoms, for instance [I]
+#            -> Encoder: explicit single/double bond for non-canconical SMILES input issue fixed
+#            -> Decoder: bug fix for [Branch*] in state X1
+#       - we thank Benjamin Sanchez-Lengeling, Theophile Gaudin and Zhenpeng Yao for suggestions and bug reports 
+#
+# 0.1.1 (04.06.2019): 
+#       - initial release    
+#
+#
 # For comments, bug reports or feature ideas, please send an email to
 # mario.krenn@utoronto.ca and alan@aspuru.com
 # =============================================================================
 
-from random  import randint
+from random import randint
 from selfies import encoder, decoder
+
+print('SELFIES 0.2.0 - example file')
 
 # Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
@@ -73,7 +95,7 @@ my_alphabet=['[Branch1_1]','[Branch1_2]','[Branch1_3]','[Ring1]','[O]','[=O]','[
                                                                                                                                           # This alphabet can be extended with additional elements. For example, see the list start_alphabet in the function smiles_to_selfies.
                                                                                                                                           # Also when you run the three test-molecules above, you see the brackets that are used, and can use some of them.
                                                                                                                                           
-len_of_molecule=15 # Number of selfies symbols of the random string. The final SMILES string will not necessarily be of the same size, because some elements of this alphabet stop the derivation (such as Flour, as it can form only a single bond)
+len_of_molecule=30 # Number of selfies symbols of the random string. The final SMILES string will not necessarily be of the same size, because some elements of this alphabet stop the derivation (such as Flour, as it can form only a single bond)
                   
 rnd_selfies=''
 for ii in range(len_of_molecule):
