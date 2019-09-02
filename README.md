@@ -20,26 +20,6 @@ You can install SELFIES via
 pip install selfies
 ```
 
-
-### Versions
-#### 0.2.1 (02.09.2019):
-       - added:
-           -> Decoder: added optional argument to restrict nitrogen to 3 bonds. decoder(...,N_restrict=False) to allow for more bonds;
-                       standard: N_restrict=True
-           -> Decoder: added optional argument make ring-function bi-local (i.e. confirms bond number at target).
-                       decoder(...,bilocal_ring_function=False) to not allow bi-local ring function; standard:
-                       bilocal_ring_function=True. The bi-local ring function will allow validity of >99.99% of random molecules
-           -> Decoder: made double-bond ring RDKit syntax conform
-           -> Decoder: added state X5 and X6 for having five and six bonds free
-       - bug fixes:
-            -> Decoder+Encoder: allowing for explicit brackets for organic atoms, for instance [I]
-            -> Encoder: explicit single/double bond for non-canconical SMILES input issue fixed
-            -> Decoder: bug fix for [Branch*] in state X1
-       - we thank Benjamin Sanchez-Lengeling, Theophile Gaudin and Zhenpeng Yao for suggestions and bug reports 
-
-#### 0.1.1 (04.06.2019): 
-       - initial release 
-
 ### Examples
 Several examples can be seen in examples/selfies_example.py. Here is a simple encoding and decoding:
 
@@ -68,3 +48,24 @@ fully tested with Python 3.7.1 on
 
 supported:
 - Python 3.7.2, 3.7.1, 3.6.8, 3.6.7, 2.7.15
+
+
+
+### Versions
+#### 0.2.1 (02.09.2019):
+       - added:
+           -> Decoder: added optional argument to restrict nitrogen to 3 bonds. decoder(...,N_restrict=False) to allow for more bonds;
+                       standard: N_restrict=True
+           -> Decoder: added optional argument make ring-function bi-local (i.e. confirms bond number at target).
+                       decoder(...,bilocal_ring_function=False) to not allow bi-local ring function; standard:
+                       bilocal_ring_function=True. The bi-local ring function will allow validity of >99.99% of random molecules
+           -> Decoder: made double-bond ring RDKit syntax conform
+           -> Decoder: added state X5 and X6 for having five and six bonds free
+       - bug fixes:
+            -> Decoder+Encoder: allowing for explicit brackets for organic atoms, for instance [I]
+            -> Encoder: explicit single/double bond for non-canconical SMILES input issue fixed
+            -> Decoder: bug fix for [Branch*] in state X1
+       - we thank Benjamin Sanchez-Lengeling, Theophile Gaudin and Zhenpeng Yao for suggestions and bug reports 
+
+#### 0.1.1 (04.06.2019): 
+       - initial release 
