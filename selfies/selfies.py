@@ -397,14 +397,15 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
         # The semantic informations of this set of rules could be significantly extended and more details could be added. Here, we have semantic rules for the most important molecules in organic chemistry, Carbon, Oxygen, Nitrogen, Flour.
         # Other elements get a generic (very weak) restrictions
 
+
         if state==0:
             if current_symbol=='[epsilon]':
                 new_smiles_symbol='X0'
             elif current_symbol.find('Ring')>=0 or current_symbol.find('Branch')>=0:
                 new_smiles_symbol='X0'
                 [_,tmp_ds]=_get_next_selfies_symbol(tmp_ds)  # ignore next symbol  
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]X1'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]X1'
             elif current_symbol=='[Br]':
@@ -434,6 +435,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[C]X4'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[C]X4'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X4'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X3'
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X6'
             elif current_symbol=='[=S]':
@@ -488,8 +493,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
 
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -519,6 +524,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[C]X3'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[C]X3'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -631,8 +640,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'              
                 
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -662,6 +671,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[=C]X2'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -835,11 +848,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 branch_smiles=__selfies_to_smiles_derive(branch_str,'X9992',N_restrict)
                 new_smiles_symbol=''
                 if len(branch_smiles)>0:
-                    new_smiles_symbol='('+branch_smiles+')X1'                 
+                    new_smiles_symbol='('+branch_smiles+')X1'
                 
-                
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -866,9 +878,13 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
             elif current_symbol=='[C]':
                 new_smiles_symbol='[C]X3'
             elif current_symbol=='[=C]':
-                new_smiles_symbol='[=C]X2'
+                new_smiles_symbol='[=C]X2'            
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[#C]X1'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1105,10 +1121,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X1'         
 
-
-
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1138,6 +1152,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[#C]X1'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1372,9 +1390,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X2'     
 
-                
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1404,6 +1421,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[#C]X1'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1639,9 +1660,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 if len(branch_smiles)>0:
                     new_smiles_symbol='('+branch_smiles+')X3'     
 
-                
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1671,6 +1691,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[#C]X1'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1687,8 +1711,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol=''
             elif current_symbol.find('Ring')>=0 or current_symbol.find('Branch')>=0: 
                 new_smiles_symbol='X9991'
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1718,6 +1742,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[C]X3'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[C]X3'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1733,8 +1761,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol=''          
             elif current_symbol.find('Ring')>=0 or current_symbol.find('Branch')>=0: 
                 new_smiles_symbol='X9992' 
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1764,6 +1792,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[=C]X2'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1780,8 +1812,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol=''        
             elif current_symbol.find('Ring')>=0 or current_symbol.find('Branch')>=0: 
                 new_smiles_symbol='X9993'     
-            elif current_symbol=='[F]':
-                new_smiles_symbol='[F]'
+            elif current_symbol=='[F]' or current_symbol=='[H]':
+                new_smiles_symbol=current_symbol
             elif current_symbol=='[Cl]':
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
@@ -1811,6 +1843,10 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[=C]X2'
             elif current_symbol=='[#C]':
                 new_smiles_symbol='[#C]X1'
+            elif current_symbol=='[C@expl]' or current_symbol=='[C@@expl]':
+                new_smiles_symbol=current_symbol+'X3'
+            elif current_symbol=='[C@Hexpl]' or current_symbol=='[C@@Hexpl]':
+                new_smiles_symbol=current_symbol+'X2'                   
             elif current_symbol=='[S]':
                 new_smiles_symbol='[S]X5'
             elif current_symbol=='[=S]':
@@ -1963,8 +1999,6 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
         smiles=smiles[0:cc+1]+smiles[cc_init+2:cc_init+6]+smiles[cc+1:cc_init+2]+smiles[cc_init+6:]
         pos=smiles.find(')_')
          
-
-
     ring_counter=1
     while True:
         pos_of_ring_symbol=smiles.find('_')
@@ -1989,7 +2023,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                 allowed_bond_at_target=42   # some large number
                 if bilocal_ring_function:
                     target_atom_type=smiles[r_count-1]
-                    if target_atom_type=='F':
+                    if target_atom_type=='F' or target_atom_type=='H':
                         allowed_bond_at_target=1
                     elif target_atom_type=='O':
                         allowed_bond_at_target=2
@@ -1998,8 +2032,16 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                             allowed_bond_at_target=3
                     elif target_atom_type=='C':
                         allowed_bond_at_target=4    
-                    elif target_atom_type=='S':
-                        allowed_bond_at_target=6                          
+                    elif target_atom_type=='S' or target_atom_type=='P':
+                        allowed_bond_at_target=6
+                    elif target_atom_type=='l':
+                        if smiles[r_count-2]=='p':
+                            if smiles[r_count-3]=='x':
+                                if smiles[r_count-4]=='e':
+                                     if smiles[r_count-5]=='@': # [C@@] or [C@]
+                                         allowed_bond_at_target=4
+                                     elif smiles[r_count-5]=='H' and smiles[r_count-6]=='@': # [C@@H] or [C@H]
+                                         allowed_bond_at_target=3
     
                     if smiles[1:r_count].find('[')>=0: # bond with previous 
                         if smiles[1:r_count].find('.')>=0:
@@ -2050,7 +2092,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                                 while b_cnt>0:
                                     if tmp_str2[gg]==')':            
                                         b_cnt-=1
-                                    if tmp_str2[gg]=='(':            
+                                    if tmp_str2[gg]=='(': 
                                         b_cnt+=1
                                     gg+=1
                                 tmp_str3=tmp_str2[gg:]
@@ -2115,9 +2157,12 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
     # rewrite to match definition of double ring in RDKit as X1YYYYYYZ=1
     dd=0
     
+    
     while True:
         if dd>len(smiles)-9:
             break
+
+        
 
         if smiles[dd:dd+2]=='@$' and smiles[dd+4:dd+6]=='@$': # double ring input
             double_ring_idf=smiles[dd:dd+8]
@@ -2272,7 +2317,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
 def encoder(smiles,PrintErrorMessage=True): # encodes SMILES -> SELFIES
     """
     SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-                  v0.2.1, 02. September 2019
+                  v0.2.2, 19. September 2019
     by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
 
     SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
