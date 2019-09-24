@@ -63,7 +63,7 @@
 # =============================================================================
 
 from random import randint
-from selfies_fcts import encoder, decoder
+from selfies import encoder, decoder
 
 from rdkit.Chem import MolFromSmiles
 
