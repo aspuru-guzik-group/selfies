@@ -52,6 +52,12 @@ supported:
 
 
 ### Versions
+#### 0.2.2 (19.09.2019):
+       - added:
+           -> Enabled [C@],[C@H],[C@@],[C@@H],[H] to use in a semantic constrained way
+       - we thank Andrew Brereton for suggestions and bug reports 
+
+
 #### 0.2.1 (02.09.2019):
        - added:
            -> Decoder: added optional argument to restrict nitrogen to 3 bonds. decoder(...,N_restrict=False) to allow for more bonds;
