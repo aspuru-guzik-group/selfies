@@ -35,7 +35,7 @@
 #
 #
 # versions:
-# 0.2.3 (01.10.2019):
+# 0.2.4 (01.10.2019):
 #       - added:
 #           -> functon selfies_alphabet() which returns a list of 29 selfies symbols whos arbitrary combination produce >99.99% valid molecules
 #       - bug fixes:
