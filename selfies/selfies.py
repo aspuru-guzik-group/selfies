@@ -1,13 +1,17 @@
 import math
 
 
+def selfies_alphabet():
+    alphabet=['[Branch1_1]','[Branch1_2]','[Branch1_3]','[Ring1]','[Branch2_1]','[Branch2_2]','[Branch2_3]','[Ring2]','[Branch3_1]','[Branch3_2]','[Branch3_3]','[Ring3]','[O]','[=O]','[N]','[=N]','[C]','[=C]','[#C]','[S]','[=S]','[P]','[F]','[C@Hexpl]','[C@@Hexpl]','[C@expl]','[C@@expl]','[H]','[NHexpl]']; 
+    return alphabet
+
 
 def _make_brackets_around_atoms(smiles): # first function in the encoder: All atoms are itemized via brackets. 
                                          # for example: C1=CO1O -> [C]1[=C][O][O]. 
                                          # Meaning that bond information is treated as part of the atom, to ensure semantical validity
                                          # Brackets define an element of the alphabet, and for each of them there is a rule vector in the grammar.
-                                        
-                                        
+
+
     ii=0
     smiles=smiles.replace(' ','')
     current_new_smiles=''
@@ -68,7 +72,7 @@ def _reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
     all_smiles=smiles.split('.')
     all_smiles_new=''
 
-    for current_smiles in all_smiles: # make all rings of the form '%NN'
+    for current_smiles in all_smiles: # make all rings of the form '%NNNN'
         current_smiles_empty=current_smiles
         in_bracket=0
         jj=0
@@ -85,7 +89,7 @@ def _reconfigure_smiles_numbers1(smiles): # All rings get a unique identifiers
                 current_smiles_empty=current_smiles_empty[0:jj]+'%0'+current_smiles_empty[jj:]
                 current_smiles=current_smiles[0:jj]+'%0'+current_smiles[jj:]
                 jj+=2
-                
+
             if current_smiles_empty[jj]=='%':
                 jj+=2
             jj+=1
@@ -162,13 +166,15 @@ def _reconfigure_smiles_numbers2(smiles): # pairs of unique identifiers will be 
                 str_ring_size=str(ring_size)
                 
                 if len(str_ring_size)==1:
-                    ring_sizeSymbol='%00'+str_ring_size
+                    ring_sizeSymbol='%000'+str_ring_size
                 elif len(str_ring_size)==2:
-                    ring_sizeSymbol='%0'+str_ring_size
+                    ring_sizeSymbol='%00'+str_ring_size
                 elif len(str_ring_size)==3:
-                    ring_sizeSymbol='%'+str_ring_size
+                    ring_sizeSymbol='%0'+str_ring_size
+                elif len(str_ring_size)==4:
+                    ring_sizeSymbol='%'+str_ring_size                    
                 else:
-                    raise ValueError('_reconfigure_smiles_numbers2: Very long ring is not implemented.') # Rings larger than 999 Elements cannot be translated (can easily be extended if necessary)
+                    raise ValueError('_reconfigure_smiles_numbers2: Very long ring is not implemented.') # Rings larger than 9.999 Elements cannot be translated (can easily be extended if necessary)
                     
                 current_smiles=current_smiles[0:find_num_1]+current_smiles[find_num_1+4:find_num_2]+ring_sizeSymbol+current_smiles[find_num_2+4:]
             else:
@@ -213,21 +219,29 @@ def _smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
                 transitions=transitions+'['+current_symbol+']'
 
             elif current_symbol=='%': # this identifies a Ring
-                next_symbol=tmp_smiles[0:3]
-                tmp_smiles=tmp_smiles[3:]
+                next_symbol=tmp_smiles[0:4]
+                tmp_smiles=tmp_smiles[4:]
 
                 current_num=int(next_symbol)
-                if current_num>=2 and current_num<=400:
+                if current_num>=2 and current_num<=8000:
                     if current_num<=20:
                         ring_symbol=start_alphabet[current_num-2]
                         transitions=transitions+'[Ring1]'+ring_symbol 
-                    else:
+                    elif current_num<=400:
                         ring_num_1=int(math.floor(current_num/20.))
                         ring_num_2=current_num%20
                         ring_symbol1=start_alphabet[ring_num_1-1]
                         ring_symbol2=start_alphabet[ring_num_2]
-
-                        transitions=transitions+'[Ring2]'+ring_symbol1+ring_symbol2
+                        transitions=transitions+'[Ring2]'+ring_symbol1+ring_symbol2                        
+                    else:
+                        ring_num_1=int(math.floor(current_num/400.))
+                        current_num1=current_num-ring_num_1*400
+                        ring_num_2=int(math.floor(current_num1/20.))
+                        ring_num_3=current_num1-ring_num_2*20
+                        ring_symbol1=start_alphabet[ring_num_1-1]
+                        ring_symbol2=start_alphabet[ring_num_2]
+                        ring_symbol3=start_alphabet[ring_num_3]
+                        transitions=transitions+'[Ring3]'+ring_symbol1+ring_symbol2+ring_symbol3
 
                 else:
                     if current_num<2:
@@ -239,21 +253,29 @@ def _smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
                 # explicit bond number for ring, for example C1CCC=1C leads to '[C][C][C][C][Expl=Ring1][Ring1][C]', where [Expl=Ring1] shows that it involves an explicit double bond,
                 # and that the next symbol shows the size of the ring
                 pre_symbol=current_symbol
-                next_symbol=tmp_smiles[1:4]
-                tmp_smiles=tmp_smiles[4:]
+                next_symbol=tmp_smiles[1:5]
+                tmp_smiles=tmp_smiles[5:]
                 current_num=int(next_symbol)
-                if current_num>=2 and current_num<=400:
+                if current_num>=2 and current_num<=8000:
                     if current_num<=20:
                         ring_symbol=start_alphabet[current_num-2]
                         transitions=transitions+'[Expl'+pre_symbol+'Ring1]'+ring_symbol 
-                    else:
+                    elif current_num<=400:
                         ring_num_1=int(math.floor(current_num/20.))
                         ring_num_2=current_num%20
                         ring_symbol1=start_alphabet[ring_num_1-1]
                         ring_symbol2=start_alphabet[ring_num_2]
 
                         transitions=transitions+'[Expl'+pre_symbol+'Ring2]'+ring_symbol1+ring_symbol2
-
+                    else:
+                        ring_num_1=int(math.floor(current_num/400.))
+                        current_num1=current_num-ring_num_1*400
+                        ring_num_2=int(math.floor(current_num1/20.))
+                        ring_num_3=current_num1-ring_num_2*20
+                        ring_symbol1=start_alphabet[ring_num_1-1]
+                        ring_symbol2=start_alphabet[ring_num_2]
+                        ring_symbol3=start_alphabet[ring_num_3]
+                        transitions=transitions+'[Expl'+pre_symbol+'Ring3]'+ring_symbol1+ring_symbol2+ring_symbol3
                 else:
                     if current_num<2:
                         raise ValueError('_smiles_to_selfies: Malformed Ring.')                    
@@ -351,7 +373,7 @@ def _smiles_to_selfies(smiles): # translating the prepared string into SELFIES.
         all_smiles_new=all_smiles_new+'.'+transitions
         
     return all_smiles_new[1:]
-      
+
 
 
 def _get_next_selfies_symbol(tmp_ds): # get the next selfies symbol
@@ -372,8 +394,7 @@ def _get_next_selfies_symbol(tmp_ds): # get the next selfies symbol
         tmp_ds_new=tmp_ds_new[end_of_symbol+1:]
         
     return [next_symbol, tmp_ds_new]
-    
-    
+
 
 
 def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):    
@@ -397,7 +418,6 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
         # The semantic informations of this set of rules could be significantly extended and more details could be added. Here, we have semantic rules for the most important molecules in organic chemistry, Carbon, Oxygen, Nitrogen, Flour.
         # Other elements get a generic (very weak) restrictions
 
-
         if state==0:
             if current_symbol=='[epsilon]':
                 new_smiles_symbol='X0'
@@ -410,8 +430,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]X1'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]X1'
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X2'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X2'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[O]X2'
             elif current_symbol=='[N]':
@@ -462,12 +482,14 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num=str(start_alphabet.index(next_symbol)+2)
                 else:
                     ring_num='5'
-                
+
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -485,13 +507,42 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
                     
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
 
             elif current_symbol=='[F]' or current_symbol=='[H]':
                 new_smiles_symbol=current_symbol
@@ -499,8 +550,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[O]'
             elif current_symbol=='[N]':
@@ -550,10 +601,12 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
                     
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X1'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X1'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X1'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X1'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X1'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X1'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -572,13 +625,42 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
                     
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X1'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X1'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X1'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X1'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X1'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X1'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X1'
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X1'
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X1'
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num+'X1'
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
 
             elif current_symbol=='[Branch1_1]' or current_symbol=='[Branch1_2]' or current_symbol=='[Branch1_3]':
                 [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
@@ -646,8 +728,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -698,10 +780,12 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
                     
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X2'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X2'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X2'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X2'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X2'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X2'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -720,13 +804,43 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
                     
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X2'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X2'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X2'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X2'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X2'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X2'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X2'
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X2'
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X2'
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num+'X2'
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+
 
             elif current_symbol=='[Branch1_1]' or current_symbol=='[Branch1_2]':
                 [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
@@ -856,8 +970,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -909,10 +1023,12 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'                
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X3'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X3'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X3'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X3'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X3'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X3'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -932,13 +1048,42 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X3'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X3'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X3'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X3'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X3'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X3'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X3'
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X3'
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X3'
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num+'X3'
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
 
             elif current_symbol=='[Branch1_1]':
                 [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
@@ -1127,8 +1272,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -1180,10 +1325,12 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'                
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X4'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X4'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X4'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X4'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X4'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X4'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -1203,13 +1350,42 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X4'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X4'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X4'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X4'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X4'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X4'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X4'
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X4'
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X4'
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num+'X4'
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
 
             elif current_symbol=='[Branch1_1]':
                 [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
@@ -1396,8 +1572,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -1450,10 +1626,12 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'                
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X5'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X5'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X5'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X5'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X5'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X5'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
@@ -1464,7 +1642,6 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     pre_symbol=current_symbol[5]
                 [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
                 [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
-                new_smiles_symbol='X6'
                 if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet):
                     ring_num_1=(start_alphabet.index(next_symbol1)+1)*20
                     ring_num_2=start_alphabet.index(next_symbol2)                
@@ -1473,13 +1650,42 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                     ring_num='5'
 
                 if len(ring_num)==1:
-                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X5'
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X5'
                 elif len(ring_num)==2:
-                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X5'
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X5'
                 elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X5'
+                elif len(ring_num)==4:
                     new_smiles_symbol=pre_symbol+'%'+ring_num+'X5'
                 else:
                     raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
+            elif current_symbol.find('Ring3]')>=0:
+                pre_symbol=''
+                if current_symbol[1:5]=='Expl': # Explicit Bond Information
+                    pre_symbol=current_symbol[5]                
+                [next_symbol1,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol2,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                [next_symbol3,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
+                if (next_symbol1 in start_alphabet) and (next_symbol2 in start_alphabet) and (next_symbol3 in start_alphabet):
+                    ring_num_1=(start_alphabet.index(next_symbol1)+1)*400
+                    ring_num_2=(start_alphabet.index(next_symbol2))*20
+                    ring_num_3=start_alphabet.index(next_symbol3)
+                    ring_num=str(ring_num_1+ring_num_2+ring_num_3)
+                else:
+                    ring_num='5'
+
+                if len(ring_num)==1:
+                    new_smiles_symbol=pre_symbol+'%000'+ring_num+'X5'
+                elif len(ring_num)==2:
+                    new_smiles_symbol=pre_symbol+'%00'+ring_num+'X5'
+                elif len(ring_num)==3:
+                    new_smiles_symbol=pre_symbol+'%0'+ring_num+'X5'
+                elif len(ring_num)==4:
+                    new_smiles_symbol=pre_symbol+'%'+ring_num+'X5'
+                else:
+                    raise ValueError('__selfies_to_smiles_derive: Problem with deriving very long ring.')
+
 
             elif current_symbol=='[Branch1_1]':
                 [next_symbol,tmp_ds]=_get_next_selfies_symbol(tmp_ds)
@@ -1666,8 +1872,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -1717,8 +1923,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[O]'
             elif current_symbol=='[N]':
@@ -1767,8 +1973,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -1818,8 +2024,8 @@ def __selfies_to_smiles_derive(selfies,smiles,N_restrict=True):
                 new_smiles_symbol='[Cl]'
             elif current_symbol=='[Br]':
                 new_smiles_symbol='[Br]'                  
-            elif current_symbol=='[O]':
-                new_smiles_symbol='[O]X1'
+            elif current_symbol=='[O]' or current_symbol=='[NHexpl]':
+                new_smiles_symbol=current_symbol+'X1'
             elif current_symbol=='[=O]':
                 new_smiles_symbol='[=O]'
             elif current_symbol=='[N]':
@@ -1898,6 +2104,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
     # by grammar, at destination by the extended ring-function) leads to extremly high
     # validities beyond 99.99% even for random strings.
     
+    
     available_nums=['@$aa','@$ab','@$ac','@$ad','@$ae','@$af','@$ag','@$ah','@$ai','@$aj','@$ak','@$al','@$am','@$an','@$ao','@$ap','@$aq','@$ar','@$as','@$at','@$au','@$av','@$aw','@$ax','@$ay','@$az','@$ba','@$bb','@$bc','@$bd','@$be','@$bf','@$bg','@$bh','@$bi','@$bj','@$bk','@$bl','@$bm','@$bn','@$bo','@$bp','@$bq','@$br','@$bs','@$bt','@$bu','@$bv','@$bw','@$bx','@$by','@$bz','@$ca','@$cb','@$cc','@$cd','@$ce','@$cf','@$cg','@$ch','@$ci','@$cj','@$ck','@$cl','@$cm','@$cn','@$co','@$cp','@$cq','@$cr','@$cs','@$ct','@$cu','@$cv','@$cw','@$cx','@$cy','@$cz','@$da','@$db','@$dc','@$dd','@$de','@$df','@$dg','@$dh','@$di','@$dj','@$dk','@$dl','@$dm','@$dn','@$do','@$dp','@$dq','@$dr','@$ds','@$dt','@$du','@$dv']
     unique_nums=[]
     for ii in range(200):
@@ -1907,31 +2114,30 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
         elif len(num_str)==2:
             num_str='%0'+num_str   
         elif len(num_str)==3:
-            num_str='%'+num_str 
+            num_str='%'+num_str           
         unique_nums.append(num_str)
 
-    smiles=smiles.replace('%','_') # to avoid conflicts when adding numbers
+    smiles=smiles.replace('%','_') # to avoid conflicts when adding numbers (%NNNN is the size of the ring, unique_nums will be identifier-pairs)
 
     # one additional rule, which can easily encoded into the grammar itself (similar as states X0)
     # for the initial state, or X9991-X9993 for the states after a branch, one could have three initial state classes)
     
-
     atom1=smiles[1:].find(']')
     if len(smiles)>atom1+2:
         if smiles[atom1+2]=='_':    
-            smiles=smiles[0:atom1+2]+smiles[atom1+6:] # after first atom
+            smiles=smiles[0:atom1+2]+smiles[atom1+7:] # ring after first atom
             atom1=smiles[1:].find(']')
 
     if atom1>=0:
         atom2=smiles[atom1+2:].find(']')
         if atom2>=0 and len(smiles)>atom1+atom2+3:
             if smiles[atom1+atom2+3]=='_':
-                smiles=smiles[0:atom1+atom2+3]+smiles[atom1+atom2+7:] # after second atom
+                smiles=smiles[0:atom1+atom2+3]+smiles[atom1+atom2+8:] # after second atom
             elif smiles[atom1+atom2+3]=='(':
                 pos_end=smiles[atom1+atom2+4:].find(')')
                 if len(smiles)>atom1+atom2+5+pos_end:
                     if smiles[atom1+atom2+5+pos_end]=='_':
-                        smiles=smiles[0:atom1+atom2+5+pos_end]+smiles[atom1+atom2+9+pos_end:]
+                        smiles=smiles[0:atom1+atom2+5+pos_end]+smiles[atom1+atom2+10+pos_end:]
 
     if len(smiles)>atom1+2:
         if smiles[atom1+2]=='(':
@@ -1951,19 +2157,55 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
             atom1=smiles[1:].find(']')
             if len(smiles)>atom1+2:
                 if smiles[atom1+2]=='_':
-                    smiles=smiles[0:atom1+2]+smiles[atom1+6:] # after first atom (branch1 removed)
+                    smiles=smiles[0:atom1+2]+smiles[atom1+7:] # after first atom (branch1 removed)
                     atom1=smiles[1:].find(']')
                     
                     if len(smiles)>atom1+2:
                         if smiles[atom1+2]=='_':
-                            smiles=smiles[0:atom1+2]+smiles[atom1+6:] # double ring here
+                            smiles=smiles[0:atom1+2]+smiles[atom1+7:] # double ring here
                             atom1=smiles[1:].find(']')
 
             if atom1>=0:
                 atom2=smiles[atom1+2:].find(']')
                 if atom2>=0 and len(smiles)>atom1+atom2+3:
                     if smiles[atom1+atom2+3]=='_':
-                        smiles=smiles[0:atom1+atom2+3]+smiles[atom1+atom2+7:] # after second atom (branch1 removed)
+                        smiles=smiles[0:atom1+atom2+3]+smiles[atom1+atom2+8:] # after second atom (branch1 removed)
+                        
+
+            if len(smiles)>atom1+2:
+                if smiles[atom1+2]=='(':
+                    b_cnt=1
+                    cc=atom1+3
+                    while b_cnt>0:
+                        if smiles[cc]==')':            
+                            b_cnt-=1
+                        if smiles[cc]=='(':            
+                            b_cnt+=1
+                        cc+=1
+                    bracket1X=atom1+2
+                    bracket2X=cc
+                    bracket_contX=smiles[bracket1X:bracket2X]
+                    smiles=smiles[0:atom1+2]+smiles[cc:]
+                        
+                    atom1=smiles[1:].find(']')
+                    if len(smiles)>atom1+2:
+                        if smiles[atom1+2]=='_':
+                            smiles=smiles[0:atom1+2]+smiles[atom1+7:] # after first atom (branch1 removed)
+                            atom1=smiles[1:].find(']')
+                            
+                            if len(smiles)>atom1+2:
+                                if smiles[atom1+2]=='_':
+                                    smiles=smiles[0:atom1+2]+smiles[atom1+7:] # double ring here
+                                    atom1=smiles[1:].find(']')
+            
+                    if atom1>=0:
+                        atom2=smiles[atom1+2:].find(']')
+                        if atom2>=0 and len(smiles)>atom1+atom2+3:
+                            if smiles[atom1+atom2+3]=='_':
+                                smiles=smiles[0:atom1+atom2+3]+smiles[atom1+atom2+8:] # after second atom (branch1 removed)
+                                
+                    smiles=smiles[0:bracket1X]+bracket_contX+smiles[bracket1X:]
+            
             smiles=smiles[0:bracket1]+bracket_cont+smiles[bracket1:]
         else:
             atom2=smiles[atom1+2:].find(']')
@@ -1983,9 +2225,9 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                     pos_bracket=cc
                     if len(smiles)>pos_bracket:
                         if smiles[pos_bracket]=='_':
-                            smiles=smiles[0:pos_bracket]+smiles[pos_bracket+4:]
+                            smiles=smiles[0:pos_bracket]+smiles[pos_bracket+5:]
 
-    pos=smiles.find(')_')
+    pos=smiles.find(')_')   # C1CC(CCCC)1 -> C1CC1(CCCC)
     while pos>=0:
         b_cnt=1
         cc=smiles.find(')_')-1
@@ -1996,15 +2238,16 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
             if smiles[cc]=='(':
                 b_cnt-=1
             cc-=1
-        smiles=smiles[0:cc+1]+smiles[cc_init+2:cc_init+6]+smiles[cc+1:cc_init+2]+smiles[cc_init+6:]
+        smiles=smiles[0:cc+1]+smiles[cc_init+2:cc_init+7]+smiles[cc+1:cc_init+2]+smiles[cc_init+7:]
         pos=smiles.find(')_')
          
     ring_counter=1
+
     while True:
         pos_of_ring_symbol=smiles.find('_')
         if pos_of_ring_symbol>=0:
             if (len(smiles[0:pos_of_ring_symbol])-len(smiles[0:pos_of_ring_symbol].replace('[','')))>2:
-                size_of_ring=int(smiles[pos_of_ring_symbol+1:pos_of_ring_symbol+4])+1
+                size_of_ring=int(smiles[pos_of_ring_symbol+1:pos_of_ring_symbol+5])+1
                 
                 num_of_elements=len(smiles[0:pos_of_ring_symbol])-len(smiles[0:pos_of_ring_symbol].replace(']',''))            
                 r_count=pos_of_ring_symbol
@@ -2042,6 +2285,8 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                                          allowed_bond_at_target=4
                                      elif smiles[r_count-5]=='H' and smiles[r_count-6]=='@': # [C@@H] or [C@H]
                                          allowed_bond_at_target=3
+                                     elif smiles[r_count-5]=='H' and smiles[r_count-6]=='N': # [NH]
+                                         allowed_bond_at_target=2
     
                     if smiles[1:r_count].find('[')>=0: # bond with previous 
                         if smiles[1:r_count].find('.')>=0:
@@ -2136,17 +2381,17 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
 
                 if allowed_bond_at_target>0:
                     ring_symbol=available_nums[ring_counter]
-            
+
                     if smiles[r_count+1]=='@': # There is already an identifier, i'm the subsequent one
                         r_count+=4
                         if smiles[r_count+1]=='@':
-                            r_count+=4                    
-                    smiles=smiles[0:r_count+1]+ring_symbol+smiles[r_count+1:pos_of_ring_symbol]+ring_symbol+smiles[pos_of_ring_symbol+4:]
+                            r_count+=4
+                    smiles=smiles[0:r_count+1]+ring_symbol+smiles[r_count+1:pos_of_ring_symbol]+ring_symbol+smiles[pos_of_ring_symbol+5:]
                     ring_counter+=1           
                 else:
-                    smiles=smiles[0:pos_of_ring_symbol]+smiles[pos_of_ring_symbol+4:]   # bi-local analysation of property at ring insertion, leads to non-inclusion of ring
+                    smiles=smiles[0:pos_of_ring_symbol]+smiles[pos_of_ring_symbol+5:]   # bi-local analysation of property at ring insertion, leads to non-inclusion of ring
             else:    # this can be seen as two additional states of the derivation.  X0 -> X0A -> X0B, and in X0* rings are not allowed. 
-                smiles=smiles[0:pos_of_ring_symbol]+smiles[pos_of_ring_symbol+4:]
+                smiles=smiles[0:pos_of_ring_symbol]+smiles[pos_of_ring_symbol+5:]
 
         else:
             break
@@ -2156,13 +2401,11 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
     # X12YYYYYYZ12 stands for a double ring between X and Z.
     # rewrite to match definition of double ring in RDKit as X1YYYYYYZ=1
     dd=0
-    
+
     
     while True:
         if dd>len(smiles)-9:
             break
-
-        
 
         if smiles[dd:dd+2]=='@$' and smiles[dd+4:dd+6]=='@$': # double ring input
             double_ring_idf=smiles[dd:dd+8]
@@ -2172,8 +2415,19 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                 pos2=smiles.find(double_ring_idf)
                 smiles=smiles[0:pos2]+'='+smiles[pos2:pos2+4]+smiles[pos2+8:]
                 dd=0
+        
+        if len(smiles)>=dd+12:
+            if smiles[dd:dd+2]=='@$' and smiles[dd+4:dd+6]=='@$' and smiles[dd+8:dd+10]=='@$': # double ring in a triple ring configuration: C12CC3C45CC31C425
+                double_ring_idf=smiles[dd:dd+4]+smiles[dd+8:dd+12]                
+                if smiles.find(double_ring_idf)>=0: # double ring between same two vertices
+                    posDouble=smiles.find(double_ring_idf)
+                    if dd>posDouble:
+                        smiles=smiles[0:posDouble+4]+smiles[posDouble+8:dd]+'='+smiles[dd:dd+8]+smiles[dd+12:]
+                    else:
+                        smiles=smiles[0:dd+8]+smiles[dd+12:posDouble]+'='+smiles[posDouble+posDouble:4]+smiles[posDouble+8:]                    
+                    dd=0
         dd+=1
-                  
+
     tmp_smiles=smiles.replace('(','').replace(')','')
     for unique_id in available_nums:
         pos1=tmp_smiles.find(unique_id)
@@ -2188,7 +2442,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
                         smiles=smiles[0:pos1-1]+smiles[pos1+4:]
                     else:
                         smiles=smiles[0:pos1]+smiles[pos1+4:]
-                        
+  
     gg=0
     while gg<len(smiles):
         tmp_smiles0=smiles[gg:]
@@ -2243,6 +2497,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
             cc+=1
         tmp_smiles=tmp_smiles[0:cc_init]+tmp_smiles[cc:]
 
+
     for unique_id in available_nums:
         pos1=tmp_smiles.find(unique_id)
         indices = [i for i, x in enumerate(tmp_smiles) if x =='@']
@@ -2261,13 +2516,14 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
 
     # #########
     cc=1
+
     while True:
         if cc>(len(smiles)-2):
             break
 
         if smiles[cc:cc+2]=='@$': # replace by unique identifier
             ring_id=smiles[cc:cc+4]            
-            smiles=smiles.replace(ring_id,unique_nums[0])            
+            smiles=smiles.replace(ring_id,unique_nums[0])
             unique_nums=unique_nums[1:]
         
         elif smiles[cc:cc+2]=='%0': # this identifier is free again for further use
@@ -2276,7 +2532,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
             unique_nums.sort()   # sort the list such that smallest identifier will be used next
             
         cc+=1
-        
+
     smiles=smiles.replace('[=','=[') # all special symbols for bond or sterochemical information are now outside of the bracket again
     smiles=smiles.replace('[#','#[')
     smiles=smiles.replace('[\\','\\[')
@@ -2303,7 +2559,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
     
     smiles=smiles.replace('expl]',']')
     
-    
+           
     smiles=smiles.replace('%00','') # finally, make rings in a standard form.
     smiles=smiles.replace('%0','%')
 
@@ -2317,7 +2573,7 @@ def _insert_rings_to_smiles(smiles,N_restrict=True,bilocal_ring_function=True):
 def encoder(smiles,PrintErrorMessage=True): # encodes SMILES -> SELFIES
     """
     SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-                  v0.2.2, 19. September 2019
+                  v0.2.3, 01. October 2019
     by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
 
     SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
