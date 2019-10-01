@@ -1,7 +1,7 @@
 # =============================================================================
 # 
 # SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
-#               v0.2.2, 19. September 2019
+#               v0.2.3, 01. October 2019
 # by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
 #
 # SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, sequence-based,
@@ -35,10 +35,20 @@
 #
 #
 # versions:
+# 0.2.3 (01.10.2019):
+#       - added:
+#           -> functon selfies_alphabet() which returns a list of 29 selfies symbols whos arbitrary combination produce >99.99% valid molecules
+#       - bug fixes:
+#           -> fixed bug which happens when three rings start at one node, and two of them form a double ring
+#           -> enabled rings with sizes of up to 8000 SELFIES symbols
+#           -> bugfix for tiny ring to RDkit syntax conversion, spanning multiple branches
+#       - we thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin and Andrew Brereton for suggestions and bug reports 
+#
 # 0.2.2 (19.09.2019):
 #       - added:
-#           -> Enabled [C@],[C@H],[C@@],[C@@H],[H] to use in a semantic constrained way
+#           -> enabled [C@],[C@H],[C@@],[C@@H],[H] to use in a semantic constrained way
 #       - we thank Andrew Brereton for suggestions and bug reports 
+#
 # 0.2.0 (02.09.2019):
 #       - added:
 #           -> Decoder: added optional argument to restrict nitrogen to 3 bonds. decoder(...,N_restrict=False) to allow for more bonds;
@@ -63,9 +73,11 @@
 # =============================================================================
 
 from random import randint
-from selfies import encoder, decoder
+from selfies import encoder, decoder, selfies_alphabet
 
-from rdkit.Chem import MolFromSmiles
+
+
+
 
 # Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
@@ -88,24 +100,39 @@ print('equal: '+str(test_molecule2==smiles2)+'\n\n\n')
 test_molecule3='CCOC(=O)C1(C(=O)OCC)C23c4c5c6c7c8c4-c4c2c2c9c%10c4C4%11c%12c-%10c%10c%13c%14c%15c%16c%17c%18c%19c%20c%21c%22c%23c%24c(c-7c(c7c%12c%13c(c7%24)c(c%19%23)c%18%14)C84C%11(C(=O)OCC)C(=O)OCC)C%224C(C(=O)OCC)(C(=O)OCC)C64c4c-5c5c6c(c4-%21)C%204C(C(=O)OCC)(C(=O)OCC)C%174c4c-6c(c-2c(c4-%16)C92C(C(=O)OCC)(C(=O)OCC)C%10%152)C513' # from PubChem
 selfies3=encoder(test_molecule3)
 smiles3=decoder(selfies3)
-print('test_molecule1: '+test_molecule3+'\n')
-print('selfies1: '+selfies3+'\n')
-print('smiles1: '+smiles3+'\n')
+print('test_molecule3: '+test_molecule3+'\n')
+print('selfies3: '+selfies3+'\n')
+print('smiles3: '+smiles3+'\n')
 print('equal: '+str(test_molecule3==smiles3)+'\n\n\n')
 
+test_molecule4='Cc1c(C)c(S(=O)(=O)NC(=N)NCCC[C@H](NC(=O)[C@@H]2CCCN2C(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](C)NC(=O)[C@@H]2CCCN2C(=O)[C@@H]2CCCN2C(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@@H](NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](Cc2cn(C(=O)OC(C)(C)C)cn2)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@@H]2CCCN2C(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](Cc2ccccc2)NC(=O)[C@H](COC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](COC(C)(C)C)NC(=O)CNC(=O)OC(C)(C)C)C(C)C)C(=O)O)c(C)c2c1OC(C)(C)CC2'
+selfies4=encoder(test_molecule4)
+smiles4=decoder(selfies4)
+print('test_molecule4: '+test_molecule4+'\n')
+print('selfies4: '+selfies4+'\n')
+print('smiles4: '+smiles4+'\n')
+print('equal: '+str(test_molecule4==smiles4)+'\n\n\n')
 
-#Create a random Molecule
-                                                                               # this is a very small alphabet from which the random selfies are generated
+
+
+#Create a random Molecule, test robustness
+
+
+my_alphabet=selfies_alphabet()                                                 # this is a very small alphabet from which the random selfies are generated
                                                                                # This alphabet can be extended with additional elements. For example, see the list start_alphabet in the function smiles_to_selfies.
                                                                                # Also when you run the three test-molecules above, you see the brackets that are used, and can use some of them.
-my_alphabet=['[Branch1_1]','[Branch1_2]','[Branch1_3]','[Ring1]','[Branch2_1]','[Branch2_2]','[Branch2_3]','[Ring2]','[Branch3_1]','[Branch3_2]','[Branch3_3]','[O]','[=O]','[N]','[=N]','[C]','[=C]','[#C]','[S]','[=S]','[P]','[F]','[C@Hexpl]','[C@@Hexpl]','[C@expl]','[C@@expl]','[H]']; 
 
-len_of_molecule=30 # Number of selfies symbols of the random string. The final SMILES string will not necessarily be of the same size, because some elements of this alphabet stop the derivation (such as Flour, as it can form only a single bond)
-                  
+
+len_of_molecule=50 # Number of selfies symbols of the random string. The final SMILES string will not necessarily be of the same size, because some elements of this alphabet stop the derivation (such as Flour, as it can form only a single bond)
+
 rnd_selfies=''
 for ii in range(len_of_molecule):
     rnd_selfies+=my_alphabet[randint(0,len(my_alphabet)-1)]
 
 smiles4=decoder(rnd_selfies)
-print('From random selfies: '+smiles4+'\n')
+
+        
+    
+    
+print('Random Molecule: '+str(smiles4)+'\n')
 
