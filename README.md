@@ -10,9 +10,9 @@ validity.
 See the paper at arXiv: https://arxiv.org/abs/1905.13741
 
 The code presented here is a concrete application of SELFIES in chemistry, for
-the robust representation of molecule. We show the encoding and decoding of three
-molecules from various databases, and the generation of a new, random molecule
-with high semantical and syntactical validity.
+the robust representation of molecule. 
+
+SELFIES has a validity of >99.99% even for entire random strings.
 
 ### Installation
 You can install SELFIES via
@@ -24,7 +24,7 @@ pip install selfies
 Several examples can be seen in examples/selfies_example.py. Here is a simple encoding and decoding:
 
 ```python
-from selfies import encoder, decoder
+from selfies import encoder, decoder, selfies_alphabet()  
     
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
 selfies1=encoder(test_molecule1)
@@ -34,6 +34,9 @@ print('test_molecule1: '+test_molecule1+'\n')
 print('selfies1: '+selfies1+'\n')
 print('smiles1: '+smiles1+'\n')
 print('equal: '+str(test_molecule1==smiles1)+'\n\n\n')
+
+my_alphabet=selfies_alphabet() # contains all semantically valid SELFIES symbols.
+
 ```
 
 - an example of SELFIES in a generative model can be seen in the directory 'VariationalAutoEncoder_with_SELFIES\'. There, SMILES datasets are automatically translated into SELFIES, and used for training of a variational autoencoder (VAE).
@@ -52,6 +55,15 @@ supported:
 
 
 ### Versions
+#### 0.2.4 (01.10.2019):
+       - added:
+           -> functon selfies_alphabet() which returns a list of 29 selfies symbols whos arbitrary combination produce >99.99% valid molecules
+       - bug fixes:
+           -> fixed bug which happens when three rings start at one node, and two of them form a double ring
+           -> enabled rings with sizes of up to 8000 SELFIES symbols
+           -> bugfix for tiny ring to RDkit syntax conversion, spanning multiple branches
+       - we thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin and Andrew Brereton for suggestions and bug reports 
+
 #### 0.2.2 (19.09.2019):
        - added:
            -> Enabled [C@],[C@H],[C@@],[C@@H],[H] to use in a semantic constrained way
