@@ -24,7 +24,7 @@ pip install selfies
 Several examples can be seen in examples/selfies_example.py. Here is a simple encoding and decoding:
 
 ```python
-from selfies import encoder, decoder, selfies_alphabet()  
+from selfies import encoder, decoder, selfies_alphabet
     
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
 selfies1=encoder(test_molecule1)
