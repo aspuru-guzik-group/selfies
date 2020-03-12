@@ -8,25 +8,18 @@
 
 # File Navigator: 
 
-- GAN_selfies: 
-2RGSMILES_QM9.txt : Dearomatized QM9 dataset (selfies representation)
+GAN_selfies: 
+- 2RGSMILES_QM9.txt : Dearomatized QM9 dataset (selfies representation)
+- GAN.py: Code for running the generative adversarial network
+- one_hot_converter.py: Code for creating one-hot-encodings of molecular strings
+- adjusted_selfies_fcts.py: SMILES to SELFIES conversion file
+- GPlus2S.py: SMILES to SELFIES conversion file
+- translate.py: General helper functions file
 
-GAN.py: Code for running the generative adversarial network
-
-one_hot_converter.py: Code for creating one-hot-encodings of molecular strings
-
-adjusted_selfies_fcts.py: SMILES to SELFIES conversion file
-
-GPlus2S.py: SMILES to SELFIES conversion file
-
-translate.py: General helper functions file
-
-- GAN_smiles: 
-GAN.py: Code for running the generative adversarial network
-
-one_hot_converter.py: Code for creating one-hot-encodings of molecular strings
-
-smiles_qm9.txt: Dearomatized QM9 dataset (smiles representation)
+GAN_smiles: 
+- GAN.py: Code for running the generative adversarial network
+- one_hot_converter.py: Code for creating one-hot-encodings of molecular strings
+- smiles_qm9.txt: Dearomatized QM9 dataset (smiles representation)
 
 # How to Run the code:? 
 Step1: cd inside either 'GAN_selfies' or 'GAN_smiles' depending on which type of molecular representation you would like to run the GAN
