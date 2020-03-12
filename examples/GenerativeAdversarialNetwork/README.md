@@ -9,7 +9,7 @@
 # File Navigator: 
 
 GAN_selfies: 
-- 2RGSMILES_QM9.txt : Dearomatized QM9 dataset (selfies representation)
+- 2RGSMILES_QM9.txt : Dearomatized QM9 dataset (selfies representation, from alphabet described in the main text (symbols shortened for simplicity))
 - GAN.py: Code for running the generative adversarial network
 - one_hot_converter.py: Code for creating one-hot-encodings of molecular strings
 - adjusted_selfies_fcts.py: SMILES to SELFIES conversion file
