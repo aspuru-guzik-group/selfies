@@ -5,19 +5,19 @@
 # by Mario Krenn, Florian Haese, AkshatKumar Nigam,
 #      Pascal Friederich, Alán Aspuru-Guzik
 #
-# Demo of Rubustness of SMILES and SELFIES
+# Demo of Rubustness of SMILES and SELFIES and DeepSMILES
 # 
 # Generates 1000 cases of 1, 2 or 3 mutations of small bio-molecule (MDMA).
 # The alphabets are those that can translate the QM0 dataset (and have been used in all experiments in the paper)
 #
-
 #
 # questions/remarks: mario.krenn@utoronto.ca or alan@aspuru.com
 #
 #                        11.03.2020
 #
 # Requirements: RDKit
-#               selfies (pip install selfies)                
+#               selfies (pip install selfies)    
+#               DeepSMILES (pip install --upgrade deepsmiles)            
 #
 #
 
@@ -27,6 +27,8 @@ from rdkit import rdBase
 
 from random import randint
 from selfies import encoder, decoder  
+
+import deepsmiles
 
 rdBase.DisableLog('rdApp.error')
 
@@ -92,7 +94,7 @@ for c_num_of_mut in range(3):
 
 
 # SELFIES code
-mdma_selfies=encoder('CNC(C)CC1=CC=C2C(=C1)OCO2')
+mdma_selfies=encoder(mdma)
 print('\n\n\n')
 print('SELFIES: ',mdma_selfies,'\n')
 mdma_selfies_tok=tokenize_selfies(mdma_selfies)
@@ -124,5 +126,37 @@ for c_num_of_mut in range(3):
             print('Iteration: ', c_muts, '/', num_repeat)
         
 
-    print(c_num_of_mut+1, 'mutations with SMILES. Correct: ', num_repeat-single_mut_err, '/', num_repeat, '=', 1-single_mut_err/num_repeat)
+    print(c_num_of_mut+1, 'mutations with SELFIES. Correct: ', num_repeat-single_mut_err, '/', num_repeat, '=', 1-single_mut_err/num_repeat)
 
+
+
+# DeepSMILES code
+deepsmiles_symbols='FONC)=#3456789' # with this alphabet, the whole QM9 db can be translated (except of ions and stereochemistry)
+converter = deepsmiles.Converter(rings=True, branches=True)
+
+mdma_deepsmiles=converter.encode(mdma)
+print('\n\n\n')
+print('DeepSMILES: ',mdma_deepsmiles,'\n')
+
+num_repeat=1000
+for c_num_of_mut in range(3):
+    single_mut_err=0
+    for c_muts in range(num_repeat):
+
+        new_mdma=mdma_deepsmiles
+        for ii in range(c_num_of_mut+1):
+            mol_idx=randint(0,len(new_mdma)-1)        
+            symbol_idx=randint(0,len(deepsmiles_symbols)-1)
+
+            new_mdma=new_mdma[0:mol_idx]+deepsmiles_symbols[symbol_idx]+new_mdma[mol_idx+1:]
+
+        try:
+            mutated_smiles=converter.decode(new_mdma)
+        except Exception:
+            mutated_smiles='err'
+
+        res_new=IsCorrectSMILES(mutated_smiles)
+        if res_new==0:
+            single_mut_err=single_mut_err+1
+
+    print(c_num_of_mut+1, 'mutations with DeepSMILES. Correct: ', num_repeat-single_mut_err, '/', num_repeat, '=', 1-single_mut_err/num_repeat)
