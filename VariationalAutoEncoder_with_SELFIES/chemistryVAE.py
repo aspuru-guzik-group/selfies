@@ -459,6 +459,8 @@ def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
     for selfies_element in selfies_alphabet_pre:
         selfies_alphabet.append('['+selfies_element+']')        
     largest_selfies_len=max(selfies_len)
+    if not '[epsilon]' in selfies_alphabet:
+        selfies_alphabet.append('[epsilon]')
     print('Finished translating SMILES to SELFIES.')
     return(selfies_list, selfies_alphabet, largest_selfies_len, smiles_list, smiles_alphabet, largest_smiles_len)
     
