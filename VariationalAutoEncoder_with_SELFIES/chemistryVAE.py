@@ -75,7 +75,7 @@ from torch import nn
 from random import shuffle
 
 sys.path.append('VAE_dependencies')
-from data_loader import multiple_smile_to_hot, multiple_selfies_to_hot
+from data_loader import multiple_smile_to_hot, multiple_selfies_to_hot, len_selfie, split_selfie
 from rdkit.Chem import MolFromSmiles
 from rdkit import rdBase
 rdBase.DisableLog('rdApp.error')
@@ -327,7 +327,7 @@ def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr
     optimizer_encoder = torch.optim.Adam(model_encode.parameters(), lr=lr_enc)
     optimizer_decoder = torch.optim.Adam(model_decode.parameters(), lr=lr_dec)
 
-    data_train=torch.tensor(data_train, dtype=torch.float)
+    data_train = data_train.clone().detach()
     data_train=data_train.to(device)
 
     #print(data)
@@ -444,24 +444,22 @@ def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
     """
 
     df = pd.read_csv(filename_data_set_file_smiles)
+
     smiles_list = np.asanyarray(df.smiles)
-    smiles_alphabet=list(set(''.join(smiles_list)))
-    largest_smiles_len=len(max(smiles_list, key=len))
-    selfies_list=[]
-    selfies_len=[]
+    smiles_alphabet = list(set(''.join(smiles_list)))
+    smiles_alphabet.append(' ')  # for padding
+    largest_smiles_len = len(max(smiles_list, key=len))
+
     print('--> Translating SMILES to SELFIES...')
-    for individual_smile in smiles_list:
-        individual_selfie=selfies.encoder(individual_smile)
-        selfies_list.append(individual_selfie)
-        selfies_len.append(len(individual_selfie)-len(individual_selfie.replace('[',''))) # len of SELFIES
-    selfies_alphabet_pre=list(set(''.join(selfies_list)[1:-1].split('][')))
-    selfies_alphabet=[]
-    for selfies_element in selfies_alphabet_pre:
-        selfies_alphabet.append('['+selfies_element+']')
-    largest_selfies_len=max(selfies_len)
-    if not '[epsilon]' in selfies_alphabet:
-        selfies_alphabet.append('[epsilon]')
+    selfies_list = list(map(selfies.encoder, smiles_list))
+    largest_selfies_len = max(len_selfie(s) for s in selfies_list)
+
+    all_selfies_chars = split_selfie(''.join(selfies_list))
+    all_selfies_chars.append('[epsilon]')
+    selfies_alphabet = list(set(all_selfies_chars))
+
     print('Finished translating SMILES to SELFIES.')
+
     return(selfies_list, selfies_alphabet, largest_selfies_len, smiles_list, smiles_alphabet, largest_smiles_len)
 
 
@@ -473,7 +471,7 @@ if __name__ == '__main__':
         content.close()
 
         if os.path.exists("settings.yml"):
-            user_settings=yaml.load(open("settings.yml","r"))
+            user_settings=yaml.safe_load(open("settings.yml","r"))
             settings = user_settings
         else:
             print("Expected a file settings.yml but didn't find it.")
@@ -492,7 +490,6 @@ if __name__ == '__main__':
         if type_of_encoding == 0:
             print('Representation: SMILES')
             encoding_alphabet=smiles_alphabet
-            encoding_alphabet.append(' ') # for padding
             encoding_list=smiles_list
             largest_molecule_len = largest_smiles_len
             print('--> Creating one-hot encoding...')
