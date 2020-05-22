@@ -4,53 +4,53 @@
  SELFIES: a robust representation of semantically constrained graphs with an
            example application in chemistry (https://arxiv.org/abs/1905.13741)
            by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
-           
-           
+
+
            Variational Auto Encoder (VAE) for chemistry
                   comparing SMILES and SELFIES representation using reconstruction
                   quality, diversity and latent space validity as metrics of
                   interest
-                  v0.1.0 -- 04. August 2019             
-                  
+                  v0.1.0 -- 04. August 2019
+
  information:
      ML framework: pytorch
-     chemistry framework: RDKit     
-     
-     
+     chemistry framework: RDKit
+
+
      settings.yml
              contains link to data file containing SMILES encoded molecule, and
              hyperparameters of neural network model and training
-             
+
      get_selfie_and_smiles_encodings_for_dataset
              generate complete encoding (inclusive alphabet) for SMILES and SELFIES given a data file
-                          
+
      VAE_encode
              fully connection, 3 layer neural network - encodes a one-hot representation
              of molecule (in SMILES or SELFIES representation) to latent space
-             
+
      VAE_decode
              decodes point in latent space using an RNN
-             
+
      latent_space_quality
              samples points from latent space, decodes them into molecules,
              calculates chemical validity (using RDKit's MolFromSmiles), calculates
              diversity
-             
+
      environment.yml
              shows dependencies
              Particularily important: RDKit and SELFIES (via 'pip install selfies')
-    
-    
+
+
  tested at:
      - Python 3.7.1
-     - Python 3.6.8               
+     - Python 3.6.8
 
      CPU and GPU supported
-     
 
-     
-     
-Note: semantic validity is only implemented so far for atoms described in 
+
+
+
+Note: semantic validity is only implemented so far for atoms described in
       Table 2 of our paper. This corresponds to (non-ionic) QM9. Other chemical
       constraints might generate additional mistakes. Syntactical constraints
       are always fulfilled
@@ -62,8 +62,8 @@ Note: semantic validity is only implemented so far for atoms described in
 
 
 For comments, bug reports or feature ideas, please send an email to
-mario.krenn@utoronto.ca and alan@aspuru.com 
- 
+mario.krenn@utoronto.ca and alan@aspuru.com
+
 """
 import os, sys, time
 import numpy as np
@@ -93,13 +93,13 @@ def save_models(encoder, decoder, epoch):
 
 
 class VAE_encode(nn.Module):
-    
+
     def __init__(self, layer_1d, layer_2d, layer_3d, latent_dimension):
         """
         Fully Connected layers to encode molecule to latent space
         """
         super(VAE_encode, self).__init__()
-        
+
         # Reduce dimension upto second last layer of Encoder
         self.encode_nn = nn.Sequential(
             nn.Linear(len_max_molec1Hot, layer_1d),
@@ -109,43 +109,43 @@ class VAE_encode(nn.Module):
             nn.Linear(layer_2d, layer_3d),
 			nn.ReLU()
         )
-        
+
         # Latent space mean
-        self.encode_mu = nn.Linear(layer_3d, latent_dimension) 
-        
-        # Latent space variance 
+        self.encode_mu = nn.Linear(layer_3d, latent_dimension)
+
+        # Latent space variance
         self.encode_log_var = nn.Linear(layer_3d, latent_dimension)
-        
-        
+
+
     def reparameterize(self, mu, log_var):
         """
         This trick is explained well here:
             https://stats.stackexchange.com/a/16338
         """
         std = torch.exp(0.5 * log_var)
-        eps = torch.randn_like(std) 
+        eps = torch.randn_like(std)
         return eps.mul(std).add_(mu)
-    
-    
+
+
     def forward(self, x):
         """
         Pass throught the Encoder
         """
         # Get results of encoder network
         h1 = self.encode_nn(x)
-         
+
         # latent space
         mu = self.encode_mu(h1)
         log_var = self.encode_log_var(h1)
-        
+
         # Reparameterize
         z = self.reparameterize(mu, log_var)
         return z, mu, log_var
-        
+
 
 
 class VAE_decode(nn.Module):
-    
+
     def __init__(self, latent_dimension, gru_stack_size, gru_neurons_num):
         """
         Through Decoder
@@ -156,34 +156,34 @@ class VAE_decode(nn.Module):
 
         # Simple Decoder
         self.decode_RNN  = nn.GRU(
-                input_size  = latent_dimension, 
+                input_size  = latent_dimension,
                 hidden_size = gru_neurons_num,
                 num_layers  = gru_stack_size,
-                batch_first = False)                
-        
+                batch_first = False)
+
         self.decode_FC = nn.Sequential(
             nn.Linear(gru_neurons_num, len_alphabet),
         )
-    
+
 
     def init_hidden(self, batch_size = 1):
         weight = next(self.parameters())
         return weight.new_zeros(self.gru_stack_size, batch_size, self.gru_neurons_num)
-                 
-                       
+
+
     def forward(self, z, hidden):
         """
         A forward pass throught the entire model.
         """
         # Decode
-        l1, hidden = self.decode_RNN(z, hidden)    
+        l1, hidden = self.decode_RNN(z, hidden)
         decoded = self.decode_FC(l1)        # fully connected layer
 
         return decoded, hidden
 
 
 
-def is_correct_smiles(smiles):    
+def is_correct_smiles(smiles):
     """
     Using RDKit to calculate whether molecule is syntactically and semantically valid.
     """
@@ -191,7 +191,7 @@ def is_correct_smiles(smiles):
         res_molecule=MolFromSmiles(smiles, sanitize=True)
     except Exception:
         res_molecule=None
-                
+
     if res_molecule==None:
         return 0
     else:
@@ -199,16 +199,16 @@ def is_correct_smiles(smiles):
 
 
 
-def sample_latent_space(latent_dimension): 
+def sample_latent_space(latent_dimension):
     model_encode.eval()
     model_decode.eval()
-    
+
     fancy_latent_point=torch.normal(torch.zeros(latent_dimension),torch.ones(latent_dimension))
 
-    hidden = model_decode.init_hidden() 
+    hidden = model_decode.init_hidden()
     gathered_atoms = []
     for ii in range(len_max_molec):                 # runs over letters from molecules (len=size of largest molecule)
-        fancy_latent_point = fancy_latent_point.reshape(1, 1, latent_dimension) 
+        fancy_latent_point = fancy_latent_point.reshape(1, 1, latent_dimension)
         fancy_latent_point=fancy_latent_point.to(device)
         decoded_one_hot, hidden = model_decode(fancy_latent_point, hidden)
 
@@ -218,12 +218,12 @@ def sample_latent_space(latent_dimension):
         soft = nn.Softmax(0)
         decoded_one_hot = soft(decoded_one_hot)
 
-        _,max_index=decoded_one_hot.max(0)        
+        _,max_index=decoded_one_hot.max(0)
         gathered_atoms.append(max_index.data.cpu().numpy().tolist())
-            
+
     model_encode.train()
     model_decode.train()
-    
+
     return gathered_atoms
 
 
@@ -242,29 +242,29 @@ def latent_space_quality(latent_dimension, encoding_alphabet, sample_num):
                 for ii in sample_latent_space(latent_dimension):
                     molecule_pre+=encoding_alphabet[ii]
                 molecule=molecule_pre.replace(' ','')
-            
-    
+
+
             if type_of_encoding==1: # SELFIES
                 molecule_pre=''
                 for ii in sample_latent_space(latent_dimension):
                     molecule_pre+=encoding_alphabet[ii]
-                molecule_pre2=molecule_pre.replace(' ','')    
+                molecule_pre2=molecule_pre.replace(' ','')
                 molecule=selfies.decoder(molecule_pre2)
-        
+
         total_samples+=1
         if is_decoding_error==0:
             is_it_correct=is_correct_smiles(molecule)
         else:
             is_it_correct=0
-            
+
         if is_it_correct==1:
-            total_correct+=1            
+            total_correct+=1
             same_mol_identifier=0
             for jj in range(len(all_correct_molecules)):
                 if molecule==all_correct_molecules[jj]:
                     same_mol_identifier=1
                     break
-            
+
             if same_mol_identifier==0:
                 all_correct_molecules.append(molecule)
 
@@ -274,31 +274,31 @@ def latent_space_quality(latent_dimension, encoding_alphabet, sample_num):
 
 
 
-def quality_in_validation_set(data_valid):    
+def quality_in_validation_set(data_valid):
     x = [i for i in range(len(data_valid))]  # random shuffle input
     shuffle(x)
     data_valid = data_valid[x]
-    
+
     quality_list=[]
     for batch_iteration in range(min(25,num_batches_valid)):  # batch iterator
-        
+
         current_smiles_start, current_smiles_stop = batch_iteration * batch_size, (batch_iteration + 1) * batch_size
         inp_smile_hot = data_valid[current_smiles_start : current_smiles_stop]
-    
+
         inp_smile_encode = inp_smile_hot.reshape(inp_smile_hot.shape[0], inp_smile_hot.shape[1] * inp_smile_hot.shape[2])
         latent_points, mus, log_vars = model_encode(inp_smile_encode)
         latent_points = latent_points.reshape(1, batch_size, latent_points.shape[1])
-    
+
         hidden = model_decode.init_hidden(batch_size = batch_size)
         decoded_one_hot = torch.zeros(batch_size, inp_smile_hot.shape[1], inp_smile_hot.shape[2]).to(device)
         for seq_index in range(inp_smile_hot.shape[1]):
-            decoded_one_hot_line, hidden  = model_decode(latent_points, hidden)            
+            decoded_one_hot_line, hidden  = model_decode(latent_points, hidden)
             decoded_one_hot[:, seq_index, :] = decoded_one_hot_line[0]
-    
+
         decoded_one_hot = decoded_one_hot.reshape(batch_size * inp_smile_hot.shape[1], inp_smile_hot.shape[2])
         _, label_atoms  = inp_smile_hot.max(2)
-        label_atoms     = label_atoms.reshape(batch_size * inp_smile_hot.shape[1])    
-          
+        label_atoms     = label_atoms.reshape(batch_size * inp_smile_hot.shape[1])
+
         # assess reconstruction quality
         _, decoded_max_indices = decoded_one_hot.max(1)
         _, input_max_indices   = inp_smile_hot.reshape(batch_size * inp_smile_hot.shape[1], inp_smile_hot.shape[2]).max(1)
@@ -308,14 +308,14 @@ def quality_in_validation_set(data_valid):
         quality     = 100. * torch.mean(differences)
         quality     = quality.detach().cpu().numpy()
         quality_list.append(quality)
-    
-    return(np.mean(quality_list))
-    
-    
-    
-    
 
- 
+    return(np.mean(quality_list))
+
+
+
+
+
+
 def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr_dec, KLD_alpha, sample_num, encoding_alphabet):
     """
     Train the Variational Auto-Encoder
@@ -339,43 +339,43 @@ def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr
         data_train  = data_train[x]
         start = time.time()
         for batch_iteration in range(num_batches_train):  # batch iterator
-            
+
             loss, recon_loss, kld = 0., 0., 0.
 
             # manual batch iterations
-            current_smiles_start, current_smiles_stop = batch_iteration * batch_size, (batch_iteration + 1) * batch_size 
+            current_smiles_start, current_smiles_stop = batch_iteration * batch_size, (batch_iteration + 1) * batch_size
             inp_smile_hot = data_train[current_smiles_start : current_smiles_stop]
 
             # reshaping for efficient parallelization
-            inp_smile_encode = inp_smile_hot.reshape(inp_smile_hot.shape[0], inp_smile_hot.shape[1] * inp_smile_hot.shape[2]) 
+            inp_smile_encode = inp_smile_hot.reshape(inp_smile_hot.shape[0], inp_smile_hot.shape[1] * inp_smile_hot.shape[2])
             latent_points, mus, log_vars = model_encode(inp_smile_encode)
             latent_points = latent_points.reshape(1, batch_size, latent_points.shape[1])
 
             # standard Kullback–Leibler divergence
-            kld += -0.5 * torch.mean(1. + log_vars - mus.pow(2) - log_vars.exp()) 
+            kld += -0.5 * torch.mean(1. + log_vars - mus.pow(2) - log_vars.exp())
 
             # initialization hidden internal state of RNN (RNN has two inputs and two outputs:)
             #    input: latent space & hidden state
             #    output: onehot encoding of one character of molecule & hidden state
             #    the hidden state acts as the internal memory
             hidden = model_decode.init_hidden(batch_size = batch_size)
-                                                                       
+
             # decoding from RNN N times, where N is the length of the largest molecule (all molecules are padded)
-            decoded_one_hot = torch.zeros(batch_size, inp_smile_hot.shape[1], inp_smile_hot.shape[2]).to(device) 
+            decoded_one_hot = torch.zeros(batch_size, inp_smile_hot.shape[1], inp_smile_hot.shape[2]).to(device)
             for seq_index in range(inp_smile_hot.shape[1]):
                 decoded_one_hot_line, hidden  = model_decode(latent_points, hidden)
                 decoded_one_hot[:, seq_index, :] = decoded_one_hot_line[0]
 
-            
+
             decoded_one_hot = decoded_one_hot.reshape(batch_size * inp_smile_hot.shape[1], inp_smile_hot.shape[2])
             _, label_atoms  = inp_smile_hot.max(2)
             label_atoms     = label_atoms.reshape(batch_size * inp_smile_hot.shape[1])
- 
+
             # we use cross entropy of expected symbols and decoded one-hot
             criterion   = torch.nn.CrossEntropyLoss()
             recon_loss += criterion(decoded_one_hot, label_atoms)
 
-            loss += recon_loss + KLD_alpha * kld 
+            loss += recon_loss + KLD_alpha * kld
 
             # perform back propogation
             optimizer_encoder.zero_grad()
@@ -385,8 +385,8 @@ def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr
             optimizer_encoder.step()
             optimizer_decoder.step()
 
-            if batch_iteration % 30 == 0:     
-                end = time.time()       
+            if batch_iteration % 30 == 0:
+                end = time.time()
 
                 # assess reconstruction quality
                 _, decoded_max_indices = decoded_one_hot.max(1)
@@ -398,7 +398,7 @@ def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr
                 quality     = quality.detach().cpu().numpy()
 
                 qualityValid=quality_in_validation_set(data_valid)
-               
+
                 new_line = 'Epoch: %d,  Batch: %d / %d,\t(loss: %.4f\t| quality: %.4f | quality_valid: %.4f)\tELAPSED TIME: %.5f' % (epoch, batch_iteration, num_batches_train, loss.item(), quality, qualityValid, end - start)
                 print(new_line)
                 start = time.time()
@@ -427,7 +427,7 @@ def train_model(data_train, data_valid, num_epochs, latent_dimension, lr_enc, lr
         if quality_increase > 20:
             print('Early stopping criteria')
             break
-     
+
 
 def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
     """
@@ -447,7 +447,7 @@ def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
     smiles_list = np.asanyarray(df.smiles)
     smiles_alphabet=list(set(''.join(smiles_list)))
     largest_smiles_len=len(max(smiles_list, key=len))
-    selfies_list=[]    
+    selfies_list=[]
     selfies_len=[]
     print('--> Translating SMILES to SELFIES...')
     for individual_smile in smiles_list:
@@ -457,40 +457,40 @@ def get_selfie_and_smiles_encodings_for_dataset(filename_data_set_file_smiles):
     selfies_alphabet_pre=list(set(''.join(selfies_list)[1:-1].split('][')))
     selfies_alphabet=[]
     for selfies_element in selfies_alphabet_pre:
-        selfies_alphabet.append('['+selfies_element+']')        
+        selfies_alphabet.append('['+selfies_element+']')
     largest_selfies_len=max(selfies_len)
     if not '[epsilon]' in selfies_alphabet:
         selfies_alphabet.append('[epsilon]')
     print('Finished translating SMILES to SELFIES.')
     return(selfies_list, selfies_alphabet, largest_selfies_len, smiles_list, smiles_alphabet, largest_smiles_len)
-    
-    
-if __name__ == '__main__':     
+
+
+if __name__ == '__main__':
     try:
         content = open('logfile.dat', 'w')
         content.close()
-        content = open('results.dat', 'w') 
+        content = open('results.dat', 'w')
         content.close()
 
-        if os.path.exists("settings.yml"):        
+        if os.path.exists("settings.yml"):
             user_settings=yaml.load(open("settings.yml","r"))
             settings = user_settings
         else:
             print("Expected a file settings.yml but didn't find it.")
             print()
             exit()
-       
-        
-        print('--> Acquiring data...')        
+
+
+        print('--> Acquiring data...')
         type_of_encoding = settings['data']['type_of_encoding']
         file_name_smiles = settings['data']['smiles_file']
-        
+
         selfies_list, selfies_alphabet, largest_selfies_len, smiles_list, smiles_alphabet, largest_smiles_len=get_selfie_and_smiles_encodings_for_dataset(file_name_smiles)
 
         print('Finished acquiring data.')
 
         if type_of_encoding == 0:
-            print('Representation: SMILES')            
+            print('Representation: SMILES')
             encoding_alphabet=smiles_alphabet
             encoding_alphabet.append(' ') # for padding
             encoding_list=smiles_list
@@ -499,12 +499,12 @@ if __name__ == '__main__':
             data = multiple_smile_to_hot(smiles_list, largest_molecule_len, encoding_alphabet)
             print('Finished creating one-hot encoding.')
         elif type_of_encoding == 1:
-            print('Representation: SELFIES')            
-            
+            print('Representation: SELFIES')
+
             encoding_alphabet=selfies_alphabet
             encoding_list=selfies_list
             largest_molecule_len=largest_selfies_len
-            
+
             print('--> Creating one-hot encoding...')
             data = multiple_selfies_to_hot(encoding_list, largest_molecule_len, encoding_alphabet)
             print('Finished creating one-hot encoding.')
@@ -514,42 +514,42 @@ if __name__ == '__main__':
         len_max_molec1Hot = len_max_molec * len_alphabet
         print(' ')
         print('Alphabet has ', len_alphabet, ' letters, largest molecule is ', len_max_molec, ' letters.')
-         
+
         data_parameters = settings['data']
         batch_size = data_parameters['batch_size']
- 
-        encoder_parameter = settings['encoder'] 
+
+        encoder_parameter = settings['encoder']
         decoder_parameter = settings['decoder']
         training_parameters = settings['training']
-  
+
         model_encode = VAE_encode(**encoder_parameter)
         model_decode = VAE_decode(**decoder_parameter)
-       
+
         model_encode.train()
         model_decode.train()
-           
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print('*'*15, ': -->', device)        
-  
+        print('*'*15, ': -->', device)
+
         data = torch.tensor(data, dtype=torch.float).to(device)
-  
-        train_valid_test_size=[0.5, 0.5, 0.0]    
+
+        train_valid_test_size=[0.5, 0.5, 0.0]
         x = [i for i in range(len(data))]  # random shuffle input
         shuffle(x)
         data = data[x]
         idx_traintest=int(len(data)*train_valid_test_size[0])
-        idx_trainvalid=idx_traintest+int(len(data)*train_valid_test_size[1])    
+        idx_trainvalid=idx_traintest+int(len(data)*train_valid_test_size[1])
         data_train=data[0:idx_traintest]
         data_valid=data[idx_traintest:idx_trainvalid]
         data_test=data[idx_trainvalid:]
-         
+
         num_batches_train = int(len(data_train) / batch_size)
         num_batches_valid = int(len(data_valid) / batch_size)
-      
+
         model_encode = VAE_encode(**encoder_parameter).to(device)
         model_decode = VAE_decode(**decoder_parameter).to(device)
         print("start training")
-        train_model(data_train=data_train, data_valid=data_valid, **training_parameters, encoding_alphabet=encoding_alphabet) 
+        train_model(data_train=data_train, data_valid=data_valid, **training_parameters, encoding_alphabet=encoding_alphabet)
 
         with open('COMPLETED', 'w') as content:
             content.write('exit code: 0')

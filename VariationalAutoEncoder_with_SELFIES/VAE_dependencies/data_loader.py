@@ -11,11 +11,11 @@ def smile_to_hot(smile, largest_smile_len, alphabet):
     # integer encode input smile
     for _ in range(largest_smile_len-len(smile)):
         smile+=' '
-        
+
     atoms = []
     for i in range(len(smile)):
-        atoms.append(smile[i])        
-        
+        atoms.append(smile[i])
+
     integer_encoded = [char_to_int[char] for char in atoms]
 
     # one hot-encode input smile
@@ -25,12 +25,12 @@ def smile_to_hot(smile, largest_smile_len, alphabet):
     	letter[value] = 1
     	onehot_encoded.append(letter)
     return integer_encoded, np.array(onehot_encoded)
-    
+
 
 def multiple_smile_to_hot(smiles_list, largest_molecule_len, alphabet):
     """
     Convert a list of smile strings to a one-hot encoding
-    
+
     Returned shape (num_smiles x len_of_largest_smile x len_smile_encoding)
     """
     hot_list = []
@@ -38,7 +38,7 @@ def multiple_smile_to_hot(smiles_list, largest_molecule_len, alphabet):
         _, onehot_encoded = smile_to_hot(smile, largest_molecule_len, alphabet)
         hot_list.append(onehot_encoded)
     return np.array(hot_list)
-        
+
 
 def selfies_to_hot(molecule, largest_smile_len, alphabet):
     """
@@ -53,20 +53,20 @@ def selfies_to_hot(molecule, largest_smile_len, alphabet):
     selfies_char_list_pre=molecule[1:-1].split('][')
     selfies_char_list=[]
     for selfies_element in selfies_char_list_pre:
-        selfies_char_list.append('['+selfies_element+']')   
+        selfies_char_list.append('['+selfies_element+']')
 
     integer_encoded = [char_to_int[char] for char in selfies_char_list]
-    
-        
+
+
     # one hot-encode input smile
     onehot_encoded = list()
     for value in integer_encoded:
     	letter = [0 for _ in range(len(alphabet))]
     	letter[value] = 1
     	onehot_encoded.append(letter)
-            
+
     return integer_encoded, np.array(onehot_encoded)
-    
+
 
 def multiple_selfies_to_hot(selfies_list, largest_molecule_len, alphabet):
     """
@@ -77,4 +77,3 @@ def multiple_selfies_to_hot(selfies_list, largest_molecule_len, alphabet):
         _, onehot_encoded = selfies_to_hot(selfiesI, largest_molecule_len, alphabet)
         hot_list.append(onehot_encoded)
     return np.array(hot_list)
-        
