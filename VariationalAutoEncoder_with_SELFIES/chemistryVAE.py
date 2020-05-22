@@ -229,49 +229,26 @@ def sample_latent_space(latent_dimension):
 
 
 def latent_space_quality(latent_dimension, encoding_alphabet, sample_num):
-    total_samples=0
-    total_correct=0
-    all_correct_molecules=[];
-    print('latent_space_quality: Take ',sample_num, ' samples from the latent space')
-    while total_samples<=sample_num:
-        molecule=''
-        while len(molecule)==0:
-            is_decoding_error=0
-            if type_of_encoding==0: # SMILES
-                molecule_pre=''
-                for ii in sample_latent_space(latent_dimension):
-                    molecule_pre+=encoding_alphabet[ii]
-                molecule=molecule_pre.replace(' ','')
+    total_correct = 0
+    all_correct_molecules = set()
+    print(f"latent_space_quality:"
+          f" Take {sample_num} samples from the latent space")
 
+    for sample_i in range(1, sample_num + 1):
 
-            if type_of_encoding==1: # SELFIES
-                molecule_pre=''
-                for ii in sample_latent_space(latent_dimension):
-                    molecule_pre+=encoding_alphabet[ii]
-                molecule_pre2=molecule_pre.replace(' ','')
-                molecule=selfies.decoder(molecule_pre2)
+        molecule_pre = ''
+        for ii in sample_latent_space(latent_dimension):
+            molecule_pre += encoding_alphabet[ii]
+        molecule = molecule_pre.replace(' ', '')
 
-        total_samples+=1
-        if is_decoding_error==0:
-            is_it_correct=is_correct_smiles(molecule)
-        else:
-            is_it_correct=0
+        if type_of_encoding == 1:  # if SELFIES, decode to SMILES
+            molecule = selfies.decoder(molecule)
 
-        if is_it_correct==1:
-            total_correct+=1
-            same_mol_identifier=0
-            for jj in range(len(all_correct_molecules)):
-                if molecule==all_correct_molecules[jj]:
-                    same_mol_identifier=1
-                    break
-
-            if same_mol_identifier==0:
-                all_correct_molecules.append(molecule)
+        if is_correct_smiles(molecule):
+            total_correct += 1
+            all_correct_molecules.add(molecule)
 
     return total_correct, len(all_correct_molecules)
-
-
-
 
 
 def quality_in_validation_set(data_valid):
