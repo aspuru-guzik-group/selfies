@@ -187,16 +187,14 @@ def is_correct_smiles(smiles):
     """
     Using RDKit to calculate whether molecule is syntactically and semantically valid.
     """
-    try:
-        res_molecule=MolFromSmiles(smiles, sanitize=True)
-    except Exception:
-        res_molecule=None
-
-    if res_molecule==None:
+    if smiles == "":
         return 0
-    else:
-        return 1
 
+    try:
+        MolFromSmiles(smiles, sanitize=True)
+        return 1
+    except Exception:
+        return 0
 
 
 def sample_latent_space(latent_dimension):
