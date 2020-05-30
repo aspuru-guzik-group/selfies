@@ -50,6 +50,8 @@ You can run the test suite for SELFIES from your command line:
 python setup.py test
 ```
 
+These tests are necessary but not sufficient for the correctness of SELFIES. ToDo: More molecules should be tested, and the final comparison should be between the canonical input SMILES and the canonical output SMILES.
+
 ### Python version
 fully tested with Python 3.7.1 on
 - 134.000 molecules at QM9 database (https://www.nature.com/articles/sdata201422)
