@@ -20,5 +20,11 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
+    setup_requires = [
+        'pytest-runner'
+    ],
+    tests_require = [
+        'pytest'
+    ]
 )
 
