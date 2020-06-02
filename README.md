@@ -12,7 +12,7 @@ See the paper at arXiv: https://arxiv.org/abs/1905.13741
 The code presented here is a concrete application of SELFIES in chemistry, for
 the robust representation of molecule. 
 
-SELFIES has a validity of >99.99% even for entire random strings. This fact has been used via a genetic algorithm to achieve SOTA performance for inverse design in this [ICLR2020 paper](https://arxiv.org/abs/1909.11655), with the [code here](https://github.com/aspuru-guzik-group/GA).
+SELFIES has a validity of >99.99% even for entire random strings. 
 
 ### Installation
 You can install SELFIES via
@@ -40,6 +40,8 @@ my_alphabet=selfies_alphabet() # contains all semantically valid SELFIES symbols
 ```
 
 - an example of SELFIES in a generative model can be seen in the directory 'VariationalAutoEncoder_with_SELFIES\'. There, SMILES datasets are automatically translated into SELFIES, and used for training of a variational autoencoder (VAE).
+
+- One example used SELFIES in a genetic algorithm to achieve state-of-the-art performance for inverse design in this [ICLR2020 paper](https://arxiv.org/abs/1909.11655), with the [code here](https://github.com/aspuru-guzik-group/GA).
 
 ### Running Tests
 SELFIES uses `pytest` as its testing framework. All tests can be found in the `tests/` directory.
