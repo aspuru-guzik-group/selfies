@@ -41,6 +41,8 @@ my_alphabet=selfies_alphabet() # contains all semantically valid SELFIES symbols
 
 - an example of SELFIES in a generative model can be seen in the directory 'VariationalAutoEncoder_with_SELFIES\'. There, SMILES datasets are automatically translated into SELFIES, and used for training of a variational autoencoder (VAE).
 
+- an example to use SELFIES in a Genetic Algorithm can be seen in this [ICLR2020 paper](https://arxiv.org/abs/1909.11655), with the [code here](https://github.com/aspuru-guzik-group/GA).
+
 ### Running Tests
 SELFIES uses `pytest` as its testing framework. All tests can be found in the `tests/` directory.
 
