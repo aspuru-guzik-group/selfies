@@ -191,8 +191,7 @@ def is_correct_smiles(smiles):
         return 0
 
     try:
-        MolFromSmiles(smiles, sanitize=True)
-        return 1
+        return int(MolFromSmiles(smiles, sanitize=True) is not None)
     except Exception:
         return 0
 
