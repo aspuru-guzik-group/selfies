@@ -6,6 +6,7 @@ import pytest
 import random
 
 import selfies as sf
+import selfiesv1.decoder_prototype as sfv1
 from rdkit.Chem import MolFromSmiles, MolToSmiles
 
 test_path_list = [
@@ -32,17 +33,25 @@ def test_roundtrip_translation(test_paths, sample_size=1000):
 
         for smiles in smiles_set:
 
-            decoded_smiles = sf.decoder(sf.encoder(smiles), N_restrict=False)
+            decoded_smiles = sfv1.decoder(sf.encoder(smiles), N_restrict=False)
 
-            can_input = MolToSmiles(MolFromSmiles(smiles))
-            can_output = MolToSmiles(MolFromSmiles(decoded_smiles))
+            try:
+                if MolFromSmiles(decoded_smiles) is None:
+                    raise ValueError
 
-            if can_input != can_output:
-                error_list.append((smiles, decoded_smiles,
-                                   can_input, can_output))
+                can_input = MolToSmiles(MolFromSmiles(smiles))
+                can_output = MolToSmiles(MolFromSmiles(decoded_smiles))
+
+                if can_input != can_output:
+                    error_list.append((smiles, decoded_smiles,
+                                       can_input, can_output))
+            except ValueError:
+                error_list.append((smiles, decoded_smiles, "", ""))
+
+        error_list.sort(key=lambda x: len(x[0]))
 
     with open("error_list.csv", "w") as error_log:
-        error_log.write("In, Out, Canonical In, Canonical Out")
+        error_log.write("In, Out, Canonical In, Canonical Out\n")
         for error in error_list:
             error_log.write(','.join(error) + "\n")
 
@@ -53,7 +62,7 @@ def test_random_selfies_decoder():
     """Passes random strings built from the SELFIES alphabet to the decoder,
     and uses RDKit to check whether the decoded SMILES are valid.
     """
-    trials = 1000
+    trials = 10000
     max_len = 50
     alphabet = sf.selfies_alphabet()
 
@@ -62,7 +71,7 @@ def test_random_selfies_decoder():
         # create random SELFIES and decode
         rand_len = random.randint(1, max_len)
         selfies = ''.join(random.choice(alphabet) for _ in range(rand_len))
-        smiles = sf.decoder(selfies)
+        smiles = sfv1.decoder(selfies)
 
         # check if SMILES is valid
         try:
@@ -70,7 +79,8 @@ def test_random_selfies_decoder():
         except Exception:
             is_valid = False
 
-        assert is_valid, f"Invalid SMILES {smiles} decoded from {selfies}"
+        assert is_valid, f"Invalid SMILES {smiles} decoded from {selfies}. " \
+                         f"Should be {sf.decoder(selfies)}"
 
 
 if __name__ == '__main__':

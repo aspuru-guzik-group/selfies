@@ -1,13 +1,11 @@
 import random
 import time
 
-import pytest
-
 import selfies as sf
+import selfiesv1.decoder_prototype as sfv1
 
 
-@pytest.mark.skip(reason="runtime of test is too long")
-def test_time_roundtrip(file_path: str, sample_size: int = -1):
+def time_roundtrip(file_path: str, sample_size: int = -1):
     """Tests the amount of time it takes to encode and then decode an
     entire .txt file of SMILES strings <n> times. If <sample_size> is positive,
     then a random sample is taken from the file instead.
@@ -37,8 +35,15 @@ def test_time_roundtrip(file_path: str, sample_size: int = -1):
     dec_time = time.time() - start
     print(f"--> selfies.decoder: {dec_time:0.7f}s")
 
+    # time sfv1.decoder
+    start = time.time()
+    for s in selfies:
+        sfv1.decoder(s)
+    dec_time = time.time() - start
+    print(f"--> selfies.decoder: {dec_time:0.7f}s")
+
 
 if __name__ == '__main__':
 
     # temporary example
-    test_time_roundtrip('test_sets/dataA_QM9.txt', 1000)
+    time_roundtrip('test_sets/dataA_QM9.txt', -1)
