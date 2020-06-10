@@ -3,6 +3,16 @@ from selfiesv1.utils import get_num_from_bond, get_n_from_chars, \
 
 
 def decoder(selfies, N_restrict=True, print_error=True):
+    """Converts a SELFIES string into its SMILES representation.
+
+    Args:
+        selfies: the SELFIES string to be decoded
+        N_restrict: if True, nitrogen will be constrained to 3 bonds
+        print_error: if True error messages will be printed to console
+
+    Returns: the SMILES translation of <selfies>. If an error occurs, and
+             <selfies> cannot be translated, -1 is returned instead.
+    """
     if not isinstance(selfies, str):
         return -1
 
@@ -13,16 +23,17 @@ def decoder(selfies, N_restrict=True, print_error=True):
         return '.'.join(all_selfies)
 
     except ValueError as err:
+        raise ValueError
         if print_error:
             print(err)
-            print("Could not decode SELFIES. Please contact authors.")
+            print(f"Could not decode '{selfies}'. Please contact authors.")
         return -1
 
 
 def _parse_selfies(selfies):
-    """A generator, which parses a SELFIES string and returns one-by-one
-    its characters. We assume <selfies> has no dots in it, so a character
-    is denoted by an open and closed square bracket, i.e. [X].
+    """A generator, which parses a SELFIES string and returns its characters
+    one-by-one. We assume <selfies> has no dots in it, so a character
+    is indicated by an open and closed square bracket, i.e. [X].
 
     Args:
         selfies: the SElFIES string to be parsed
@@ -54,26 +65,35 @@ def _translate_selfies(selfies, N_restrict):
     Returns: the SMILES translation of <selfies>.
     """
 
-    # the i-th element of <derived> is list with three elements:
-    #  (1) a string representing the i-th derived atom
-    #  (2) the number of available bonds this atom has to make
-    #  (3) a list of indexes j of the atoms the i-th derived atom is connected
-    #      to, where j < i
-    # For example, if the 6-th derived atom was 'C', had 2 available bonds,
-    # and was connected to the 0 and 5-th derived atoms, the 6-th element would
-    # be ['C', 2, [0, 5]]
+    # derived[i] is list with three elements:
+    #  (1) a string representing the i-th derived atom, and its connecting
+    #      bond (e.g. =C, #N, N, C are all possible)
+    #  (2) the number of available bonds the i-th atom has to make
+    #  (3) the index of the previously derived atom, which the i-th derived
+    #      atom is bonded to
+    # Example: if the 6-th derived atom was 'C', had 2 available bonds,
+    # and was connected to the 5-th derived atom by a double bond, then
+    # derived[6] = ['=C', 2, 5]
     derived = []
 
-    # each element of <branches> is a tuple of two indexes, indicating where
-    # in <derived> a branch starts and ends (in this order).
+    # each element of <branches> is a tuple of size two that represents the
+    # branches to be made, in the same order they appear in the SELFIES (left
+    # to right). If the i-th branch starts at the j-th derived atom and ends
+    # at the k-th derived atom, then branches[i] = (j, k).
     branches = []
 
+    # each element of <rings> is a tuple of size three that represents the rings
+    # to be made, in the same order they appear in the SELFIES (left to right).
+    # If the i-th ring is between the j-th and k-th derived atoms (j <= k) and
+    # has bond character s ('=', '#', '\', etc.), then rings[i] = (j, k, s).
     rings = []
 
     _translate_selfies_derive(selfies, 0, N_restrict, derived, -1,
                               branches, rings)
     _form_rings_bilocally(derived, rings)
 
+    # TODO: actually, I think <lb_locs> is pointless because (( can never
+    #  occur in a SMILES. Check this, and if true, remove <lb_locs>.
     lb_locs = {}  # key = index of left bracket, value = how many brackets
     rb_locs = {}  # key = index of right bracket, value = how many brackets
     for lb, rb in branches:
@@ -96,6 +116,21 @@ def _translate_selfies(selfies, N_restrict):
 
 def _translate_selfies_derive(selfies, init_state, N_restrict,
                               derived, prev_idx, branches, rings):
+    """Recursive helper for _translate_selfies. Derives the SMILES characters
+    one-by-one from a SELFIES string, and fills <derived> and <branches>.
+
+    Args:
+        selfies: the SELFIES string (without dots) to be decoded
+        init_state: the initial derivation state
+        N_restrict: if True, nitrogen will be constrained to 3 bonds
+        derived: see <derived> in _translate_selfies
+        prev_idx: the index of the previously derived atom, or -1, if
+                  no atoms have been derived yet
+        branches: see <branches> in _translate_selfies
+        counter: see <ring_counter> in _translate_selfies
+
+    Returns: None.
+    """
     selfies_gen = _parse_selfies(selfies)
 
     curr_char = next(selfies_gen)

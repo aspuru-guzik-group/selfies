@@ -37,6 +37,7 @@ _state_dict_0 = {
     '[F]': ('F', 1),
     '[Cl]': ('Cl', 1),
     '[Br]': ('Br', 1),
+    '[I]': ('I', 1),
     '[O]': ('O', 2),
     '[=O]': ('O', 2),
     '[N]': ('N', 3),
@@ -61,6 +62,7 @@ _state_dict_1 = {
     '[F]': ('F', -1),
     '[Cl]': ('Cl', -1),
     '[Br]': ('Br', -1),
+    '[I]': ('I', -1),
     '[O]': ('O', 1),
     '[=O]': ('O', -1),
     '[N]': ('N', 2),
@@ -85,6 +87,7 @@ _state_dict_2 = {
     '[F]': ('F', -1),
     '[Cl]': ('Cl', -1),
     '[Br]': ('Br', -1),
+    '[I]': ('I', -1),
     '[O]': ('O', 1),
     '[=O]': ('=O', -1),
     '[N]': ('N', 2),
@@ -109,6 +112,7 @@ _state_dict_3_to_6 = {
     '[F]': ('F', -1),
     '[Cl]': ('Cl', -1),
     '[Br]': ('Br', -1),
+    '[I]': ('I', -1),
     '[O]': ('O', 1),
     '[=O]': ('=O', -1),
     '[N]': ('N', 2),
@@ -161,7 +165,14 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
 
     state_dict = _state_library[state]
 
+    # TODO: potentially integrate this in state_dict to save time
+    stereo_bond = None
+    if '/' == char[1] or '\\' == char[1]:
+        stereo_bond = char[1]
+        char = '[' + char[2:]
+
     if char in state_dict:
+
         derived_char, new_state = state_dict[char]
 
         # relax nitrogen constraints if N_restrict = False
@@ -170,6 +181,10 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
 
             if state >= 991:
                 new_state = 4
+
+        # TODO: potentially integrate this in state_dict to save time
+        if (stereo_bond is not None) and state > 0:
+            derived_char = stereo_bond + derived_char
 
         return derived_char, new_state
 
