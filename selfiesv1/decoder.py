@@ -1,5 +1,5 @@
-from selfiesv1.state_dicts import chars_to_index, get_bond_num, \
-    get_next_branch_state, get_next_state
+from selfiesv1.utils import get_num_from_bond, get_n_from_chars, \
+    get_next_branch_state, get_next_state, get_bond_from_num
 
 
 def decoder(selfies, N_restrict=True, print_error=True):
@@ -68,10 +68,11 @@ def _translate_selfies(selfies, N_restrict):
     # in <derived> a branch starts and ends (in this order).
     branches = []
 
-    ring_counter = [1]  # a running counter of the ring numbers used
+    rings = []
 
     _translate_selfies_derive(selfies, 0, N_restrict, derived, -1,
-                              branches, ring_counter)
+                              branches, rings)
+    _form_rings_bilocally(derived, rings)
 
     lb_locs = {}  # key = index of left bracket, value = how many brackets
     rb_locs = {}  # key = index of right bracket, value = how many brackets
@@ -94,8 +95,7 @@ def _translate_selfies(selfies, N_restrict):
 
 
 def _translate_selfies_derive(selfies, init_state, N_restrict,
-                              derived, prev_idx, branches, counter):
-
+                              derived, prev_idx, branches, rings):
     selfies_gen = _parse_selfies(selfies)
 
     curr_char = next(selfies_gen)
@@ -121,7 +121,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = chars_to_index(*L_symbols, default=1)
+                N = get_n_from_chars(*L_symbols, default=1)
 
                 branch_selfies = ""
                 for _ in range(N + 1):
@@ -130,7 +130,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 branch_start = len(derived)
                 _translate_selfies_derive(branch_selfies, branch_init_state,
                                           N_restrict, derived, prev_idx,
-                                          branches, counter)
+                                          branches, rings)
                 branch_end = len(derived) - 1
 
                 new_state = derived[prev_idx][1]
@@ -153,19 +153,27 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = chars_to_index(*L_symbols, default=5)
+                N = get_n_from_chars(*L_symbols, default=5)
 
-                new_state = _form_ring(curr_char, state, derived, N, counter)
+                left_idx = max(0, len(derived) - 1 - (N + 1))
+                right_idx = len(derived) - 1
+
+                bond_char = ''
+                if curr_char[1:5] == 'Expl':
+                    bond_char = curr_char[5]
+
+                new_state = state
+                rings.append((left_idx, right_idx, bond_char))
 
         # Case 3: regular character (e.g. [N], [=C], [F])
         else:
             new_char, new_state = get_next_state(curr_char, state, N_restrict)
 
             if new_char != '':  # exclude the case of [epsilon]
-                derived.append([new_char, new_state, [prev_idx]])
+                derived.append([new_char, new_state, prev_idx])
 
                 if prev_idx >= 0:
-                    bond_num = get_bond_num(new_char[0])
+                    bond_num = get_num_from_bond(new_char[0])
                     derived[prev_idx][1] -= bond_num
 
                 prev_idx = len(derived) - 1
@@ -174,43 +182,58 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
         state = new_state
 
 
-def _form_ring(ring_char, state, derived, N, ring_counter):
-    left_idx = max(0, len(derived) - 1 - (N + 1))
-    right_idx = len(derived) - 1
+def _form_rings_bilocally(derived, rings):
+    ring_locs = {}
 
-    if left_idx == right_idx or left_idx in derived[right_idx][2]:
-        return state
+    for left_idx, right_idx, bond_char in rings:
 
-    left_end = derived[left_idx]
-    right_end = derived[right_idx]
+        if left_idx == right_idx:
+            continue
 
-    bond_char = ''
-    bond_num = 1
+        left_end = derived[left_idx]
+        right_end = derived[right_idx]
+        bond_num = get_num_from_bond(bond_char)
 
-    if ring_char[1:5] == 'Expl':
-        bond_char = ring_char[5]
-        bond_num = get_bond_num(bond_char)
+        if bond_num > left_end[1] or bond_num > right_end[1]:
+            continue
 
-    if left_end[1] >= bond_num and right_end[1] >= bond_num:
+        if left_idx == right_end[2]:
 
-        # form ring
-        ring_id = str(ring_counter[0])
-        if len(ring_id) == 2:
-            ring_id = "%" + ring_id
-        ring_id = bond_char + ring_id
+            right_char = right_end[0]
 
-        ring_counter[0] += 1  # increment
+            if right_char[0] in {'-', '/', '\\', '=', '#'}:
+                old_bond = right_char[0]
+            else:
+                old_bond = ''
 
-        left_end[0] += ring_id
+            new_bond_num = min(bond_num + get_num_from_bond(old_bond), 3)
+            new_bond_char = get_bond_from_num(new_bond_num)
+
+            right_end[0] = new_bond_char + right_end[0][len(old_bond):]
+
+        else:
+            loc = (left_idx, right_idx)
+
+            if loc in ring_locs:
+                new_bond_num = min(bond_num
+                                   + get_num_from_bond(ring_locs[loc]), 3)
+                new_bond_char = get_bond_from_num(new_bond_num)
+                ring_locs[loc] = new_bond_char
+
+            else:
+                ring_locs[loc] = bond_char
+
         left_end[1] -= bond_num
-
-        right_end[0] += ring_id
         right_end[1] -= bond_num
 
-        derived[right_idx][2].append(left_idx)
+    ring_counter = 1
+    for (left_idx, right_idx), bond_char in ring_locs.items():
 
-        if state == bond_num:
-            return -1
-        return state - bond_num
+        ring_id = str(ring_counter)
+        if len(ring_id) == 2:
+            ring_id = "%" + ring_id
+        ring_counter += 1  # increment
 
-    return state
+        derived[left_idx][0] += bond_char + ring_id
+        derived[right_idx][0] += bond_char + ring_id
+

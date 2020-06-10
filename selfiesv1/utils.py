@@ -1,5 +1,6 @@
-"""A file of various state dictionaries used to enforce the SELFIES grammar in
-a relatively fast manner.
+"""A file of various utilities, ranging from state dictionaries used to enforce
+the SELFIES grammar in an efficient manner, helper methods, and the
+selfies_alphabet() method.
 
 Next steps include:
 TODO: generate these _state_dicts and _state_library dynamically,
@@ -7,10 +8,16 @@ TODO: generate these _state_dicts and _state_library dynamically,
 TODO: For states 991-993, the new N state is 4, which is inconsistent with an
     unknown atom. Also, this can be expanded to pardon the restrictions on
     any atom in general.
+TODO: add or remove error checking if needed
 """
+from typing import List, Tuple
 
 
-def selfies_alphabet():
+def selfies_alphabet() -> List[str]:
+    """
+    Returns: a list of the characters of the SELFIES alphabet
+    """
+
     alphabet = ['[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
                 '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
                 '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
@@ -139,7 +146,7 @@ _state_library = {
 }
 
 
-def get_next_state(char, state, N_restrict):
+def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
     """Given the current non-branch, non-ring character and current derivation
     state, retrieves the derived SMILES character and the next derivation state.
 
@@ -180,7 +187,7 @@ _bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
                         '[c]', '[n]', '[o]', '[s]', '[p]'}
 
 
-def _process_unknown_char(char):
+def _process_unknown_char(char: str) -> str:
     """Attempts to convert an unknown SELFIES character <char> into a
     proper SMILES character. For example, explicit aromatic symbols
     are not part of the SELFIES alphabet, but _process_unknown_char
@@ -214,23 +221,24 @@ def _process_unknown_char(char):
 # <_branch_state_library> takes as a key the current derivation state.
 # Its value is a tuple; for [BranchL_X], the (X - 1)th element of the tuple
 # gives a tuple of (1) the initial branch derivation state and (2) the
-# next derivation state (after the branch is derived).
+# next derivation state (after the branch is derived). States 0-1, 9991-9993
+# are not included because Branches at those states are simply skipped.
 
 _branch_state_library = {
-    0: ((None, 0), (None, 0), (None, 0)),
-    1: ((None, 1), (None, 1), (None, 1)),
+    0: ((-1, 0), (-1, 0), (-1, 0)),
+    1: ((-1, 1), (-1, 1), (-1, 1)),
     2: ((9991, 1), (9991, 1), (9991, 1)),
     3: ((9991, 2), (9992, 1), (9992, 1)),
     4: ((9991, 3), (9992, 2), (9993, 1)),
     5: ((9991, 4), (9992, 3), (9993, 2)),
     6: ((9991, 5), (9992, 4), (9993, 3)),
-    9991: ((None, 9991), (None, 9991), (None, 9991)),
-    9992: ((None, 9992), (None, 9992), (None, 9992)),
-    9993: ((None, 9993), (None, 9993), (None, 9993))
+    9991: ((-1, 9991), (-1, 9991), (-1, 9991)),
+    9992: ((-1, 9992), (-1, 9992), (-1, 9992)),
+    9993: ((-1, 9993), (-1, 9993), (-1, 9993))
 }
 
 
-def get_next_branch_state(branch_char, state):
+def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
     """Given the branch character and current derivation state, retrieves
     the initial branch derivation state (i.e. the derivation state that the
     new branch begins on), and the next derivation state (i.e. the derivation
@@ -265,7 +273,7 @@ _index_alphabet = ['[epsilon]', '[Ring1]', '[Ring2]',
 _alphabet_code = {c: i for i, c in enumerate(_index_alphabet)}
 
 
-def chars_to_index(*chars, default=1):
+def get_n_from_chars(*chars: List[str], default: int = 1) -> int:
     """Converts a list of SELFIES characters [c_1, ..., c_n] into a number N.
     This is done by converting each character c_n to an integer idx(c_n) via
     <_alphabet_code>, and then treating the list as a number in base
@@ -273,7 +281,8 @@ def chars_to_index(*chars, default=1):
 
     Args:
         *chars: a list of SELFIES characters
-        default: the value to be returned if an error occurs.
+        default: the value to be returned if any character in <chars>
+                 is not recognized
 
     Returns: the corresponding N for <chars>, or <default> if an element
              in <chars> does not have an index.
@@ -289,30 +298,40 @@ def chars_to_index(*chars, default=1):
     return N
 
 
-def index_to_chars(N):
+def get_chars_from_n(n: int) -> List[str]:
+    """Converts an integer n into a list of SELFIES characters that, if
+    passed into <chars_to_index> in that order, would have produced n.
 
-    if N == 0:
+    Args:
+        n: an integer
+
+    Returns: a list of SELFIES characters representing n
+             in base len(_alphabet_code)
+    """
+
+    if n == 0:
         return [_index_alphabet[0]]
 
     chars = []
     base = len(_index_alphabet)
-    while N:
-        chars.append(_index_alphabet[N % base])
-        N //= base
+    while n:
+        chars.append(_index_alphabet[n % base])
+        n //= base
     return chars[::-1]
 
 
 # Helper Methods ===============================================================
 
-def get_bond_num(bond_char):
-    """
-    Gets the bond number of a SMILES representation of a bond.
+
+def get_num_from_bond(bond_char: str) -> int:
+    """Retrieves the bond multiplicity from a SMILES character representing
+    a bond. If <bond_char> is not known, 1 is returned by default.
 
     Args:
-        bond_char: the bond character, e.g., '=', '-', '#'
+        bond_char: a SMILES character representing a bond
 
-    Returns: the number of bonds <bond_char> represents, or 1 if the
-             bond character is unknown.
+    Returns: the bond multiplicity of <bond_char>, or 1 if <bond_char> is not
+             recognized.
     """
 
     if bond_char == "=":
@@ -321,3 +340,16 @@ def get_bond_num(bond_char):
         return 3
     else:
         return 1
+
+
+def get_bond_from_num(n: int) -> str:
+    """Returns the SMILES character representing a bond with multiplicity
+    <n>. More specifically, '' = 1 and '=' = 2 and '#' = 3.
+
+    Args:
+        n: either 1, 2, 3
+
+    Returns: the SMILES character representing a bond with multiplicity <n>
+    """
+
+    return ('', '=', '#')[n - 1]

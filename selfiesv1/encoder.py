@@ -1,4 +1,4 @@
-from selfiesv1.state_dicts import get_bond_num, index_to_chars
+from selfiesv1.utils import get_num_from_bond, get_chars_from_n
 
 
 def encoder(smiles, print_error=True):
@@ -62,7 +62,7 @@ def _parse_smiles(smiles):
             i += 3
 
         else:
-            raise ValueError("Unknown symbol in SMILES.")
+            raise ValueError(f"Unknown symbol '{smiles[i]}' in SMILES.")
 
         yield bond, char
 
@@ -94,8 +94,8 @@ def _translate_smiles_derive(smiles_gen, counter, rings):
                 branch, branch_len = \
                     _translate_smiles_derive(smiles_gen, counter, rings)
 
-                N_as_chars = index_to_chars(branch_len - 1)
-                bond_num = get_bond_num(bond)
+                N_as_chars = get_chars_from_n(branch_len - 1)
+                bond_num = get_num_from_bond(bond)
 
                 selfies += f"[Branch{len(N_as_chars)}_{bond_num}]"
                 selfies += ''.join(N_as_chars) + branch
@@ -112,7 +112,7 @@ def _translate_smiles_derive(smiles_gen, counter, rings):
                 right_bond, right_end = bond, counter[0]
 
                 ring_len = right_end - left_end
-                N_as_chars = index_to_chars(ring_len - 1)
+                N_as_chars = get_chars_from_n(ring_len - 1)
 
                 if left_bond != '':
                     selfies += f"[Expl{left_bond}Ring{len(N_as_chars)}]"

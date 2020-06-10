@@ -140,3 +140,5 @@ cython_debug/
 # IntelliJ
 .idea/
 
+tests/test_sets/dataZ_massive.smi
+tests/test_sets/dataZ_massive.smi
