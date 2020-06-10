@@ -9,6 +9,19 @@ TODO: For states 991-993, the new N state is 4, which is inconsistent with an
     any atom in general.
 """
 
+
+def selfies_alphabet():
+    alphabet = ['[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
+                '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
+                '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
+                '[O]', '[=O]', '[S]', '[=S]',
+                '[N]', '[=N]', '[#N]', '[NHexpl]', '[P]',
+                '[C]', '[=C]', '[#C]',
+                '[C@Hexpl]', '[C@@Hexpl]', '[C@expl]', '[C@@expl]',
+                '[H]', '[F]']
+    return alphabet
+
+
 # Character State Dict Functions ===============================================
 
 _state_dict_0 = {
@@ -207,10 +220,10 @@ _branch_state_library = {
     0: ((None, 0), (None, 0), (None, 0)),
     1: ((None, 1), (None, 1), (None, 1)),
     2: ((9991, 1), (9991, 1), (9991, 1)),
-    3: ((9991, 2), (9991, 2), (9992, 1)),
-    4: ((9992, 2), (9991, 3), (9993, 1)),
-    5: ((9992, 3), (9991, 4), (9993, 2)),
-    6: ((9992, 4), (9991, 5), (9993, 3)),
+    3: ((9991, 2), (9992, 1), (9992, 1)),
+    4: ((9991, 3), (9992, 2), (9993, 1)),
+    5: ((9991, 4), (9992, 3), (9993, 2)),
+    6: ((9991, 5), (9992, 4), (9993, 3)),
     9991: ((None, 9991), (None, 9991), (None, 9991)),
     9992: ((None, 9992), (None, 9992), (None, 9992)),
     9993: ((None, 9993), (None, 9993), (None, 9993))
@@ -252,11 +265,11 @@ _index_alphabet = ['[epsilon]', '[Ring1]', '[Ring2]',
 _alphabet_code = {c: i for i, c in enumerate(_index_alphabet)}
 
 
-def get_chars_index(*chars, default=1):
+def chars_to_index(*chars, default=1):
     """Converts a list of SELFIES characters [c_1, ..., c_n] into a number N.
     This is done by converting each character c_n to an integer idx(c_n) via
-    <_alphabet_code>, adding 1 to the first integer idx(c_1), and then treating
-    the list as a number in base len(_alphabet_code).
+    <_alphabet_code>, and then treating the list as a number in base
+    len(_alphabet_code).
 
     Args:
         *chars: a list of SELFIES characters
@@ -271,8 +284,40 @@ def get_chars_index(*chars, default=1):
 
     N = 0
     for i, c in enumerate(reversed(chars)):
-        N_i = _alphabet_code[c] + int(i == len(chars) - 1)
-        N_i *= (len(_alphabet_code) ** i)
+        N_i = _alphabet_code[c] * (len(_alphabet_code) ** i)
         N += N_i
     return N
 
+
+def index_to_chars(N):
+
+    if N == 0:
+        return [_index_alphabet[0]]
+
+    chars = []
+    base = len(_index_alphabet)
+    while N:
+        chars.append(_index_alphabet[N % base])
+        N //= base
+    return chars[::-1]
+
+
+# Helper Methods ===============================================================
+
+def get_bond_num(bond_char):
+    """
+    Gets the bond number of a SMILES representation of a bond.
+
+    Args:
+        bond_char: the bond character, e.g., '=', '-', '#'
+
+    Returns: the number of bonds <bond_char> represents, or 1 if the
+             bond character is unknown.
+    """
+
+    if bond_char == "=":
+        return 2
+    elif bond_char == "#":
+        return 3
+    else:
+        return 1

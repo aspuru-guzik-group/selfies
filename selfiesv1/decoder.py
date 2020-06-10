@@ -1,19 +1,8 @@
-from selfiesv1.state_dicts import \
-    get_chars_index, get_next_branch_state, get_next_state
+from selfiesv1.state_dicts import chars_to_index, get_bond_num, \
+    get_next_branch_state, get_next_state
 
 
 def decoder(selfies, N_restrict=True, print_error=True):
-    """Converts a SELFIES string into its SMILES representation.
-
-    Args:
-        selfies: the SELFIES string to be decoded
-        N_restrict: if True, nitrogen will be constrained to 3 bonds
-        print_error: if True error messages will be printed to console
-
-    Returns: the SMILES translation of <selfies>. If an error occurs, and
-             <selfies> cannot be translated, -1 is returned instead.
-    """
-
     if not isinstance(selfies, str):
         return -1
 
@@ -106,31 +95,15 @@ def _translate_selfies(selfies, N_restrict):
 
 def _translate_selfies_derive(selfies, init_state, N_restrict,
                               derived, prev_idx, branches, counter):
-    """Recursive helper for _translate_selfies. Derives the SMILES characters
-    one-by-one from a SELFIES string, and fills <derived> and <branches>.
-
-    Args:
-        selfies: the SELFIES string (without dots) to be decoded
-        init_state: the initial derivation state
-        N_restrict: if True, nitrogen will be constrained to 3 bonds
-        derived: see <derived> in _translate_selfies
-        prev_idx: the index of the previously derived atom, or -1, if
-                  no atoms have been derived yet
-        branches: see <branches> in _translate_selfies
-        counter: see <ring_counter> in _translate_selfies
-
-    Returns: None.
-    """
 
     selfies_gen = _parse_selfies(selfies)
 
-    first_flag = True
     curr_char = next(selfies_gen)
     state = init_state
 
     while curr_char != '' and state >= 0:
 
-        # Case 1: Branch character (e.g. [Branch1_2]
+        # Case 1: Branch character (e.g. [Branch1_2])
         if 'Branch' in curr_char:
 
             branch_init_state, new_state = \
@@ -148,13 +121,11 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_chars_index(*L_symbols, default=1)
+                N = chars_to_index(*L_symbols, default=1)
 
                 branch_selfies = ""
-                for _ in range(N):
+                for _ in range(N + 1):
                     branch_selfies += next(selfies_gen)
-
-                derived[prev_idx][1] = new_state
 
                 branch_start = len(derived)
                 _translate_selfies_derive(branch_selfies, branch_init_state,
@@ -163,9 +134,6 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 branch_end = len(derived) - 1
 
                 new_state = derived[prev_idx][1]
-                if new_state == 0:
-                    new_state = -1
-
                 if branch_start <= branch_end:
                     branches.append((branch_start, branch_end))
 
@@ -185,7 +153,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_chars_index(*L_symbols, default=5)
+                N = chars_to_index(*L_symbols, default=5)
 
                 new_state = _form_ring(curr_char, state, derived, N, counter)
 
@@ -196,11 +164,9 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
             if new_char != '':  # exclude the case of [epsilon]
                 derived.append([new_char, new_state, [prev_idx]])
 
-                if not first_flag:
-                    bond_num = _get_bond_num(new_char[0])
+                if prev_idx >= 0:
+                    bond_num = get_bond_num(new_char[0])
                     derived[prev_idx][1] -= bond_num
-                else:
-                    first_flag = False
 
                 prev_idx = len(derived) - 1
 
@@ -221,9 +187,9 @@ def _form_ring(ring_char, state, derived, N, ring_counter):
     bond_char = ''
     bond_num = 1
 
-    if ring_char[1:4] == 'Expl':
+    if ring_char[1:5] == 'Expl':
         bond_char = ring_char[5]
-        bond_num = _get_bond_num(bond_char)
+        bond_num = get_bond_num(bond_char)
 
     if left_end[1] >= bond_num and right_end[1] >= bond_num:
 
@@ -248,32 +214,3 @@ def _form_ring(ring_char, state, derived, N, ring_counter):
         return state - bond_num
 
     return state
-
-
-def _get_bond_num(bond_char):
-    """
-    Gets the bond number of a SMILES representation of a bond.
-
-    Args:
-        bond_char: the bond character, e.g., '=', '-', '#'
-
-    Returns: the number of bonds <bond_char> represents, or 1 if the
-             bond character is unknown.
-    """
-
-    if bond_char == "=":
-        return 2
-    elif bond_char == "#":
-        return 3
-    else:
-        return 1
-
-
-if __name__ == '__main__':
-    import selfies as sf
-
-    mol = "CC1(CN1)C#N"
-
-    print(sf.encoder(mol))
-    print(decoder(sf.encoder(mol)))
-    # print(sf.decoder(sf.encoder(mol)))

@@ -6,7 +6,7 @@ import pytest
 import random
 
 import selfies as sf
-import selfiesv1.decoder_prototype as sfv1
+import selfiesv1 as sfv1
 from rdkit.Chem import MolFromSmiles, MolToSmiles
 
 test_path_list = [
@@ -17,7 +17,7 @@ test_path_list = [
 
 
 @pytest.mark.parametrize("test_paths", [test_path_list])
-def test_roundtrip_translation(test_paths, sample_size=1000):
+def test_roundtrip_translation(test_paths, sample_size=10000):
     """Tests <sample_size> random SMILES from each data set in <test_paths>;
     encodes and then decodes the SMILES, and checks whether the decoded
     SMILES corresponds to the same molecule as the input SMILES.
@@ -30,10 +30,13 @@ def test_roundtrip_translation(test_paths, sample_size=1000):
         with open(test_path, 'r') as test_file:
             smiles_set = random.sample(test_file.readlines(), sample_size)
             smiles_set = [line.rstrip() for line in smiles_set]
+            smiles_set = list(filter(lambda s: 'c' not in s, smiles_set))
+
+        print(len(smiles_set))
 
         for smiles in smiles_set:
-
-            decoded_smiles = sfv1.decoder(sf.encoder(smiles), N_restrict=False)
+            encoded = sfv1.encoder(smiles)
+            decoded_smiles = sfv1.decoder(encoded, N_restrict=False)
 
             try:
                 if MolFromSmiles(decoded_smiles) is None:
@@ -45,6 +48,7 @@ def test_roundtrip_translation(test_paths, sample_size=1000):
                 if can_input != can_output:
                     error_list.append((smiles, decoded_smiles,
                                        can_input, can_output))
+
             except ValueError:
                 error_list.append((smiles, decoded_smiles, "", ""))
 
@@ -62,7 +66,7 @@ def test_random_selfies_decoder():
     """Passes random strings built from the SELFIES alphabet to the decoder,
     and uses RDKit to check whether the decoded SMILES are valid.
     """
-    trials = 10000
+    trials = 50000
     max_len = 50
     alphabet = sf.selfies_alphabet()
 

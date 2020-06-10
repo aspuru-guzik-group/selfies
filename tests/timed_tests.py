@@ -2,7 +2,7 @@ import random
 import time
 
 import selfies as sf
-import selfiesv1.decoder_prototype as sfv1
+import selfiesv1 as sfv1
 
 
 def time_roundtrip(file_path: str, sample_size: int = -1):
@@ -21,19 +21,12 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
 
     print(f"Timing {len(smiles)} SMILES from {file_path}")
 
-    # time sf.encoder
+    # time sfv1.encoder
     start = time.time()
     for s in smiles:
-        sf.encoder(s)
+        sfv1.encoder(s)
     enc_time = time.time() - start
     print(f"--> selfies.encoder: {enc_time:0.7f}s")
-
-    # time sf.decoder
-    start = time.time()
-    for s in selfies:
-        sf.decoder(s)
-    dec_time = time.time() - start
-    print(f"--> selfies.decoder: {dec_time:0.7f}s")
 
     # time sfv1.decoder
     start = time.time()
