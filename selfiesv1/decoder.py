@@ -23,7 +23,6 @@ def decoder(selfies, N_restrict=True, print_error=True):
         return '.'.join(all_selfies)
 
     except ValueError as err:
-        raise ValueError
         if print_error:
             print(err)
             print(f"Could not decode '{selfies}'. Please contact authors.")
@@ -127,7 +126,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
         prev_idx: the index of the previously derived atom, or -1, if
                   no atoms have been derived yet
         branches: see <branches> in _translate_selfies
-        counter: see <ring_counter> in _translate_selfies
+        rings: see <rings> in _translate_selfies
 
     Returns: None.
     """

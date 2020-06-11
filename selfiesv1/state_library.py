@@ -17,7 +17,8 @@ def build_state_dict() -> Dict:
 
     for i in range(4):
 
-        state_dict = {}
+        state_dict = dict()
+        state_dict['[epsilon]'] = ('', 0) if i == 0 else ('', -1)
 
         for (atom, valence), (bond, bond_num) in \
                 itertools.product(_valences.items(), _bonds.items()):
@@ -30,6 +31,9 @@ def build_state_dict() -> Dict:
             else:
                 selfies_atom = f"[{bond}{atom}]"
 
+            if atom == 'H':  # edge case
+                atom = '[H]'
+
             if i == 0:
                 state_dict[selfies_atom] = (atom, valence)
                 continue
@@ -39,6 +43,9 @@ def build_state_dict() -> Dict:
                 bond_num = i
 
             next_state = valence - bond_num
+            if next_state == 0:
+                next_state = -1
+
             state_dict[selfies_atom] = (bond + atom, next_state)
 
         state_dict['[???]'] = (None, 6)
