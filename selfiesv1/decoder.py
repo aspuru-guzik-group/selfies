@@ -1,5 +1,5 @@
-from selfiesv1.utils import get_num_from_bond, get_n_from_chars, \
-    get_next_branch_state, get_next_state, get_bond_from_num
+from selfiesv1.utils import get_bond_from_num, get_n_from_chars, \
+    get_next_branch_state, get_next_state, get_num_from_bond
 
 
 def decoder(selfies, N_restrict=True, print_error=True):
@@ -25,7 +25,7 @@ def decoder(selfies, N_restrict=True, print_error=True):
     except ValueError as err:
         if print_error:
             print(err)
-            print(f"Could not decode '{selfies}'. Please contact authors.")
+            print(f"Could not decode SELFIES. Please contact authors.")
         return -1
 
 
@@ -203,7 +203,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
         else:
             new_char, new_state = get_next_state(curr_char, state, N_restrict)
 
-            if new_char != '':  # exclude the case of [epsilon]
+            if new_char != '':  # in case of [epsilon], which translates to ''
                 derived.append([new_char, new_state, prev_idx])
 
                 if prev_idx >= 0:
@@ -212,16 +212,29 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
 
                 prev_idx = len(derived) - 1
 
-        curr_char = next(selfies_gen)
+        curr_char = next(selfies_gen)  # update character and state
         state = new_state
 
 
 def _form_rings_bilocally(derived, rings):
+    """Forms all the rings specified by <rings> in first-to-last order,
+    and writes them into derived. Thus, note that <derived> will be mutated.
+
+    Args:
+        derived: see <derived> in _translate_selfies
+        rings: see <rings> in _translate_selfies
+
+    Returns: None.
+    """
+
+    # due to the behaviour of allowing multiple rings between the same atom
+    # pair, or rings between already bonded atoms, we first resolve all rings
+    # so that only valid rings are left and placed into <ring_locs>.
     ring_locs = {}
 
     for left_idx, right_idx, bond_char in rings:
 
-        if left_idx == right_idx:
+        if left_idx == right_idx:  # ring to the same atom forbidden
             continue
 
         left_end = derived[left_idx]
@@ -229,8 +242,10 @@ def _form_rings_bilocally(derived, rings):
         bond_num = get_num_from_bond(bond_char)
 
         if bond_num > left_end[1] or bond_num > right_end[1]:
-            continue
+            continue  # not enough available bonds to make the ring
 
+        # ring is formed between two atoms that are already bonded
+        # e.g. CC1C1C --> CC=CC
         if left_idx == right_end[2]:
 
             right_char = right_end[0]
@@ -240,15 +255,20 @@ def _form_rings_bilocally(derived, rings):
             else:
                 old_bond = ''
 
+            # update bond multiplicity and character
             new_bond_num = min(bond_num + get_num_from_bond(old_bond), 3)
             new_bond_char = get_bond_from_num(new_bond_num)
 
             right_end[0] = new_bond_char + right_end[0][len(old_bond):]
 
+        # ring is formed between two atoms that are not bonded, e.g. C1CC1C
         else:
             loc = (left_idx, right_idx)
 
             if loc in ring_locs:
+                # a ring is formed between two atoms that are have previously
+                # been bonded by a ring, so ring bond multiplicity is updated
+
                 new_bond_num = min(bond_num
                                    + get_num_from_bond(ring_locs[loc]), 3)
                 new_bond_char = get_bond_from_num(new_bond_num)
@@ -260,6 +280,8 @@ def _form_rings_bilocally(derived, rings):
         left_end[1] -= bond_num
         right_end[1] -= bond_num
 
+    # finally, use <ring_locs> to add all the rings into <derived>
+
     ring_counter = 1
     for (left_idx, right_idx), bond_char in ring_locs.items():
 
@@ -270,4 +292,3 @@ def _form_rings_bilocally(derived, rings):
 
         derived[left_idx][0] += bond_char + ring_id
         derived[right_idx][0] += bond_char + ring_id
-

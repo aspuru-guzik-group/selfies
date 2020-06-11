@@ -1,7 +1,16 @@
-from selfiesv1.utils import get_num_from_bond, get_chars_from_n
+from selfiesv1.utils import get_chars_from_n, get_num_from_bond
 
 
 def encoder(smiles, print_error=True):
+    """Converts a SMILES string into its SELFIES representation.
+
+    Args:
+        smiles: the SMILES string to be decoded
+        print_error: if True, error messages will be printed to console
+
+    Returns: the SELFIES translation of <smiles>. If an error occurs, and
+             <smiles> cannot be translated, -1 is returned instead.
+    """
     try:
         smiles = smiles.replace(" ", '')
 
@@ -23,6 +32,21 @@ RING_TYPE = 3
 
 
 def _parse_smiles(smiles):
+    """A generator, which parses a SMILES string and returns character(s) of it
+    one-by-one as a tuple of:
+        (1) the bond character connecting the current character to the previous
+            SMILES character (e.g. '=', '', '#')
+        (2) the character(s) as a string (e.g. 'C', '12', '(')
+        (3) the type of character(s), represented as an integer that is either
+            <ATOM_TYPE>, <BRANCH_TYPE>, and <RING_TYPE>.
+    As a precondition, we also assume <smiles> has no dots in it.
+
+    Args:
+        smiles: the SMILES string (without dots) to be parsed
+
+    Returns: the character(s) of <smiles> along with their types
+    """
+
     i = 0
 
     while 0 <= i < len(smiles):
@@ -35,41 +59,64 @@ def _parse_smiles(smiles):
         elif smiles[i] == '-':
             i += 1  # TODO: check if ignoring is always valid
 
-        if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':
-            if smiles[i: i + 2] in {'Br', 'Cl'}:
-                char = (smiles[i: i + 2], ATOM_TYPE)
+        if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
+            if smiles[i: i + 2] in {'Br', 'Cl'}:  # two letter elements
+                char = smiles[i: i + 2]
+                char_type = ATOM_TYPE
                 i += 2
             else:
-                char = (smiles[i], ATOM_TYPE)
+                char = smiles[i]  # one letter elements (e.g. C, N, ...)
+                char_type = ATOM_TYPE
                 i += 1
 
-        elif smiles[i] in ['(', ')']:
+        elif smiles[i] in ['(', ')']:  # open and closed branch brackets
             bond = smiles[i + 1]
-            char = (smiles[i], BRANCH_TYPE)
+            char = smiles[i]
+            char_type = BRANCH_TYPE
             i += 1
 
-        elif smiles[i] == '[':
+        elif smiles[i] == '[':  # atoms encased in brackets (e.g. [NH])
             r_idx = smiles.find(']', i + 1)
-            char = (smiles[i + 1: r_idx] + "expl", ATOM_TYPE)
+            char = smiles[i + 1: r_idx] + "expl"
+            char_type = ATOM_TYPE
             i = r_idx + 1
 
-        elif '0' <= smiles[i] <= '9':
-            char = (smiles[i], RING_TYPE)
+        elif '0' <= smiles[i] <= '9':  # one-digit ring number
+            char = smiles[i]
+            char_type = RING_TYPE
             i += 1
 
-        elif smiles[i] == '%':
-            char = (smiles[i + 1: i + 3], RING_TYPE)
+        elif smiles[i] == '%':  # two-digit ring number (e.g. %12)
+            char = smiles[i + 1: i + 3]
+            char_type = RING_TYPE
             i += 3
 
         else:
             raise ValueError(f"Unknown symbol '{smiles[i]}' in SMILES.")
 
-        yield bond, char
+        yield bond, char, char_type
 
 
 def _translate_smiles(smiles):
+    """A helper for selfies.encoder, which converts a SMILES string
+    without dots into its SELFIES representation.
+
+    Args:
+        smiles: the SMILES string (without dots) to be encoded
+
+    Returns: the SELFIES translation of <smiles>.
+    """
+
     smiles_gen = _parse_smiles(smiles)
+
+    # a simple mutable counter to track which atom was the i-th derived atom
     derive_counter = [0]
+
+    # a dictionary to keep track of the rings to be made. If a ring with id
+    # X is connected to the i-th and j-th derived atoms (i < j) with bond
+    # character s, then after the i-th atom is derived, rings[X] = (s, i).
+    # As soon as the j-th atom is derived, rings[X] is removed from <rings>,
+    # and the ring is made.
     rings = {}
 
     selfies, _ = _translate_smiles_derive(smiles_gen, derive_counter, rings)
@@ -78,10 +125,24 @@ def _translate_smiles(smiles):
 
 
 def _translate_smiles_derive(smiles_gen, counter, rings):
+    """Recursive helper for _translate_smiles. Derives the SELFIES characters
+    from a SMILES string, and returns a tuple of (1) the encoded SELFIES
+    and (2) the length of the encoded SELFIES (as in the number of SELFIES
+    characters in the string).
+
+    Args:
+        smiles_gen: a generator produced by calling _parse_smiles on a
+                    SMILES string.
+        counter: see <derived_counter> in _translate_smiles
+        rings: see <rings> in _translate_smiles
+
+    Returns: a tuple of the encoded SELFIES and its length
+    """
+
     selfies = ""
     selfies_len = 0
 
-    for i, (bond, (char, char_type)) in enumerate(smiles_gen):
+    for i, (bond, char, char_type) in enumerate(smiles_gen):
 
         if char_type == ATOM_TYPE:
             selfies += f"[{bond}{char}]"
@@ -101,10 +162,10 @@ def _translate_smiles_derive(smiles_gen, counter, rings):
                 selfies += ''.join(N_as_chars) + branch
                 selfies_len += 1 + len(N_as_chars) + branch_len
 
-            else:
+            else:  # char == ')'
                 return selfies, selfies_len
 
-        else:
+        else:  # char_type == RING_TYPE
             ring_id = int(char)
 
             if ring_id in rings:

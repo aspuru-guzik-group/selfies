@@ -3,8 +3,6 @@ the SELFIES grammar in an efficient manner, helper methods, and the
 selfies_alphabet() method.
 
 Next steps include:
-TODO: generate these _state_dicts and _state_library dynamically,
-    using the above valence information.
 TODO: For states 991-993, the new N state is 4, which is inconsistent with an
     unknown atom. Also, this can be expanded to pardon the restrictions on
     any atom in general.
@@ -84,9 +82,7 @@ _bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
 
 def _process_unknown_char(char: str) -> str:
     """Attempts to convert an unknown SELFIES character <char> into a
-    proper SMILES character. For example, explicit aromatic symbols
-    are not part of the SELFIES alphabet, but _process_unknown_char
-    will help convert [c], [n], [o] --> c, n, o.
+    proper SMILES character.
 
     Args:
         char: an unknown SELFIES character
@@ -96,16 +92,14 @@ def _process_unknown_char(char: str) -> str:
 
     processed = ""
 
-    if char[0: 2] in ('[=', '[#', '[\\', '[/', '[-'):
+    if char[0: 2] in {'[=', '[#', '[\\', '[/', '[-'}:
         processed += char[1]
         char = "[" + char[2:]
 
     if char in _bracket_less_smiles:
         char = char[1: -1]  # remove [ and ] brackets
 
-    if 'expl' in char:
-        char = char.replace('expl]', ']')
-
+    char = char.replace('expl]', ']')
     processed += char
 
     return processed
