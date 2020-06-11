@@ -12,6 +12,8 @@ TODO: add or remove error checking if needed
 """
 from typing import List, Tuple
 
+from selfiesv1.state_library import build_state_dict
+
 
 def selfies_alphabet() -> List[str]:
     """
@@ -31,123 +33,12 @@ def selfies_alphabet() -> List[str]:
 
 # Character State Dict Functions ===============================================
 
-_state_dict_0 = {
-    '[epsilon]': ('', 0),
-    '[H]': ('[H]', 1),
-    '[F]': ('F', 1),
-    '[Cl]': ('Cl', 1),
-    '[Br]': ('Br', 1),
-    '[I]': ('I', 1),
-    '[O]': ('O', 2),
-    '[=O]': ('O', 2),
-    '[N]': ('N', 3),
-    '[=N]': ('N', 3),
-    '[#N]': ('N', 3),
-    '[NHexpl]': ('[NH]', 2),
-    '[C]': ('C', 4),
-    '[=C]': ('C', 4),
-    '[#C]': ('C', 4),
-    '[C@expl]': ('[C@]', 4),
-    '[C@@expl]': ('[C@@]', 4),
-    '[C@Hexpl]': ('[C@H]', 3),
-    '[C@@Hexpl]': ('[C@@H]', 3),
-    '[S]': ('S', 6),
-    '[=S]': ('S', 6),
-    '[???]': (None, 6)
-}
-
-_state_dict_1 = {
-    '[epsilon]': ('', -1),
-    '[H]': ('[H]', -1),
-    '[F]': ('F', -1),
-    '[Cl]': ('Cl', -1),
-    '[Br]': ('Br', -1),
-    '[I]': ('I', -1),
-    '[O]': ('O', 1),
-    '[=O]': ('O', -1),
-    '[N]': ('N', 2),
-    '[=N]': ('N', 2),
-    '[#N]': ('N', 2),
-    '[NHexpl]': ('[NH]', 1),
-    '[C]': ('C', 3),
-    '[=C]': ('C', 3),
-    '[#C]': ('C', 3),
-    '[C@expl]': ('[C@]', 3),
-    '[C@@expl]': ('[C@@]', 3),
-    '[C@Hexpl]': ('[C@H]', 2),
-    '[C@@Hexpl]': ('[C@@H]', 2),
-    '[S]': ('S', 5),
-    '[=S]': ('S', 5),
-    '[???]': (None, 6)
-}
-
-_state_dict_2 = {
-    '[epsilon]': ('', -1),
-    '[H]': ('[H]', -1),
-    '[F]': ('F', -1),
-    '[Cl]': ('Cl', -1),
-    '[Br]': ('Br', -1),
-    '[I]': ('I', -1),
-    '[O]': ('O', 1),
-    '[=O]': ('=O', -1),
-    '[N]': ('N', 2),
-    '[=N]': ('=N', 1),
-    '[#N]': ('=N', 1),
-    '[NHexpl]': ('[NH]', 1),
-    '[C]': ('C', 3),
-    '[=C]': ('=C', 2),
-    '[#C]': ('=C', 2),
-    '[C@expl]': ('[C@]', 3),
-    '[C@@expl]': ('[C@@]', 3),
-    '[C@Hexpl]': ('[C@H]', 2),
-    '[C@@Hexpl]': ('[C@@H]', 2),
-    '[S]': ('S', 5),
-    '[=S]': ('=S', 4),
-    '[???]': (None, 6)
-}
-
-_state_dict_3_to_6 = {
-    '[epsilon]': ('', -1),
-    '[H]': ('[H]', -1),
-    '[F]': ('F', -1),
-    '[Cl]': ('Cl', -1),
-    '[Br]': ('Br', -1),
-    '[I]': ('I', -1),
-    '[O]': ('O', 1),
-    '[=O]': ('=O', -1),
-    '[N]': ('N', 2),
-    '[=N]': ('=N', 1),
-    '[#N]': ('#N', -1),
-    '[NHexpl]': ('[NH]', 1),
-    '[C]': ('C', 3),
-    '[=C]': ('=C', 2),
-    '[#C]': ('#C', 1),
-    '[C@expl]': ('[C@]', 3),
-    '[C@@expl]': ('[C@@]', 3),
-    '[C@Hexpl]': ('[C@H]', 2),
-    '[C@@Hexpl]': ('[C@@H]', 2),
-    '[S]': ('S', 5),
-    '[=S]': ('=S', 4),
-    '[???]': (None, 6)
-}
-
 # <_state_library> is accessed through two keys, which are (1) the current
 # derivation state and (2) the current SELFIES character to be derived, or
 # '[???]' is the character is unknown. The corresponding value is a tuple of
 # (1) the derived SMILES character, and (2) the next derivation state.
 
-_state_library = {
-    0: _state_dict_0,
-    1: _state_dict_1,
-    2: _state_dict_2,
-    3: _state_dict_3_to_6,
-    4: _state_dict_3_to_6,
-    5: _state_dict_3_to_6,
-    6: _state_dict_3_to_6,
-    9991: _state_dict_1,
-    9992: _state_dict_2,
-    9993: _state_dict_3_to_6
-}
+_state_library = build_state_dict()
 
 
 def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
@@ -165,12 +56,6 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
 
     state_dict = _state_library[state]
 
-    # TODO: potentially integrate this in state_dict to save time
-    stereo_bond = None
-    if '/' == char[1] or '\\' == char[1]:
-        stereo_bond = char[1]
-        char = '[' + char[2:]
-
     if char in state_dict:
 
         derived_char, new_state = state_dict[char]
@@ -181,10 +66,6 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
 
             if state >= 991:
                 new_state = 4
-
-        # TODO: potentially integrate this in state_dict to save time
-        if (stereo_bond is not None) and state > 0:
-            derived_char = stereo_bond + derived_char
 
         return derived_char, new_state
 
@@ -198,8 +79,7 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
 # SMILES counterparts cannot have brackets by convention.
 
 _bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
-                        '[F]', '[Cl]', '[Br]', '[I]',
-                        '[c]', '[n]', '[o]', '[s]', '[p]'}
+                        '[F]', '[Cl]', '[Br]', '[I]'}
 
 
 def _process_unknown_char(char: str) -> str:
