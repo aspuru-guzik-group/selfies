@@ -60,7 +60,7 @@ def _parse_smiles(smiles):
             i += 1  # TODO: check if ignoring is always valid
 
         if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
-            if smiles[i: i + 2] in {'Br', 'Cl'}:  # two letter elements
+            if 'a' <= smiles[i + 1: i + 2] <= 'z':  # two letter elements
                 char = smiles[i: i + 2]
                 char_type = ATOM_TYPE
                 i += 2

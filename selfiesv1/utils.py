@@ -6,27 +6,60 @@ Next steps include:
 TODO: For states 991-993, the new N state is 4, which is inconsistent with an
     unknown atom. Also, this can be expanded to pardon the restrictions on
     any atom in general.
-TODO: add or remove error checking if needed
 """
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
-from selfiesv1.state_library import build_state_dict
+from selfiesv1.state_library import build_state_dict, default_atom_dict
 
 
-def selfies_alphabet() -> List[str]:
-    """
+def get_selfies_alphabet() -> List[str]:
+    """Retrieves the current SELFIES alphabet, which will be the default
+    unless specified otherwise by <set_selfies_alphabet>.
+
     Returns: a list of the characters of the SELFIES alphabet
     """
 
-    alphabet = ['[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
-                '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
-                '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
-                '[O]', '[=O]', '[S]', '[=S]',
-                '[N]', '[=N]', '[#N]', '[NHexpl]', '[P]',
-                '[C]', '[=C]', '[#C]',
-                '[C@Hexpl]', '[C@@Hexpl]', '[C@expl]', '[C@@expl]',
-                '[H]', '[F]']
-    return alphabet
+    global _state_library
+    return list(_state_library[0].keys())
+
+
+def get_atom_dict() -> Dict[str, int]:
+    """Retrieves the current <atom_dict> upon which the SELFIES alphabet is
+    built upon. See <set_selfies_alphabet> for further explanation of
+    the structure of <atom_dict>
+
+    Returns: the current <atom_dict>
+    """
+
+    global _atom_dict
+    return dict(_atom_dict)
+
+
+def set_selfies_alphabet(atom_dict: Dict[str, int] = None) -> None:
+    """Sets the SELFIES alphabet to one based on the atom(s) or ions in
+    <atom_dict>. <atom_dict> is a dictionary with the key being some atom(s)
+    or ion represented in SMILES, and its corresponding value being the
+    non-zero maximum bond capacity of the key. For example:
+        atom_dict['C'] = 4
+        atom_dict['Br'] = 1
+        atom_dict['[C@@H]'] = 3
+        atom_dict['[Cu++]'] = 4
+
+    Multiple keys may correspond to the same atom(s) or ion (e.g. '[Cu++]' and
+    '[Cu+2]', '[ClH]' and '[ClH1]'), but SELFIES will only recognize the
+    precise key that is included.
+
+    Args:
+        atom_dict: a dictionary of the atoms or ions that the new SELFIES
+                   alphabet will be built upon, with the value being the
+                   maximum bond capacity of the atom or ion. If None,
+                   then a default atom_dict will be used.
+
+    Returns: None.
+    """
+
+    global _state_library
+    _state_library = build_state_dict(atom_dict)
 
 
 # Character State Dict Functions ===============================================
@@ -36,6 +69,7 @@ def selfies_alphabet() -> List[str]:
 # '[???]' is the character is unknown. The corresponding value is a tuple of
 # (1) the derived SMILES character, and (2) the next derivation state.
 
+_atom_dict = default_atom_dict
 _state_library = build_state_dict()
 
 
@@ -150,6 +184,7 @@ def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
 
 # SELFIES Character to N Functions =============================================
 
+# TODO: replace '[epsilon]' = 0 with something else
 _index_alphabet = ['[epsilon]', '[Ring1]', '[Ring2]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
                    '[Branch2_1]', '[Branch2_2]', '[Branch2_3]',
