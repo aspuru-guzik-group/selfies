@@ -20,7 +20,16 @@ def get_selfies_alphabet() -> List[str]:
     """
 
     global _state_library
-    return list(_state_library[0].keys())
+
+    alphabet = list(_state_library[0].keys())
+    alphabet.extend([
+        '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
+        '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
+        '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
+    ])
+    alphabet.remove('[???]')
+
+    return alphabet
 
 
 def get_atom_dict() -> Dict[str, int]:
@@ -58,7 +67,8 @@ def set_selfies_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     Returns: None.
     """
 
-    global _state_library
+    global _state_library, _atom_dict
+    _atom_dict = atom_dict
     _state_library = build_state_dict(atom_dict)
 
 
@@ -144,6 +154,8 @@ _branch_state_library = {
     4: ((9991, 3), (9992, 2), (9993, 1)),
     5: ((9991, 4), (9992, 3), (9993, 2)),
     6: ((9991, 5), (9992, 4), (9993, 3)),
+    7: ((9991, 6), (9992, 5), (9993, 4)),
+    8: ((9991, 7), (9992, 6), (9993, 5)),
     9991: ((-1, 9991), (-1, 9991), (-1, 9991)),
     9992: ((-1, 9992), (-1, 9992), (-1, 9992)),
     9993: ((-1, 9993), (-1, 9993), (-1, 9993))

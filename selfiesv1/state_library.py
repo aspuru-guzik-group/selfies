@@ -4,12 +4,12 @@ from typing import Dict
 # default atom_dict
 # key = SMILES atom, value = maximum number of bonds key can make
 default_atom_dict = {
-    'H': 1, 'F': 1, 'Cl': 1, 'Br': 1,
+    'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
     'O': 2, '[NH]': 2,
     'N': 3, '[C@H]': 3, '[C@@H]': 3,
     'C': 4, '[C@]': 4, '[C@@]': 4,
     'P': 5,
-    'S': 6, 'I': 6,
+    'S': 6,
 }
 
 # key = bond type, value = bond multiplicity

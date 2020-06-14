@@ -4,7 +4,7 @@ from selfiesv1.utils import get_bond_from_num, get_n_from_chars, \
 from typing import Optional
 
 
-def decoder(selfies: str, print_error: bool = True) -> Optional[str]:
+def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     """Converts a SELFIES string into its SMILES representation.
 
     Args:
