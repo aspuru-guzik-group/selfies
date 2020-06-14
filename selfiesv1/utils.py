@@ -7,7 +7,7 @@ TODO: For states 991-993, the new N state is 4, which is inconsistent with an
     unknown atom. Also, this can be expanded to pardon the restrictions on
     any atom in general.
 """
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 
 from selfiesv1.state_library import build_state_dict, default_atom_dict
 
@@ -35,7 +35,7 @@ def get_atom_dict() -> Dict[str, int]:
     return dict(_atom_dict)
 
 
-def set_selfies_alphabet(atom_dict: Dict[str, int] = None) -> None:
+def set_selfies_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     """Sets the SELFIES alphabet to one based on the atom(s) or ions in
     <atom_dict>. <atom_dict> is a dictionary with the key being some atom(s)
     or ion represented in SMILES, and its corresponding value being the
