@@ -1,7 +1,9 @@
+from typing import Optional
+
 from selfiesv1.utils import get_chars_from_n, get_num_from_bond
 
 
-def encoder(smiles, print_error=True):
+def encoder(smiles: str, print_error: bool = True) -> Optional[str]:
     """Converts a SMILES string into its SELFIES representation.
 
     Args:

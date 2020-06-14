@@ -1,8 +1,10 @@
 from selfiesv1.utils import get_bond_from_num, get_n_from_chars, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
+from typing import Optional
 
-def decoder(selfies, print_error=True):
+
+def decoder(selfies: str, print_error: bool = True) -> Optional[str]:
     """Converts a SELFIES string into its SMILES representation.
 
     Args:
@@ -12,8 +14,6 @@ def decoder(selfies, print_error=True):
     Returns: the SMILES translation of <selfies>. If an error occurs, and
              <selfies> cannot be translated, None is returned instead.
     """
-    if not isinstance(selfies, str):
-        return -1
 
     try:
         all_selfies = []  # process dot-separated fragments separately
