@@ -1,12 +1,8 @@
 """A file of various utilities, ranging from state dictionaries used to enforce
 the SELFIES grammar in an efficient manner, helper methods, and the
 selfies_alphabet() method.
-
-Next steps include:
-TODO: For states 991-993, the new N state is 4, which is inconsistent with an
-    unknown atom. Also, this can be expanded to pardon the restrictions on
-    any atom in general.
 """
+
 from typing import Dict, List, Tuple, Optional
 
 from selfiesv1.state_library import build_state_dict, default_atom_dict
