@@ -9,7 +9,7 @@ def encoder(smiles, print_error=True):
         print_error: if True, error messages will be printed to console
 
     Returns: the SELFIES translation of <smiles>. If an error occurs, and
-             <smiles> cannot be translated, -1 is returned instead.
+             <smiles> cannot be translated, None is returned instead.
     """
     try:
         smiles = smiles.replace(" ", '')
@@ -23,7 +23,7 @@ def encoder(smiles, print_error=True):
         if print_error:
             print(err)
             print('Could not encode SMILES. Please contact authors.')
-        return -1
+        return None
 
 
 ATOM_TYPE = 1

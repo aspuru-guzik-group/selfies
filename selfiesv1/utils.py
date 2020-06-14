@@ -73,14 +73,13 @@ _atom_dict = default_atom_dict
 _state_library = build_state_dict()
 
 
-def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
+def get_next_state(char: str, state: int) -> Tuple[str, int]:
     """Given the current non-branch, non-ring character and current derivation
     state, retrieves the derived SMILES character and the next derivation state.
 
     Args:
         char: a SELFIES character that is not a Ring or Branch
         state: the current derivation state
-        N_restrict: if True, nitrogen is restricted to 3 bonds
 
     Returns: a tuple of (1) the derived character, and (2) the
              next derivation state
@@ -89,17 +88,7 @@ def get_next_state(char: str, state: int, N_restrict: bool) -> Tuple[str, int]:
     state_dict = _state_library[state]
 
     if char in state_dict:
-
-        derived_char, new_state = state_dict[char]
-
-        # relax nitrogen constraints if N_restrict = False
-        if not N_restrict and (char in ['[N]', '[=N]', ['#N']]):
-            _, new_state = state_dict['[???]']
-
-            if state >= 991:
-                new_state = 4
-
-        return derived_char, new_state
+        return state_dict[char]
 
     else:  # unknown SELFIES character
         _, new_state = state_dict['[???]']

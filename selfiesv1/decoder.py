@@ -2,16 +2,15 @@ from selfiesv1.utils import get_bond_from_num, get_n_from_chars, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
 
-def decoder(selfies, N_restrict=True, print_error=True):
+def decoder(selfies, print_error=True):
     """Converts a SELFIES string into its SMILES representation.
 
     Args:
         selfies: the SELFIES string to be decoded
-        N_restrict: if True, nitrogen will be constrained to 3 bonds
         print_error: if True error messages will be printed to console
 
     Returns: the SMILES translation of <selfies>. If an error occurs, and
-             <selfies> cannot be translated, -1 is returned instead.
+             <selfies> cannot be translated, None is returned instead.
     """
     if not isinstance(selfies, str):
         return -1
@@ -19,14 +18,14 @@ def decoder(selfies, N_restrict=True, print_error=True):
     try:
         all_selfies = []  # process dot-separated fragments separately
         for s in selfies.split("."):
-            all_selfies.append(_translate_selfies(s, N_restrict))
+            all_selfies.append(_translate_selfies(s))
         return '.'.join(all_selfies)
 
     except ValueError as err:
         if print_error:
             print(err)
             print(f"Could not decode SELFIES. Please contact authors.")
-        return -1
+        return None
 
 
 def _parse_selfies(selfies):
@@ -53,13 +52,12 @@ def _parse_selfies(selfies):
         yield ''
 
 
-def _translate_selfies(selfies, N_restrict):
+def _translate_selfies(selfies):
     """A helper for selfies.decoder, which converts a SELFIES string
     without dots into its SMILES representation.
 
     Args:
         selfies: the SELFIES string (without dots) to be decoded
-        N_restrict: if True, nitrogen will be constrained to 3 bonds
 
     Returns: the SMILES translation of <selfies>.
     """
@@ -87,8 +85,7 @@ def _translate_selfies(selfies, N_restrict):
     # has bond character s ('=', '#', '\', etc.), then rings[i] = (j, k, s).
     rings = []
 
-    _translate_selfies_derive(selfies, 0, N_restrict, derived, -1,
-                              branches, rings)
+    _translate_selfies_derive(selfies, 0, derived, -1, branches, rings)
     _form_rings_bilocally(derived, rings)
 
     # TODO: actually, I think <lb_locs> is pointless because (( can never
@@ -113,15 +110,14 @@ def _translate_selfies(selfies, N_restrict):
     return smiles
 
 
-def _translate_selfies_derive(selfies, init_state, N_restrict,
-                              derived, prev_idx, branches, rings):
+def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
+                              branches, rings):
     """Recursive helper for _translate_selfies. Derives the SMILES characters
     one-by-one from a SELFIES string, and fills <derived> and <branches>.
 
     Args:
         selfies: the SELFIES string (without dots) to be decoded
         init_state: the initial derivation state
-        N_restrict: if True, nitrogen will be constrained to 3 bonds
         derived: see <derived> in _translate_selfies
         prev_idx: the index of the previously derived atom, or -1, if
                   no atoms have been derived yet
@@ -163,8 +159,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
 
                 branch_start = len(derived)
                 _translate_selfies_derive(branch_selfies, branch_init_state,
-                                          N_restrict, derived, prev_idx,
-                                          branches, rings)
+                                          derived, prev_idx, branches, rings)
                 branch_end = len(derived) - 1
 
                 new_state = derived[prev_idx][1]
@@ -201,7 +196,7 @@ def _translate_selfies_derive(selfies, init_state, N_restrict,
 
         # Case 3: regular character (e.g. [N], [=C], [F])
         else:
-            new_char, new_state = get_next_state(curr_char, state, N_restrict)
+            new_char, new_state = get_next_state(curr_char, state)
 
             if new_char != '':  # in case of [epsilon], which translates to ''
                 derived.append([new_char, new_state, prev_idx])
