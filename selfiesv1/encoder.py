@@ -1,6 +1,7 @@
 from typing import Optional
 
 from selfiesv1.utils import get_chars_from_n, get_num_from_bond
+from rdkit.Chem import MolFromSmiles, MolToSmiles, Kekulize
 
 
 def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
@@ -8,13 +9,25 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
 
     Args:
         smiles: the SMILES string to be decoded
-        print_error: if True, error messages will be printed to console
+        print_error: (optional) if True, error messages will be printed to
+                     console. Default is False
 
     Returns: the SELFIES translation of <smiles>. If an error occurs, and
              <smiles> cannot be translated, None is returned instead.
     """
+
+    # TODO: remove me later
+    if 'c' in smiles:
+        m = MolFromSmiles(smiles)
+        if m is None:
+            return None
+
+        Kekulize(m)
+        smiles = MolToSmiles(m, kekulizeSmiles=True)
+    # TODO: remove me later
+
     try:
-        smiles = smiles.replace(" ", '')
+        smiles.replace('-', '')  # remove explicit single bonds
 
         all_smiles = []  # process dot-separated fragments separately
         for s in smiles.split("."):

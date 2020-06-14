@@ -181,12 +181,11 @@ def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
 
 # SELFIES Character to N Functions =============================================
 
-# TODO: replace '[epsilon]' = 0 with something else
-_index_alphabet = ['[epsilon]', '[Ring1]', '[Ring2]',
+_index_alphabet = ['[C]', '[Ring1]', '[Ring2]', '[Ring3]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
                    '[Branch2_1]', '[Branch2_2]', '[Branch2_3]',
                    '[F]', '[O]', '[=O]', '[N]', '[=N]', '[#N]',
-                   '[C]', '[=C]', '[#C]', '[S]', '[=S]']
+                   '[=C]', '[#C]', '[S]', '[=S]']
 
 # <_alphabet_code> takes as a key a SELFIES char, and its corresponding value
 # is the index of the key.

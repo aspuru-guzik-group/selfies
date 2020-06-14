@@ -5,14 +5,13 @@ faulthandler.enable()
 import pytest
 import random
 
-import selfies as sf
 import selfiesv1 as sfv1
 from rdkit.Chem import MolFromSmiles, MolToSmiles
 
 test_path_list = [
     'test_sets/dataA_QM9.txt',
     'test_sets/dataB_NonFullerene.txt',
-    'test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt'
+    "test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt"
 ]
 
 
@@ -23,6 +22,10 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
     SMILES corresponds to the same molecule as the input SMILES.
     """
 
+    atom_dict = sfv1.get_atom_dict()
+    atom_dict['N'] = 6
+    sfv1.set_selfies_alphabet(atom_dict)
+
     error_list = []
 
     for test_path in test_paths:
@@ -32,11 +35,9 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
             smiles_set = [line.rstrip() for line in smiles_set]
             smiles_set = list(filter(lambda s: 'c' not in s, smiles_set))
 
-        print(len(smiles_set))
-
         for smiles in smiles_set:
             encoded = sfv1.encoder(smiles)
-            decoded_smiles = sfv1.decoder(encoded, N_restrict=False)
+            decoded_smiles = sfv1.decoder(encoded)
 
             try:
                 if MolFromSmiles(decoded_smiles) is None:
@@ -54,7 +55,7 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
 
         error_list.sort(key=lambda x: len(x[0]))
 
-    with open("error_list.csv", "w") as error_log:
+    with open("test_sets/error_list.csv", "w") as error_log:
         error_log.write("In, Out, Canonical In, Canonical Out\n")
         for error in error_list:
             error_log.write(','.join(error) + "\n")
@@ -66,9 +67,11 @@ def test_random_selfies_decoder():
     """Passes random strings built from the SELFIES alphabet to the decoder,
     and uses RDKit to check whether the decoded SMILES are valid.
     """
-    trials = 50000
+    trials = 100000
     max_len = 50
-    alphabet = sf.selfies_alphabet()
+
+    sfv1.set_selfies_alphabet()
+    alphabet = sfv1.get_selfies_alphabet()
 
     for i in range(trials):
 
@@ -83,8 +86,7 @@ def test_random_selfies_decoder():
         except Exception:
             is_valid = False
 
-        assert is_valid, f"Invalid SMILES {smiles} decoded from {selfies}. " \
-                         f"Should be {sf.decoder(selfies)}"
+        assert is_valid, f"Invalid SMILES {smiles} decoded from {selfies}."
 
 
 if __name__ == '__main__':

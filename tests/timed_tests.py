@@ -4,6 +4,8 @@ import time
 import selfies as sf
 import selfiesv1 as sfv1
 
+from rdkit.Chem import MolToSmiles, MolFromSmiles, Kekulize
+
 
 def time_roundtrip(file_path: str, sample_size: int = -1):
     """Tests the amount of time it takes to encode and then decode an
@@ -18,6 +20,13 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
         if sample_size > 0:
             smiles = random.sample(smiles, sample_size)
         selfies = list(map(sf.encoder, smiles))
+
+        for i in range(len(smiles)):
+
+            if 'c' in smiles[i]:
+                m = MolFromSmiles(smiles[i])
+                Kekulize(m)
+                smiles[i] = MolToSmiles(m, kekuleSmiles=True)
 
     print(f"Timing {len(smiles)} SMILES from {file_path}")
 
@@ -40,3 +49,6 @@ if __name__ == '__main__':
 
     # temporary example
     time_roundtrip('test_sets/dataA_QM9.txt', -1)
+    # time_roundtrip('test_sets/dataB_NonFullerene.txt', -1)
+    # time_roundtrip('test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt', -1)
+
