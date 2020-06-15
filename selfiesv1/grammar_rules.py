@@ -20,6 +20,8 @@ def get_alphabet() -> List[str]:
         '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
     ])
     alphabet.remove('[???]')
+    alphabet.remove('[epsilon]')
+    alphabet.append('[nop]')
 
     return alphabet
 

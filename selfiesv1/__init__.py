@@ -16,9 +16,7 @@ learning models, in particular in generative models, for the generation of
 outputs with high validity.
 
 The code presented here is a concrete application of SELIFES in chemistry, for
-the robust representation of molecule. We show the encoding and decoding of
-three molecules from various databases, and the generation of a new, random
-molecule with high semantic and syntactical validity.
+the robust representation of molecule.
 
 For comments, bug reports or feature ideas, please send an email to
 mario.krenn@utoronto.ca and alan@aspuru.com

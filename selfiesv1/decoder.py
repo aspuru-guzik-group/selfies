@@ -51,7 +51,8 @@ def _parse_selfies(selfies):
         next_char = selfies[left_idx: right_idx + 1]
         left_idx = right_idx + 1
 
-        yield next_char
+        if next_char != '[nop]':  # skip [nop] 
+            yield next_char
 
     while True:  # no more characters left
         yield ''
@@ -196,7 +197,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
         else:
             new_char, new_state = get_next_state(curr_char, state)
 
-            if new_char != '':  # in case of [epsilon], which translates to ''
+            if new_char != '':  # in case of [epsilon]
                 derived.append([new_char, new_state, prev_idx])
 
                 if prev_idx >= 0:
