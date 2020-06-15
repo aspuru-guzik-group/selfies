@@ -22,7 +22,7 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
             smiles = _translate_selfies(s)
 
             if smiles != "":  # prevent dot errors (e.g. [C]..[C], .[C][C])
-                all_smiles.append(_translate_selfies(s))
+                all_smiles.append(smiles)
 
         return '.'.join(all_smiles)
 
