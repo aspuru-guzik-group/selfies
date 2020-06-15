@@ -38,13 +38,13 @@ def split_selfies(selfies: str) -> Iterable[str]:
             left_idx += 1
 
 
-def get_alphabet_from_selfies(selfies_list: Iterable[str]) -> List[str]:
-    """From a list of SELFIES, constructs the minimum-sized alphabet
+def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> List[str]:
+    """From an iterable of SELFIES, constructs the minimum-sized alphabet
     of SELFIES characters (e.g. '[C]', '.', '[Branch1_1]) such that
-    every SELFIES in that list can be constructed from the alphabet.
+    every SELFIES in that iterable can be constructed from the alphabet.
 
     Args:
-        selfies_list: a list of SELFIES
+        selfies_iter: an iterable of SELFIES
 
     Returns: a list of the characters of the SElFIES alphabet (in no
              particular oder)
@@ -52,7 +52,7 @@ def get_alphabet_from_selfies(selfies_list: Iterable[str]) -> List[str]:
 
     alphabet = set()
 
-    for s in selfies_list:
+    for s in selfies_iter:
         for char in split_selfies(s):
             alphabet.add(char)
 
