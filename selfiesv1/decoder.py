@@ -144,7 +144,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
             branch_init_state, new_state = \
                 get_next_branch_state(curr_char, state)
 
-            if state in {0, 1, 9991, 9992, 9993}:
+            if state <= 1 or state >= 9991:  # state = 0, 1, 9991, 9992, 9993
                 pass  # ignore no characters
 
             else:
@@ -171,7 +171,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
         # Case 2: Ring character (e.g. [Ring2])
         elif 'Ring' in curr_char:
 
-            if state in {0, 9991, 9992, 9993}:
+            if state == 0 or state >= 9991:  # state = 0, 9991, 9992, 9993
                 new_state = state  # ignore no characters
 
             else:
