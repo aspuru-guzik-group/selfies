@@ -5,9 +5,10 @@ from selfiesv1.state_library import build_state_dict, default_atom_dict
 
 def get_alphabet() -> List[str]:
     """Retrieves the current SELFIES alphabet, which will be the default
-    unless specified otherwise by <set_selfies_alphabet>.
+    unless specified otherwise by <set_alphabet>.
 
-    Returns: a list of the characters of the SELFIES alphabet
+    Returns: a list of the characters of the SELFIES alphabet (in no
+             particular order)
     """
 
     global _state_library
@@ -25,7 +26,7 @@ def get_alphabet() -> List[str]:
 
 def get_atom_dict() -> Dict[str, int]:
     """Retrieves the current <atom_dict> upon which the SELFIES alphabet is
-    built upon. See <set_selfies_alphabet> for further explanation of
+    built upon. See <set_alphabet> for further explanation of
     the structure of <atom_dict>
 
     Returns: the current <atom_dict>
