@@ -1,4 +1,4 @@
-from selfiesv1.utils import get_bond_from_num, get_n_from_chars, \
+from selfiesv1.grammar_rules import get_bond_from_num, get_n_from_chars, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
 from typing import Optional
@@ -16,10 +16,15 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     """
 
     try:
-        all_selfies = []  # process dot-separated fragments separately
+        all_smiles = []  # process dot-separated fragments separately
+
         for s in selfies.split("."):
-            all_selfies.append(_translate_selfies(s))
-        return '.'.join(all_selfies)
+            smiles = _translate_selfies(s)
+
+            if smiles != "":  # prevent dot errors (e.g. [C]..[C], .[C][C])
+                all_smiles.append(_translate_selfies(s))
+
+        return '.'.join(all_smiles)
 
     except ValueError as err:
         if print_error:
@@ -139,10 +144,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
             branch_init_state, new_state = \
                 get_next_branch_state(curr_char, state)
 
-            if state == 0 or state == 1:
-                next(selfies_gen)  # ignore next characters
-
-            elif state == 9991 or state == 9992 or state == 9993:
+            if state in {0, 1, 9991, 9992, 9993}:
                 pass  # ignore no characters
 
             else:
@@ -169,11 +171,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
         # Case 2: Ring character (e.g. [Ring2])
         elif 'Ring' in curr_char:
 
-            if state == 0:
-                next(selfies_gen)  # ignore next character
-                new_state = state
-
-            elif state == 9991 or state == 9992 or state == 993:
+            if state in {0, 9991, 9992, 9993}:
                 new_state = state  # ignore no characters
 
             else:

@@ -24,7 +24,7 @@ pip install selfies
 Several examples can be seen in examples/selfies_example.py. Here is a simple encoding and decoding:
 
 ```python
-from selfies import encoder, decoder, get_selfies_alphabet  
+from selfies import encoder, decoder, get_alphabet  
     
 test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
 selfies1=encoder(test_molecule1)
@@ -35,7 +35,7 @@ print('selfies1: '+selfies1+'\n')
 print('smiles1: '+smiles1+'\n')
 print('equal: '+str(test_molecule1==smiles1)+'\n\n\n')
 
-my_alphabet=get_selfies_alphabet() # contains all semantically valid SELFIES symbols.
+my_alphabet=get_alphabet() # contains all semantically valid SELFIES symbols.
 
 ```
 
@@ -70,7 +70,7 @@ supported:
 ### Versions
 #### 0.2.4 (01.10.2019):
        - added:
-           -> functon get_selfies_alphabet() which returns a list of 29 selfies symbols whos arbitrary combination produce >99.99% valid molecules
+           -> functon get_alphabet() which returns a list of 29 selfies symbols whos arbitrary combination produce >99.99% valid molecules
        - bug fixes:
            -> fixed bug which happens when three rings start at one node, and two of them form a double ring
            -> enabled rings with sizes of up to 8000 SELFIES symbols

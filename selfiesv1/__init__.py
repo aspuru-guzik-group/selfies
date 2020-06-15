@@ -28,4 +28,4 @@ __version__ = "1.0.0"
 
 from .decoder import decoder
 from .encoder import encoder
-from .utils import get_selfies_alphabet, get_atom_dict, set_selfies_alphabet
+from .grammar_rules import get_alphabet, get_atom_dict, set_alphabet

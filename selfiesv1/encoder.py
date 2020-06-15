@@ -1,6 +1,6 @@
 from typing import Optional
 
-from selfiesv1.utils import get_chars_from_n, get_num_from_bond
+from selfiesv1.grammar_rules import get_chars_from_n, get_num_from_bond
 from rdkit.Chem import MolFromSmiles, MolToSmiles, Kekulize
 
 
@@ -29,10 +29,10 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     try:
         smiles.replace('-', '')  # remove explicit single bonds
 
-        all_smiles = []  # process dot-separated fragments separately
+        all_selfies = []  # process dot-separated fragments separately
         for s in smiles.split("."):
-            all_smiles.append(_translate_smiles(s))
-        return '.'.join(all_smiles)
+            all_selfies.append(_translate_smiles(s))
+        return '.'.join(all_selfies)
 
     except ValueError as err:
         if print_error:
