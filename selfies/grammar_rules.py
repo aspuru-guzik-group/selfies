@@ -19,7 +19,7 @@ def get_alphabet() -> List[str]:
         '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
         '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
     ])
-    alphabet.remove('[???]')
+    alphabet.remove('[?]')
     alphabet.remove('[epsilon]')
     alphabet.append('[nop]')
 
@@ -64,7 +64,7 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
 
 # <_state_library> is accessed through two keys, which are (1) the current
 # derivation state and (2) the current SELFIES character to be derived, or
-# '[???]' is the character is unknown. The corresponding value is a tuple of
+# '[?]' if the character is unknown. The corresponding value is a tuple of
 # (1) the derived SMILES character, and (2) the next derivation state.
 
 _atom_dict = default_atom_dict
@@ -89,8 +89,8 @@ def get_next_state(char: str, state: int) -> Tuple[str, int]:
         return state_dict[char]
 
     else:  # unknown SELFIES character
-        _, new_state = state_dict['[???]']
         derived_char = _process_unknown_char(char)
+        new_state = state_dict['[?]'][1] - get_num_from_bond(char[1])
         return derived_char, new_state
 
 

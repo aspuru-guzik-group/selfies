@@ -10,6 +10,7 @@ default_atom_dict = {
     'C': 4, '[C@]': 4, '[C@@]': 4,
     'P': 5,
     'S': 6,
+    '?': 8,
 }
 
 # key = bond type, value = bond multiplicity
@@ -34,12 +35,16 @@ def build_state_dict(atom_dict=None) -> Dict:
     if atom_dict is None:
         atom_dict = default_atom_dict
 
+    atom_dict = dict(atom_dict)  # copy for safety
+    unknown_bond_cap = atom_dict.pop('?')
+
     state_library = {}
 
     for state in range(4):
 
         state_dict = dict()
         state_dict['[epsilon]'] = ('', 0) if state == 0 else ('', -1)
+        state_dict['[?]'] = (None, unknown_bond_cap)
 
         for (atom, max_bonds), (bond, bond_num) in \
                 itertools.product(atom_dict.items(), _bonds.items()):
@@ -70,7 +75,6 @@ def build_state_dict(atom_dict=None) -> Dict:
             else:
                 state_dict[selfies_atom] = (atom, max_bonds)
 
-        state_dict['[???]'] = (None, 8)
         state_library[state] = state_dict
 
     state_library[4] = state_library[3]
