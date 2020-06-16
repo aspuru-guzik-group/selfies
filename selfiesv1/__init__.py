@@ -2,11 +2,7 @@
 
 """
 SELFIES: a robust representation of semantically constrained graphs with an
-         example application in chemistry
-         TODO: change this date below
-         v1.0.0, 01. October 2019
-by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich,
-Alan Aspuru-Guzik
+         example application in chemistry.
 
 SELFIES (SELF-referencing Embedded Strings) is a general-purpose,
 sequence-based, robust representation of semantically constrained graphs.
@@ -16,10 +12,17 @@ learning models, in particular in generative models, for the generation of
 outputs with high validity.
 
 The code presented here is a concrete application of SELIFES in chemistry, for
-the robust representation of molecule.
+the robust representation of molecules.
+
+    Typical usage example:
+        import selfies
+
+        benzene = "C1=CC=CC=C1"
+        selfies_benzene = selfies.encoder(smiles_benzene)
+        smiles_benzene = selfies.decoder(selfies_benzene)
 
 For comments, bug reports or feature ideas, please send an email to
-mario.krenn@utoronto.ca and alan@aspuru.com
+mario.krenn@utoronto.ca and alan@aspuru.com.
 """
 
 __version__ = "1.0.0"

@@ -4,12 +4,10 @@ from typing import Iterable, List
 def len_selfies(selfies: str) -> int:
     """Retrieves the character length of a SELFIES. That is, the number
     of characters that make up the SELFIES; and not the length of the
-    string itself (i.e. len(selfies))
+    string itself (i.e. len(selfies)).  
 
-    Args:
-        selfies: a SELFIES
-
-    Returns: the length of <selfies>
+    :param selfies: a SELFIES
+    :return: the length of <selfies>
     """
 
     return selfies.count('[') + selfies.count('.')
@@ -18,11 +16,9 @@ def len_selfies(selfies: str) -> int:
 def split_selfies(selfies: str) -> Iterable[str]:
     """Reads a SELFIES character-by-character.
 
-    Args:
-        selfies: a SELFIES
-
-    Returns: an iterable of the characters of <selfies> in the same order they
-             appear in the string
+    :param selfies: a SELFIES
+    :return: an iterable of the characters of <selfies> in the same order
+        they appear in the string
     """
 
     left_idx = selfies.find('[')
@@ -43,11 +39,9 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> List[str]:
     of SELFIES characters (e.g. '[C]', '.', '[Branch1_1]) such that
     every SELFIES in that iterable can be constructed from the alphabet.
 
-    Args:
-        selfies_iter: an iterable of SELFIES
-
-    Returns: a list of the characters of the SElFIES alphabet (in no
-             particular oder)
+    :param selfies_iter: an iterable of SELFIES
+    :return: a list of the characters of the SElFIES alphabet (in no
+        particular oder)
     """
 
     alphabet = set()

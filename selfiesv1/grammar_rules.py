@@ -7,8 +7,8 @@ def get_alphabet() -> List[str]:
     """Retrieves the current SELFIES alphabet, which will be the default
     unless specified otherwise by <set_alphabet>.
 
-    Returns: a list of the characters of the SELFIES alphabet (in no
-             particular order)
+    :return: a list of the characters of the SELFIES alphabet (in no
+        particular order)
     """
 
     global _state_library
@@ -31,7 +31,7 @@ def get_atom_dict() -> Dict[str, int]:
     built upon. See <set_alphabet> for further explanation of
     the structure of <atom_dict>
 
-    Returns: the current <atom_dict>
+    :return: the current <atom_dict>
     """
 
     global _atom_dict
@@ -48,13 +48,11 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
         atom_dict['[C@@H]'] = 3
         atom_dict['[Cu++]'] = 4
 
-    Args:
-        atom_dict: a dictionary of the atoms or ions that the new SELFIES
-                   alphabet will be built upon, with the value being the
-                   maximum bond capacity of the atom or ion. If None,
-                   then a default atom_dict will be used.
-
-    Returns: None.
+    :param atom_dict: a dictionary of the atoms or ions that the new SELFIES
+        alphabet will be built upon, with the value being the
+        maximum bond capacity of the atom or ion. If None,
+        then a default atom_dict will be used.
+    :return: None.
     """
 
     global _state_library, _atom_dict
@@ -175,11 +173,10 @@ def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
 
 # SELFIES Character to N Functions =============================================
 
-_index_alphabet = ['[C]', '[Ring1]', '[Ring2]', '[Ring3]',
+_index_alphabet = ['[C]', '[Ring1]', '[Ring2]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
                    '[Branch2_1]', '[Branch2_2]', '[Branch2_3]',
-                   '[F]', '[O]', '[=O]', '[N]', '[=N]', '[#N]',
-                   '[=C]', '[#C]', '[S]', '[=S]']
+                    '[O]', '[N]', '[=N]', '[=C]', '[#C]', '[S]', '[P]']
 
 # <_alphabet_code> takes as a key a SELFIES char, and its corresponding value
 # is the index of the key.
@@ -187,27 +184,22 @@ _index_alphabet = ['[C]', '[Ring1]', '[Ring2]', '[Ring3]',
 _alphabet_code = {c: i for i, c in enumerate(_index_alphabet)}
 
 
-def get_n_from_chars(*chars: List[str], default: int = 1) -> int:
+def get_n_from_chars(*chars: List[str]) -> int:
     """Converts a list of SELFIES characters [c_1, ..., c_n] into a number N.
     This is done by converting each character c_n to an integer idx(c_n) via
     <_alphabet_code>, and then treating the list as a number in base
-    len(_alphabet_code).
+    len(_alphabet_code). If a character is unrecognized, it is given value 0 by
+    default.
 
     Args:
         *chars: a list of SELFIES characters
-        default: the value to be returned if any character in <chars>
-                 is not recognized
 
-    Returns: the corresponding N for <chars>, or <default> if an element
-             in <chars> does not have an index.
+    Returns: the corresponding N for <chars>
     """
-
-    if any(c not in _alphabet_code for c in chars):
-        return default
 
     N = 0
     for i, c in enumerate(reversed(chars)):
-        N_i = _alphabet_code[c] * (len(_alphabet_code) ** i)
+        N_i = _alphabet_code.get(c, 0) * (len(_alphabet_code) ** i)
         N += N_i
     return N
 

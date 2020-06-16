@@ -1,19 +1,32 @@
 from typing import Optional
 
+from rdkit.Chem import Kekulize, MolFromSmiles, MolToSmiles
+
 from selfiesv1.grammar_rules import get_chars_from_n, get_num_from_bond
-from rdkit.Chem import MolFromSmiles, MolToSmiles, Kekulize
 
 
 def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
-    """Converts a SMILES string into its SELFIES representation.
+    """Translates a SMILES into a SELFIES.
 
-    Args:
-        smiles: the SMILES string to be decoded
-        print_error: (optional) if True, error messages will be printed to
-                     console. Default is False
+    :param smiles: The SMILES to be translated
+    :param print_error: If True, error messages will be printed to console.
+        Defaults to False.
+    :return: the SELFIES translation of <smiles>. If an error occurs,
+        and <smiles> cannot be translated, None is returned instead.
 
-    Returns: the SELFIES translation of <smiles>. If an error occurs, and
-             <smiles> cannot be translated, None is returned instead.
+    :Example:
+
+    >>> import selfies
+    >>> selfies.encoder('C=CF')
+    '[C][=C][F]'
+
+    .. warning:: Currently, SMILES with the '.' dot-bond symbol are treated
+    as separate dot-separated fragments. Thus, selfies
+
+    does not support SMILES that use
+     ring number specifications with the '.' dot-bond symbol to specify
+     non-ring bonds, e.g. C1.C1 (ethane) and C1.C12.C2 (propane). Nonstandard
+     forms
     """
 
     # TODO: remove me later
@@ -59,7 +72,8 @@ def _parse_smiles(smiles):
     Args:
         smiles: the SMILES string (without dots) to be parsed
 
-    Returns: the character(s) of <smiles> along with their types
+    Returns:
+        str: the character(s) of <smiles> along with their types
     """
 
     i = 0
@@ -119,7 +133,8 @@ def _translate_smiles(smiles):
     Args:
         smiles: the SMILES string (without dots) to be encoded
 
-    Returns: the SELFIES translation of <smiles>.
+    Returns:
+        str: the SELFIES translation of <smiles>.
     """
 
     smiles_gen = _parse_smiles(smiles)
@@ -151,7 +166,8 @@ def _translate_smiles_derive(smiles_gen, counter, rings):
         counter: see <derived_counter> in _translate_smiles
         rings: see <rings> in _translate_smiles
 
-    Returns: a tuple of the encoded SELFIES and its length
+    Returns:
+        tuple: a tuple of the encoded SELFIES and its length
     """
 
     selfies = ""

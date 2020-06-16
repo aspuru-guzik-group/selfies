@@ -7,12 +7,10 @@ from typing import Optional
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     """Converts a SELFIES string into its SMILES representation.
 
-    Args:
-        selfies: the SELFIES string to be decoded
-        print_error: if True error messages will be printed to console
-
-    Returns: the SMILES translation of <selfies>. If an error occurs, and
-             <selfies> cannot be translated, None is returned instead.
+    :param selfies: The SELFIES string to be decoded
+    :param print_error: If True error messages will be printed to console
+    :return: The SMILES translation of <selfies>. If an error occurs, and
+        <selfies> cannot be translated, None is returned instead.
     """
 
     try:
@@ -51,7 +49,7 @@ def _parse_selfies(selfies):
         next_char = selfies[left_idx: right_idx + 1]
         left_idx = right_idx + 1
 
-        if next_char != '[nop]':  # skip [nop] 
+        if next_char != '[nop]':  # skip [nop]
             yield next_char
 
     while True:  # no more characters left
@@ -154,7 +152,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_n_from_chars(*L_symbols, default=1)
+                N = get_n_from_chars(*L_symbols)
 
                 branch_selfies = ""
                 for _ in range(N + 1):
@@ -181,7 +179,7 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_n_from_chars(*L_symbols, default=5)
+                N = get_n_from_chars(*L_symbols)
 
                 left_idx = max(0, len(derived) - 1 - (N + 1))
                 right_idx = len(derived) - 1

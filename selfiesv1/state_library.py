@@ -39,7 +39,7 @@ def build_state_dict(atom_dict=None) -> Dict:
     for state in range(4):
 
         state_dict = dict()
-        state_dict['[epsilon]'] = ('', -1)
+        state_dict['[epsilon]'] = ('', 0) if state == 0 else ('', -1)
 
         for (atom, max_bonds), (bond, bond_num) in \
                 itertools.product(atom_dict.items(), _bonds.items()):
