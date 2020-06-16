@@ -71,7 +71,7 @@ def test_random_selfies_decoder():
     max_len = 200
 
     sf.set_alphabet()
-    alphabet = sf.get_alphabet()
+    alphabet = list(sf.get_alphabet())
 
     for i in range(trials):
 

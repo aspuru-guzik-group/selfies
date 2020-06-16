@@ -1,37 +1,55 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
-from .state_library import build_state_dict, default_atom_dict
+from selfies.state_library import build_state_dict, default_atom_dict
 
 
-def get_alphabet() -> List[str]:
-    """Retrieves the current SELFIES alphabet, which will be the default
-    unless specified otherwise by <set_alphabet>.
+def get_alphabet() -> Set[str]:
+    """Returns the alphabet that ``selfies`` is currently operating on.
 
-    :return: a list of the characters of the SELFIES alphabet (in no
-        particular order)
+    More specifically, the alphabet is the set of SELFIES characters that
+    ``selfies`` recognizes and can apply semantic constraints to. ``selfies``
+    initially operates upon a default alphabet, which can later be changed using
+    ``selfies.set_alphabet``. After retrieving the alphabet, it is copied
+    and returned as a set, i.e., mutating the returned set has no effect on
+    the behaviour of ``selfies``.
+
+    Although the characters ``'[epsilon]'`` and ``'.'`` are always
+    recognized by ``selfies``, they will never be members of the returned set.
+
+    :return: The alphabet that ``selfies`` is currently operating on.
+
+    .. note:: In order to one-hot or integer encode SELFIES strings,
+        ``selfies.get_alphabet`` may be a poor choice. This is because
+        ``selfies`` often includes many characters in its alphabet that never
+        actually appear in the input set. Instead,
+        ``selfies.get_alphabet_from_selfies`` may be preferred.
+
     """
 
     global _state_library
 
-    alphabet = list(_state_library[0].keys())
-    alphabet.extend([
+    alphabet = set(_state_library[0].keys())
+    alphabet.update([
         '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
         '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
         '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
     ])
     alphabet.remove('[?]')
     alphabet.remove('[epsilon]')
-    alphabet.append('[nop]')
+    alphabet.add('[nop]')
 
     return alphabet
 
 
 def get_atom_dict() -> Dict[str, int]:
-    """Retrieves the current <atom_dict> upon which the SELFIES alphabet is
-    built upon. See <set_alphabet> for further explanation of
-    the structure of <atom_dict>
+    """Returns the ``atom_dict`` that ``selfies`` is currently operating on.
 
-    :return: the current <atom_dict>
+    The ``atom_dict`` is the argument of the most recent call of
+    ``selfies.set_alphabet``, or a default dictionary if the method has not
+    been called yet. Once retrieved, it is copied and then returned. See
+    ``selfies.set_alphabet`` for further explanation on ``atom_dict``.
+
+    :return: The ``atom_dict`` that ``selfies`` is currently operating on.
     """
 
     global _atom_dict
@@ -39,20 +57,35 @@ def get_atom_dict() -> Dict[str, int]:
 
 
 def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
-    """Sets the SELFIES alphabet to one based on the atom(s) or ions in
-    <atom_dict>. <atom_dict> is a dictionary with the key being some atom(s)
-    or ion represented in SMILES, and its corresponding value being the
-    non-zero maximum bond capacity of the key. For example:
-        atom_dict['C'] = 4
-        atom_dict['Br'] = 1
-        atom_dict['[C@@H]'] = 3
-        atom_dict['[Cu++]'] = 4
+    """Sets the alphabet the ``selfies`` is operating on based on **atom_dict**.
 
-    :param atom_dict: a dictionary of the atoms or ions that the new SELFIES
+    The SELFIES alphabet and grammar is built dynamically from a dictionary
+    **atom_dict** of atom(s) and/or ion(s) and their corresponding bond
+    capacities. The key of the dictionary is a SMILES string representing
+    either a single atom, or some atom(s) and/or ion(s) enclosed by square
+    brackets. The corresponding value is the number of bonds that
+    the key can make, between 1 and 8 inclusive. For example, one may have:
+        *   ``atom_dict['I'] = 1``
+        *   ``atom_dict['[C@@H]'] = 3``
+    ``selfies.decoder`` will only generate SMILES that respect the bond
+    constraints specified by the dictionary. In the example above, both
+    ``'[C][=I]'`` and ``'[I][=C]'`` will be translated to ``'CI'`` and
+    ``'IC'`` respectively, because I has been configured to make one bond
+    maximally.
+
+    If a SMILES key is not specified in **atom_dict**, it will by default be
+    constrained to 8 bonds. To change the default setting for unrecognized
+    characters, set ``atom_dict['?']`` to the desired integer (between 1 and 8
+    inclusive). Note that ``selfies.decoder`` only recognizes the exact
+    character string specified in **atom_dict**. For example, ``'[Fe+2]'`` will
+    not be constrained if it is not in **atom_dict**, even if ``'[Fe++]'`` is
+    a key in the dictionary.
+
+    :param atom_dict: a dictionary of the atom(s) or ions that the new SELFIES
         alphabet will be built upon, with the value being the
-        maximum bond capacity of the atom or ion. If None,
-        then a default atom_dict will be used.
-    :return: None.
+        maximum bond capacity of the atom or ion. Defaults to ``None``. In that
+        case, a default dictionary will be used for **atom_dict**.
+    :return: ``None``.
     """
 
     global _state_library, _atom_dict

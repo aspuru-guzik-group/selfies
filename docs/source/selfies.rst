@@ -1,7 +1,7 @@
 Code Documentation
 ==================
 
-.. currentmodule:: selfiesv1
+.. currentmodule:: selfies
 
 SELFIES
 ------------------------

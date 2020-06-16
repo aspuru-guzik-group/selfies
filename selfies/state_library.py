@@ -49,13 +49,14 @@ def build_state_dict(atom_dict=None) -> Dict:
         for (atom, max_bonds), (bond, bond_num) in \
                 itertools.product(atom_dict.items(), _bonds.items()):
 
-            if bond_num > max_bonds:
-                continue  # e.g. can't make a double bond with F
-
             if atom[0] == '[':
                 selfies_atom = f"[{bond}{atom[1:-1]}expl]"
             else:
                 selfies_atom = f"[{bond}{atom}]"
+
+            if bond_num > max_bonds:
+                bond = ('', '=', '#')[max_bonds - 1]
+                bond_num = max_bonds
 
             if atom == 'H':  # edge case: [H] (SELFIES) --> [H] (SMILES)
                 atom = '[H]'

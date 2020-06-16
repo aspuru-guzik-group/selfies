@@ -1,4 +1,4 @@
-from .grammar_rules import get_bond_from_num, get_n_from_chars, \
+from selfies.grammar_rules import get_bond_from_num, get_n_from_chars, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
 from typing import Optional
