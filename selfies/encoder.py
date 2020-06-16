@@ -2,7 +2,7 @@ from typing import Optional
 
 from rdkit.Chem import Kekulize, MolFromSmiles, MolToSmiles
 
-from selfiesv1.grammar_rules import get_chars_from_n, get_num_from_bond
+from .grammar_rules import get_chars_from_n, get_num_from_bond
 
 
 def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
@@ -20,8 +20,9 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     >>> selfies.encoder('C=CF')
     '[C][=C][F]'
 
-    .. warning:: Currently, SMILES with the '.' dot-bond symbol are treated
-    as separate dot-separated fragments. Thus, selfies
+    .. warning:: Currently, SMILES with the '.' dot-bond symbol are supported
+    with certain constrats. selfies.
+
 
     does not support SMILES that use
      ring number specifications with the '.' dot-bond symbol to specify

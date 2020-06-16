@@ -5,7 +5,7 @@ faulthandler.enable()
 import pytest
 import random
 
-import selfiesv1 as sfv1
+import selfies as sf
 from rdkit.Chem import MolFromSmiles, MolToSmiles
 
 test_path_list = [
@@ -22,9 +22,9 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
     SMILES corresponds to the same molecule as the input SMILES.
     """
 
-    atom_dict = sfv1.get_atom_dict()
+    atom_dict = sf.get_atom_dict()
     atom_dict['N'] = 6
-    sfv1.set_selfies_alphabet(atom_dict)
+    sf.set_alphabet(atom_dict)
 
     error_list = []
 
@@ -36,8 +36,8 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
             smiles_set = list(filter(lambda s: 'c' not in s, smiles_set))
 
         for smiles in smiles_set:
-            encoded = sfv1.encoder(smiles)
-            decoded_smiles = sfv1.decoder(encoded)
+            encoded = sf.encoder(smiles)
+            decoded_smiles = sf.decoder(encoded)
 
             try:
                 if MolFromSmiles(decoded_smiles) is None:
@@ -55,7 +55,7 @@ def test_roundtrip_translation(test_paths, sample_size=10000):
 
         error_list.sort(key=lambda x: len(x[0]))
 
-    with open("test_sets/error_list.csv", "w") as error_log:
+    with open("error_list.csv", "w") as error_log:
         error_log.write("In, Out, Canonical In, Canonical Out\n")
         for error in error_list:
             error_log.write(','.join(error) + "\n")
@@ -67,18 +67,18 @@ def test_random_selfies_decoder():
     """Passes random strings built from the SELFIES alphabet to the decoder,
     and uses RDKit to check whether the decoded SMILES are valid.
     """
-    trials = 100000
-    max_len = 50
+    trials = 10000
+    max_len = 200
 
-    sfv1.set_selfies_alphabet()
-    alphabet = sfv1.get_selfies_alphabet()
+    sf.set_alphabet()
+    alphabet = sf.get_alphabet()
 
     for i in range(trials):
 
         # create random SELFIES and decode
         rand_len = random.randint(1, max_len)
         selfies = ''.join(random.choice(alphabet) for _ in range(rand_len))
-        smiles = sfv1.decoder(selfies)
+        smiles = sf.decoder(selfies)
 
         # check if SMILES is valid
         try:

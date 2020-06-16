@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional, Tuple
 
-from selfiesv1.state_library import build_state_dict, default_atom_dict
+from .state_library import build_state_dict, default_atom_dict
 
 
 def get_alphabet() -> List[str]:

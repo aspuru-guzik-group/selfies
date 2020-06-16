@@ -2,7 +2,6 @@ import random
 import time
 
 import selfies as sf
-import selfiesv1 as sfv1
 
 from rdkit.Chem import MolToSmiles, MolFromSmiles, Kekulize
 
@@ -30,17 +29,17 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
 
     print(f"Timing {len(smiles)} SMILES from {file_path}")
 
-    # time sfv1.encoder
+    # time sf.encoder
     start = time.time()
     for s in smiles:
-        sfv1.encoder(s)
+        sf.encoder(s)
     enc_time = time.time() - start
     print(f"--> selfies.encoder: {enc_time:0.7f}s")
 
-    # time sfv1.decoder
+    # time sf.decoder
     start = time.time()
     for s in selfies:
-        sfv1.decoder(s)
+        sf.decoder(s)
     dec_time = time.time() - start
     print(f"--> selfies.decoder: {dec_time:0.7f}s")
 
