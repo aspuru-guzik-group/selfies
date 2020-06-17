@@ -19,6 +19,12 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
         Defaults to False.
     :return: the SMILES translation of **selfies**. If an error occurs,
         and **selfies** cannot be translated, ``None`` is returned instead.
+
+    :Example:
+
+    >>> import selfies
+    >>> selfies.decoder('[C][=C][F]')
+    'C=CF'
     """
 
     try:
