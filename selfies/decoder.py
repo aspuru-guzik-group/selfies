@@ -5,12 +5,20 @@ from typing import Optional
 
 
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
-    """Converts a SELFIES string into its SMILES representation.
+    """Translates a SELFIES into a SMILES.
 
-    :param selfies: The SELFIES string to be decoded
-    :param print_error: If True error messages will be printed to console
-    :return: The SMILES translation of <selfies>. If an error occurs, and
-        <selfies> cannot be translated, None is returned instead.
+    The SELFIES to SMILES translation operates based on the ``selfies`` alphabet
+    and grammar, which can be changed using ``selfies.set_alphabet``. Given
+    the appropriate settings, the decoded SMILES will always be syntactically
+    and semantically correct. That is, the output SMILES will satisfy the
+    specified bond constraints. Additionally, ``selfies.decoder`` will
+    attempt to preserve the atom and branch order of the input SELFIES.
+
+    :param selfies: The SELFIES to be translated.
+    :param print_error: If True, error messages will be printed to console.
+        Defaults to False.
+    :return: the SMILES translation of **selfies**. If an error occurs,
+        and **selfies** cannot be translated, ``None`` is returned instead.
     """
 
     try:

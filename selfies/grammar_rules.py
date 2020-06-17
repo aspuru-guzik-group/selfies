@@ -65,12 +65,14 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     either a single atom, or some atom(s) and/or ion(s) enclosed by square
     brackets. The corresponding value is the number of bonds that
     the key can make, between 1 and 8 inclusive. For example, one may have:
-        *   ``atom_dict['I'] = 1``
-        *   ``atom_dict['[C@@H]'] = 3``
+
+        * ``atom_dict['I'] = 1``
+        * ``atom_dict['[C@@H]'] = 3``
+
     ``selfies.decoder`` will only generate SMILES that respect the bond
     constraints specified by the dictionary. In the example above, both
     ``'[C][=I]'`` and ``'[I][=C]'`` will be translated to ``'CI'`` and
-    ``'IC'`` respectively, because I has been configured to make one bond
+    ``'IC'`` respectively, because ``I`` has been configured to make one bond
     maximally.
 
     If a SMILES key is not specified in **atom_dict**, it will by default be
