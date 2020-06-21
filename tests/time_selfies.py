@@ -47,7 +47,6 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
 if __name__ == '__main__':
 
     # temporary example
-    time_roundtrip('test_sets/dataA_QM9.txt', -1)
-    # time_roundtrip('test_sets/dataB_NonFullerene.txt', -1)
-    # time_roundtrip('test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt', -1)
-
+    time_roundtrip('test_sets/dataA_QM9.txt')
+    # time_roundtrip('test_sets/dataB_NonFullerene.txt')
+    # time_roundtrip('test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt')

@@ -140,4 +140,5 @@ cython_debug/
 # IntelliJ
 .idea/
 
-tests/*
+# Project-specific files
+*.smi
