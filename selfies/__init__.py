@@ -11,14 +11,14 @@ functions. A main objective is to use SELFIES as direct input into machine
 learning models, in particular in generative models, for the generation of
 outputs with high validity.
 
-The code presented here is a concrete application of SELIFES in chemistry, for
+The code presented here is a concrete application of SELFIES in chemistry, for
 the robust representation of molecules.
 
     Typical usage example:
         import selfies
 
         benzene = "C1=CC=CC=C1"
-        selfies_benzene = selfies.encoder(smiles_benzene)
+        selfies_benzene = selfies.encoder(benzene)
         smiles_benzene = selfies.decoder(selfies_benzene)
 
 For comments, bug reports or feature ideas, please send an email to

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from rdkit.Chem import Kekulize, MolFromSmiles, MolToSmiles
 
@@ -84,21 +84,21 @@ BRANCH_TYPE = 2
 RING_TYPE = 3
 
 
-def _parse_smiles(smiles):
-    """A generator, which parses a SMILES string and returns character(s) of it
+def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
+    """Parses a SMILES into its characters.
+
+    A generator, which parses a SMILES string and returns character(s) of it
     one-by-one as a tuple of:
         (1) the bond character connecting the current character to the previous
             SMILES character (e.g. '=', '', '#')
         (2) the character(s) as a string (e.g. 'C', '12', '(')
         (3) the type of character(s), represented as an integer that is either
-            <ATOM_TYPE>, <BRANCH_TYPE>, and <RING_TYPE>.
-    As a precondition, we also assume <smiles> has no dots in it.
+            ``ATOM_TYPE``, ``BRANCH_TYPE``, and ``RING_TYPE``.
+    As a precondition, we also assume ``smiles`` has no dots in it.
 
-    Args:
-        smiles: the SMILES string (without dots) to be parsed
-
-    Returns:
-        str: the character(s) of <smiles> along with their types
+    :param smiles: the SMILES to be parsed.
+    :return: an iterable of the character(s) of the SELFIES along with
+        their types.
     """
 
     i = 0
@@ -111,7 +111,7 @@ def _parse_smiles(smiles):
             bond = smiles[i]
             i += 1
         elif smiles[i] == '-':
-            i += 1  # TODO: check if ignoring is always valid
+            i += 1
 
         if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
             if 'a' <= smiles[i + 1: i + 2] <= 'z':  # two letter elements
@@ -151,15 +151,12 @@ def _parse_smiles(smiles):
         yield bond, char, char_type
 
 
-def _translate_smiles(smiles):
-    """A helper for selfies.encoder, which converts a SMILES string
-    without dots into its SELFIES representation.
+def _translate_smiles(smiles: str) -> str:
+    """A helper for ``selfies.encoder``, which translates a SMILES into a
+    SELFIES (assuming the input SMILES contains no dots).
 
-    Args:
-        smiles: the SMILES string (without dots) to be encoded
-
-    Returns:
-        str: the SELFIES translation of <smiles>.
+    :param smiles: the SMILES to be translated.
+    :return: the SELFIES translation of SMILES.
     """
 
     smiles_gen = _parse_smiles(smiles)
@@ -174,25 +171,25 @@ def _translate_smiles(smiles):
     # and the ring is made.
     rings = {}
 
-    selfies, _ = _translate_smiles_derive(smiles_gen, derive_counter, rings)
+    selfies, _ = _translate_smiles_derive(smiles_gen, rings, derive_counter)
 
     return selfies
 
 
-def _translate_smiles_derive(smiles_gen, counter, rings):
-    """Recursive helper for _translate_smiles. Derives the SELFIES characters
-    from a SMILES string, and returns a tuple of (1) the encoded SELFIES
-    and (2) the length of the encoded SELFIES (as in the number of SELFIES
-    characters in the string).
+def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
+                             rings: Dict[int, Tuple[str, int]],
+                             counter: List[int]) -> Tuple[str, int]:
+    """Recursive helper for _translate_smiles.
 
-    Args:
-        smiles_gen: a generator produced by calling _parse_smiles on a
-                    SMILES string.
-        counter: see <derived_counter> in _translate_smiles
-        rings: see <rings> in _translate_smiles
+    Derives the SELFIES from a SMILES, and returns a tuple of (1) the
+    translated SELFIES and (2) the character length of the outputted SELFIES.
 
-    Returns:
-        tuple: a tuple of the encoded SELFIES and its length
+    :param smiles_gen: an iterable of the characters (and their types)
+        of the SMILES to be translated, created by ``_parse_smiles``.
+    :param rings: See ``rings`` in ``_translate_smiles``.
+    :param counter: a one-element list that serves as a mutable counter.
+        See ``derived_counter`` in ``_translate_smiles``.
+    :return: A tuple of the translated SELFIES and its character length.
     """
 
     selfies = ""
@@ -209,7 +206,7 @@ def _translate_smiles_derive(smiles_gen, counter, rings):
             if char == '(':
 
                 branch, branch_len = \
-                    _translate_smiles_derive(smiles_gen, counter, rings)
+                    _translate_smiles_derive(smiles_gen, rings, counter)
 
                 N_as_chars = get_chars_from_n(branch_len - 1)
                 bond_num = get_num_from_bond(bond)

@@ -1,7 +1,7 @@
 from selfies.grammar_rules import get_bond_from_num, get_n_from_chars, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
-from typing import Optional
+from typing import Optional, Iterable, List, Union, Tuple
 
 
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
@@ -33,7 +33,7 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
         for s in selfies.split("."):
             smiles = _translate_selfies(s)
 
-            if smiles != "":  # prevent dot errors (e.g. [C]..[C], .[C][C])
+            if smiles != "":  # prevent malformed dots (e.g. [C]..[C], .[C][C])
                 all_smiles.append(smiles)
 
         return '.'.join(all_smiles)
@@ -45,15 +45,16 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
         return None
 
 
-def _parse_selfies(selfies):
-    """A generator, which parses a SELFIES string and returns its characters
-    one-by-one. We assume <selfies> has no dots in it, so a character
-    is indicated by an open and closed square bracket, i.e. [X].
+def _parse_selfies(selfies: str) -> Iterable[str]:
+    """Parses a SELFIES into its characters.
 
-    Args:
-        selfies: the SElFIES string to be parsed
+    A generator, which parses a SELFIES and yields its characters
+    one-by-one. When no characters are left in the SELFIES, the empty
+    string is infinitely yielded. As a precondition, the input SELFIES contains
+    no dots, so all characters are enclosed by square brackets, e.g. [X].
 
-    Returns: the characters of <selfies> one-by-one.
+    :param selfies: the SElFIES string to be parsed.
+    :return: an iterable of the characters of the SELFIES.
     """
 
     left_idx = selfies.find('[')
@@ -70,21 +71,37 @@ def _parse_selfies(selfies):
         yield ''
 
 
-def _translate_selfies(selfies):
-    """A helper for selfies.decoder, which converts a SELFIES string
-    without dots into its SMILES representation.
+def _parse_selfies_chars(selfies_chars: List[str]) -> Iterable[str]:
+    """Equivalent to ``_parse_selfies``, except the input SELFIES is presented
+    as a list of SELFIES characters, as opposed to a string.
 
-    Args:
-        selfies: the SELFIES string (without dots) to be decoded
+    :param selfies_chars: a list of SELFIES characters represented.
+    :return: an iterable of the characters of the SELFIES.
+    """
+    for char in selfies_chars:
 
-    Returns: the SMILES translation of <selfies>.
+        if char != '[nop]':
+            yield char
+
+    while True:
+        yield ''
+
+
+def _translate_selfies(selfies: str) -> str:
+    """A helper for ``selfies.decoder``, which translates a SELFIES into a
+    SMILES (assuming the input SELFIES contains no dots).
+
+    :param selfies: the SELFIES to be translated.
+    :return: the SMILES translation of the SELFIES.
     """
 
-    # derived[i] is list with three elements:
+    selfies_gen = _parse_selfies(selfies)
+
+    # derived[i] is a list with three elements:
     #  (1) a string representing the i-th derived atom, and its connecting
     #      bond (e.g. =C, #N, N, C are all possible)
     #  (2) the number of available bonds the i-th atom has to make
-    #  (3) the index of the previously derived atom, which the i-th derived
+    #  (3) the index of the previously derived atom that the i-th derived
     #      atom is bonded to
     # Example: if the 6-th derived atom was 'C', had 2 available bonds,
     # and was connected to the 5-th derived atom by a double bond, then
@@ -103,11 +120,9 @@ def _translate_selfies(selfies):
     # has bond character s ('=', '#', '\', etc.), then rings[i] = (j, k, s).
     rings = []
 
-    _translate_selfies_derive(selfies, 0, derived, -1, branches, rings)
+    _translate_selfies_derive(selfies_gen, 0, derived, -1, branches, rings)
     _form_rings_bilocally(derived, rings)
 
-    # TODO: actually, I think <lb_locs> is pointless because (( can never
-    #  occur in a SMILES. Check this, and if true, remove <lb_locs>.
     lb_locs = {}  # key = index of left bracket, value = how many brackets
     rb_locs = {}  # key = index of right bracket, value = how many brackets
     for lb, rb in branches:
@@ -128,23 +143,29 @@ def _translate_selfies(selfies):
     return smiles
 
 
-def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
-                              branches, rings):
-    """Recursive helper for _translate_selfies. Derives the SMILES characters
-    one-by-one from a SELFIES string, and fills <derived> and <branches>.
+def _translate_selfies_derive(selfies_gen: Iterable[str],
+                              init_state: int,
+                              derived: List[List[Union[str, int]]],
+                              prev_idx: int,
+                              branches: List[Tuple[int, int]],
+                              rings: List[Tuple[int, int, str]]) -> None:
+    """Recursive helper for _translate_selfies.
 
-    Args:
-        selfies: the SELFIES string (without dots) to be decoded
-        init_state: the initial derivation state
-        derived: see <derived> in _translate_selfies
-        prev_idx: the index of the previously derived atom, or -1, if
-                  no atoms have been derived yet
-        branches: see <branches> in _translate_selfies
-        rings: see <rings> in _translate_selfies
+    Derives the SMILES characters one-by-one from a SELFIES, and
+    populates derived, branches, and rings. The main chain and side branches
+    of the SELFIES are translated recursively. Rings are not actually
+    translated, but saved to the rings list to be added later.
 
-    Returns: None.
+    :param selfies_gen: an iterable of the characters of the SELFIES to be
+        translated, created by ``_parse_selfies``.
+    :param init_state: the initial derivation state.
+    :param derived: see ``derived`` in ``_translate_selfies``.
+    :param prev_idx: the index of the previously derived atom, or -1,
+        if no atoms have been derived yet.
+    :param branches: see ``branches`` in ``_translate_selfies``.
+    :param rings: see ``rings`` in ``_translate_selfies``.
+    :return: ``None``.
     """
-    selfies_gen = _parse_selfies(selfies)
 
     curr_char = next(selfies_gen)
     state = init_state
@@ -168,12 +189,13 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
 
                 N = get_n_from_chars(*L_symbols)
 
-                branch_selfies = ""
+                branch_chars = []
                 for _ in range(N + 1):
-                    branch_selfies += next(selfies_gen)
+                    branch_chars.append(next(selfies_gen))
+                branch_gen = _parse_selfies_chars(branch_chars)
 
                 branch_start = len(derived)
-                _translate_selfies_derive(branch_selfies, branch_init_state,
+                _translate_selfies_derive(branch_gen, branch_init_state,
                                           derived, prev_idx, branches, rings)
                 branch_end = len(derived) - 1
 
@@ -184,8 +206,10 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
         # Case 2: Ring character (e.g. [Ring2])
         elif 'Ring' in curr_char:
 
+            new_state = state
+
             if state == 0 or state >= 9991:  # state = 0, 9991, 9992, 9993
-                new_state = state  # ignore no characters
+                pass  # ignore no characters
 
             else:
                 L = int(curr_char[-2])  # corresponds to [RingL]
@@ -202,7 +226,6 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
                 if curr_char[1:5] == 'Expl':
                     bond_char = curr_char[5]
 
-                new_state = state
                 rings.append((left_idx, right_idx, bond_char))
 
         # Case 3: regular character (e.g. [N], [=C], [F])
@@ -222,15 +245,14 @@ def _translate_selfies_derive(selfies, init_state, derived, prev_idx,
         state = new_state
 
 
-def _form_rings_bilocally(derived, rings):
-    """Forms all the rings specified by <rings> in first-to-last order,
-    and writes them into derived. Thus, note that <derived> will be mutated.
+def _form_rings_bilocally(derived: List[List[Union[str, int]]],
+                          rings: List[Tuple[int, int, str]]) -> None:
+    """Forms all the rings specified by the rings list, in first-to-last order,
+    by updating derived.
 
-    Args:
-        derived: see <derived> in _translate_selfies
-        rings: see <rings> in _translate_selfies
-
-    Returns: None.
+    :param derived: see ``derived`` in ``_translate_selfies``.
+    :param rings: see ``rings`` in ``_translate_selfies``.
+    :return: ``None``.
     """
 
     # due to the behaviour of allowing multiple rings between the same atom

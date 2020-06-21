@@ -1,5 +1,5 @@
 import itertools
-from typing import Dict
+from typing import Dict, Optional, Tuple
 
 # default atom_dict
 # key = SMILES atom, value = maximum number of bonds key can make
@@ -19,17 +19,19 @@ default_atom_dict = {
 _bonds = {'': 1, '/': 1, '\\': 1, '=': 2, '#': 3}
 
 
-def build_state_dict(atom_dict=None) -> Dict:
-    """Dynamically builds the state dict used to enforce the SELFIES
-    grammar based on <atom_dict>. See <state_library> in utils.py for
-    further explanation of the structure of the state dict.
+def build_state_dict(atom_dict: Optional[Dict[str, int]] = None) \
+        -> Dict[int, Dict[str, Tuple[Optional[str], int]]]:
+    """Dynamically build the state dict used to enforce the SELFIES
+    grammar based on atom_dict.
 
-    Args:
-        atom_dict: a dictionary of the maximum bond capacity of various atom(s)
-                   or ions, as specified by <set_selfies_alphabet> in
-                   utils.py. If None, then has value <default_atom_dict>.
+    See ``state_library`` in utils.py for further explanation of the
+    structure of the state dict.
 
-    Returns: the SELFIES derivation state dict
+    :param atom_dict: a dictionary of the maximum bond capacity of
+        various atom(s) or ions, as specified by ``set_selfies_alphabet`` in
+        utils.py. Defaults to None, which runs ``build_state_dict`` with
+        ``default_atom_dict``.
+    :return: the SELFIES derivation state dict.
     """
 
     if atom_dict is None:
