@@ -1,6 +1,7 @@
 import random
 import time
 
+import os
 import selfies as sf
 
 from rdkit.Chem import MolToSmiles, MolFromSmiles, Kekulize
@@ -12,9 +13,13 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
     then a random sample is taken from the file instead.
     """
 
+    curr_dir = os.path.dirname(__file__)
+    file_path = os.path.join(curr_dir, file_path)
+
     # load data
     with open(file_path, 'r') as file:
         smiles = [line.rstrip() for line in file.readlines()]
+        smiles.pop(0)
 
         if sample_size > 0:
             smiles = random.sample(smiles, sample_size)
@@ -47,6 +52,4 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
 if __name__ == '__main__':
 
     # temporary example
-    time_roundtrip('test_sets/dataA_QM9.txt')
-    # time_roundtrip('test_sets/dataB_NonFullerene.txt')
-    # time_roundtrip('test_sets/dataJ_250k_rndm_zinc_drugs_clean.txt')
+    time_roundtrip('test_sets/130K_QM9.txt')
