@@ -11,19 +11,20 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     The SMILES to SELFIES translation occurs independently of the SELFIES
     alphabet and grammar. Thus, ``selfies.encoder`` will work regardless of
     the alphabet and grammar rules that ``selfies`` is operating on, assuming
-    the input is a valid SMILES. Additionally, ``selfies.encoder`` preserves the
-    atom and branch order of the input SMILES; thus, one could generate random
-    SELFIES corresponding to the same molecule by generating random SMILES,
-    and then translating them.
+    the input is a valid SMILES. Additionally, ``selfies.encoder`` preserves
+    the atom and branch order of the input SMILES; thus, one could generate
+    random SELFIES corresponding to the same molecule by generating random
+    SMILES, and then translating them.
 
     However, encoding and then decoding a SMILES may not necessarily yield
     the original SMILES. Reasons include:
 
         1.  SMILES with explicit aromatic symbols are automatically
             Kekulized before being translated.
-        2.  A SMILES that violates the bond constraints specified by ``selfies``
-            will be successfully encoded by ``selfies.encoder``, but then
-            decoded into a new molecule that satisfies the constraints.
+        2.  A SMILES that violates the bond constraints specified by
+            ``selfies`` will be successfully encoded by ``selfies.encoder``,
+            but then decoded into a new molecule that satisfies the
+            constraints.
         3.  The exact ring numbering order is lost in ``selfies.encoder``,
             and cannot be reconstructed by ``selfies.decoder``.
 

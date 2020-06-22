@@ -8,8 +8,8 @@ def get_alphabet() -> Set[str]:
 
     More specifically, the alphabet is the set of SELFIES characters that
     ``selfies`` recognizes and can apply semantic constraints to. ``selfies``
-    initially operates upon a default alphabet, which can later be changed using
-    ``selfies.set_alphabet``. After retrieving the alphabet, it is copied
+    initially operates upon a default alphabet, which can later be changed
+    using ``selfies.set_alphabet``. After retrieving the alphabet, it is copied
     and returned as a set, i.e., mutating the returned set has no effect on
     the behaviour of ``selfies``.
 
@@ -56,7 +56,8 @@ def get_atom_dict() -> Dict[str, int]:
 
 
 def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
-    """Sets the alphabet the ``selfies`` is operating on based on **atom_dict**.
+    """Sets the alphabet the ``selfies`` is operating on based on
+    **atom_dict**.
 
     The SELFIES alphabet and grammar is built dynamically from a dictionary
     **atom_dict** of atom(s) and/or ion(s) and their corresponding bond
@@ -99,7 +100,7 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     _state_library = build_state_dict(atom_dict)
 
 
-# Character State Dict Functions ===============================================
+# Character State Dict Functions ==============================================
 
 # _state_library is accessed through two keys, which are (1) the current
 # derivation state and (2) the current SELFIES character to be derived, or
@@ -114,7 +115,8 @@ def get_next_state(char: str, state: int) -> Tuple[str, int]:
     """Enforces the grammar rules for standard SELFIES characters.
 
     Given the current non-branch, non-ring character and current derivation
-    state, retrieves the derived SMILES character and the next derivation state.
+    state, retrieves the derived SMILES character and the next derivation
+    state.
 
     :param char: a SELFIES character that is not a Ring or Branch.
     :param state: the current derivation state.
@@ -163,7 +165,7 @@ def _process_unknown_char(char: str) -> str:
     return processed
 
 
-# Branch State Dict Functions ==================================================
+# Branch State Dict Functions =================================================
 
 # _branch_state_library takes as a key the current derivation state.
 # Its value is a tuple; for [BranchL_X], the (X - 1)th element of the tuple
@@ -209,7 +211,7 @@ def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
     return _branch_state_library[state][branch_type - 1]
 
 
-# SELFIES Character to N Functions =============================================
+# SELFIES Character to N Functions ============================================
 
 _index_alphabet = ['[C]', '[Ring1]', '[Ring2]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
@@ -262,7 +264,7 @@ def get_chars_from_n(n: int) -> List[str]:
     return chars[::-1]
 
 
-# Helper Methods ===============================================================
+# Helper Methods ==============================================================
 
 
 def get_num_from_bond(bond_char: str) -> int:

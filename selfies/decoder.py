@@ -7,12 +7,12 @@ from typing import Optional, Iterable, List, Union, Tuple
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     """Translates a SELFIES into a SMILES.
 
-    The SELFIES to SMILES translation operates based on the ``selfies`` alphabet
-    and grammar, which can be changed using ``selfies.set_alphabet``. Given
-    the appropriate settings, the decoded SMILES will always be syntactically
-    and semantically correct. That is, the output SMILES will satisfy the
-    specified bond constraints. Additionally, ``selfies.decoder`` will
-    attempt to preserve the atom and branch order of the input SELFIES.
+    The SELFIES to SMILES translation operates based on the ``selfies``
+    alphabet and grammar, which can be changed using ``selfies.set_alphabet``.
+    Given the appropriate settings, the decoded SMILES will always be
+    syntactically and semantically correct. That is, the output SMILES will
+    satisfy the specified bond constraints. Additionally, ``selfies.decoder``
+    will attempt to preserve the atom and branch order of the input SELFIES.
 
     :param selfies: The SELFIES to be translated.
     :param print_error: If True, error messages will be printed to console.
@@ -114,10 +114,11 @@ def _translate_selfies(selfies: str) -> str:
     # at the k-th derived atom, then branches[i] = (j, k).
     branches = []
 
-    # each element of <rings> is a tuple of size three that represents the rings
-    # to be made, in the same order they appear in the SELFIES (left to right).
-    # If the i-th ring is between the j-th and k-th derived atoms (j <= k) and
-    # has bond character s ('=', '#', '\', etc.), then rings[i] = (j, k, s).
+    # each element of <rings> is a tuple of size three that represents the
+    # rings to be made, in the same order they appear in the SELFIES (left
+    # to right). If the i-th ring is between the j-th and k-th derived atoms
+    # (j <= k) and has bond character s ('=', '#', '\', etc.), then
+    # rings[i] = (j, k, s).
     rings = []
 
     _translate_selfies_derive(selfies_gen, 0, derived, -1, branches, rings)
