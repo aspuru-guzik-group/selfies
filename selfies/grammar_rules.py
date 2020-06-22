@@ -214,7 +214,7 @@ def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
 _index_alphabet = ['[C]', '[Ring1]', '[Ring2]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
                    '[Branch2_1]', '[Branch2_2]', '[Branch2_3]',
-                    '[O]', '[N]', '[=N]', '[=C]', '[#C]', '[S]', '[P]']
+                   '[O]', '[N]', '[=N]', '[=C]', '[#C]', '[S]', '[P]']
 
 # _alphabet_code takes as a key a SELFIES char, and its corresponding value
 # is the index of the key.

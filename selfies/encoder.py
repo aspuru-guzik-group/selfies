@@ -61,7 +61,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
             return None
 
         Kekulize(m)
-        smiles = MolToSmiles(m, kekulizeSmiles=True)
+        smiles = MolToSmiles(m, kekuleSmiles=True)
     # TODO: remove me later
 
     try:

@@ -142,3 +142,4 @@ cython_debug/
 
 # Project-specific files
 *.smi
+tests/error_sets/

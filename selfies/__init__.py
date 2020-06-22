@@ -4,7 +4,7 @@
 SELFIES: a robust representation of semantically constrained graphs with an
          example application in chemistry.
 
-SELFIES (SELF-referencing Embedded Strings) is a general-purpose,
+SELFIES (SELF-referencIng Embedded Strings) is a general-purpose,
 sequence-based, robust representation of semantically constrained graphs.
 It is based on a Chomsky type-2 grammar, augmented with two self-referencing
 functions. A main objective is to use SELFIES as direct input into machine
