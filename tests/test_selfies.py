@@ -150,6 +150,10 @@ def test_get_alphabet_and_atom_dict():
     assert '.' not in alphabet
     assert '[nop]' in alphabet
 
+    # The appropriate characters are in atom_dict()
+    atom_dict = sf.get_atom_dict()
+    assert '?' in atom_dict
+
 
 # Helper Methods
 
