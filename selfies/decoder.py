@@ -144,6 +144,7 @@ def _translate_selfies(selfies: str) -> str:
     return smiles
 
 
+# flake8: noqa: C901
 def _translate_selfies_derive(selfies_gen: Iterable[str],
                               init_state: int,
                               derived: List[List[Union[str, int]]],

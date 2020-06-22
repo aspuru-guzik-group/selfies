@@ -1,15 +1,14 @@
 import faulthandler
-
-faulthandler.enable()
-
-import pytest
+import os
 import random
 
-import os
-
 import pandas as pd
-import selfies as sf
+import pytest
 from rdkit.Chem import MolFromSmiles, MolToSmiles
+
+import selfies as sf
+
+faulthandler.enable()
 
 test_sets = [
     ('test_sets/130K_QM9.txt', 'smiles'),
