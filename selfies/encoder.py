@@ -197,7 +197,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
     selfies = ""
     selfies_len = 0
 
-    for i, (bond, char, char_type) in enumerate(smiles_gen):
+    for bond, char, char_type in smiles_gen:
 
         if bond == '-':  # ignore explicit single bonds
             bond = ''
@@ -210,6 +210,9 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
         elif char_type == BRANCH_TYPE:
             if char == '(':
 
+                # NOTE: looping inside a loop on a generator will produce
+                # expected behaviour in this case.
+
                 branch, branch_len = \
                     _translate_smiles_derive(smiles_gen, rings, counter)
 
@@ -221,7 +224,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 selfies_len += 1 + len(N_as_chars) + branch_len
 
             else:  # char == ')'
-                return selfies, selfies_len
+                break
 
         else:  # char_type == RING_TYPE
             ring_id = int(char)
