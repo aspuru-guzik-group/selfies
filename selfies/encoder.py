@@ -66,8 +66,6 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     # TODO: remove me later
 
     try:
-        smiles.replace('-', '')  # remove explicit single bonds
-
         all_selfies = []  # process dot-separated fragments separately
         for s in smiles.split("."):
             all_selfies.append(_translate_smiles(s))
@@ -108,10 +106,8 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
 
         bond = ''
 
-        if smiles[i] in {'/', '\\', '=', '#'}:
+        if smiles[i] in {'-', '/', '\\', '=', '#'}:
             bond = smiles[i]
-            i += 1
-        elif smiles[i] == '-':
             i += 1
 
         if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
@@ -123,6 +119,11 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
                 char = smiles[i]  # one letter elements (e.g. C, N, ...)
                 char_type = ATOM_TYPE
                 i += 1
+
+        elif 'a' <= smiles[i] <= 'z':  # explicit aromatic elements
+            char = smiles[i]
+            char_type = ATOM_TYPE
+            i += 1
 
         elif smiles[i] in ['(', ')']:  # open and closed branch brackets
             bond = smiles[i + 1]
@@ -197,6 +198,9 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
     selfies_len = 0
 
     for i, (bond, char, char_type) in enumerate(smiles_gen):
+
+        if bond == '-':  # ignore explicit single bonds
+            bond = ''
 
         if char_type == ATOM_TYPE:
             selfies += f"[{bond}{char}]"
