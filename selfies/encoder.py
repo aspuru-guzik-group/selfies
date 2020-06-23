@@ -115,7 +115,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             i += 1
 
         if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
-            if smiles[i: i + 2] in ('Cl', 'Br'):  # two letter organic elements
+            if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter organic elements
                 char = smiles[i: i + 2]
                 char_type = ATOM_TYPE
                 i += 2
