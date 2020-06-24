@@ -125,7 +125,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             char_type = ATOM_TYPE
             i += 1
 
-        elif smiles[i] in ['(', ')']:  # open and closed branch brackets
+        elif smiles[i] in ('(', ')'):  # open and closed branch brackets
             bond = smiles[i + 1]
             char = smiles[i]
             char_type = BRANCH_TYPE
