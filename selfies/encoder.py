@@ -106,7 +106,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
 
         bond = ''
 
-        if smiles[i] in {'-', '/', '\\', '=', '#'}:
+        if smiles[i] in {'-', '/', '\\', '=', '#', ":"}:
             bond = smiles[i]
             i += 1
 
@@ -121,9 +121,14 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
                 i += 1
 
         elif 'a' <= smiles[i] <= 'z':  # explicit aromatic elements
-            char = smiles[i]
-            char_type = ATOM_TYPE
-            i += 1
+            if smiles[i: i + 2] in ('as', 'se'):
+                char = smiles[i: i + 2]  # char = as, se
+                char_type = ATOM_TYPE
+                i += 2
+            else:
+                char = smiles[i]  # char = c, n, o, p, s
+                char_type = ATOM_TYPE
+                i += 1
 
         elif smiles[i] in ('(', ')'):  # open and closed branch brackets
             bond = smiles[i + 1]
