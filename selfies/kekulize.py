@@ -60,12 +60,6 @@ def _build_molecular_graph(graph, smiles_chars, rings,
 def _kekulize(mol_graph):
     mol_graph.prune_to_pi_subgraph()
 
-    # print(sorted(mol_graph.aro_indices))
-    # m = copy.deepcopy(mol_graph.graph)
-    # for c in m:
-    #     m[c] = list(map(str, m[c]))
-    # pprint.pprint(m)
-
     visited = set()
 
     for i in mol_graph.graph.keys():
