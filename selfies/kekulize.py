@@ -1,6 +1,3 @@
-import copy
-import pprint
-
 from selfies.grammar_rules import get_num_from_bond
 
 ATOM_TYPE = 1
@@ -351,26 +348,3 @@ class Edge:
     def __str__(self):  # for debugging
 
         return f"[{self.idx_a} -> {self.idx_b} | {self.bond_idx}]"
-
-
-def main():
-    from selfies.encoder import _parse_smiles
-
-    kekule_gen = kekulize_parser(
-        _parse_smiles("C(c1ncncn1)=c1ccc(=c2ccc(=Cc3ncncn3)s2)s1"))
-
-    kekule_smiles = ""
-    for bond, char, char_type in kekule_gen:
-        if char_type == BRANCH_TYPE:
-            bond = ''
-        kekule_smiles += bond
-
-        if char_type == RING_TYPE and len(char) == 2:
-            kekule_smiles += "%"
-        kekule_smiles += char
-
-    print(kekule_smiles)
-
-
-if __name__ == '__main__':
-    main()
