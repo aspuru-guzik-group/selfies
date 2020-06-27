@@ -1,4 +1,5 @@
 import os
+import time
 
 import pandas as pd
 import pytest
@@ -31,13 +32,17 @@ def test_kekulize_parser(test_path, column_name):
         error_log.write("In\n")
     error_found_flag = False
 
+    elapsed = 0
+
     # roundtrip testing
     for chunk in pd.read_csv(test_path, chunksize=10000, delimiter=' '):
 
         for smiles in chunk[column_name]:
 
             try:
-                kekule_gen = kekulize_parser(_parse_smiles(smiles))
+                start = time.time()
+                kekule_gen = list(kekulize_parser(_parse_smiles(smiles)))
+                elapsed += time.time() - start
 
                 kekule_smiles = ""
                 for bond, char, char_type in kekule_gen:
@@ -65,4 +70,6 @@ def test_kekulize_parser(test_path, column_name):
         error_found_flag = error_found_flag or error_list
         error_list = []
 
+    print()
+    print(f"{test_name} in {elapsed:11.7f}s")
     assert not error_found_flag

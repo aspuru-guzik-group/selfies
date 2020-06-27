@@ -29,7 +29,7 @@ def _build_molecular_graph(graph, smiles_chars, rings,
 
         if char_type == ATOM_TYPE:
             if prev_idx >= 0:
-                graph.add_edge(prev_idx, curr_idx, curr_idx)
+                graph.add_bond(prev_idx, curr_idx, curr_idx)
             prev_idx = curr_idx
 
         elif char_type == BRANCH_TYPE:
@@ -51,7 +51,7 @@ def _build_molecular_graph(graph, smiles_chars, rings,
                     bond_idx = right_bond_idx
                     smiles_chars[left_bond_idx][0] = ''
 
-                graph.add_edge(left_idx, right_idx, bond_idx)
+                graph.add_bond(left_idx, right_idx, bond_idx)
             else:
                 rings[char] = (prev_idx, curr_idx)
 
@@ -62,7 +62,7 @@ def _kekulize(mol_graph):
     mol_graph.prune_to_pi_subgraph()
 
     visited = set()
-    for i in mol_graph.graph.keys():
+    for i in mol_graph.get_nodes_by_num_edges():
         matched = set()
 
         success = mol_graph.dfs_assign_bonds(i, visited, matched)
@@ -75,35 +75,39 @@ def _kekulize(mol_graph):
 # Aromatic Helper Methods and Classes
 
 _aromatic_valences = {  # wild card not supported currently
-    'b': 3, 'c': 4, 'n': 5, 'p': 5, '[as]': 5,
-    'o': 6, 's': 6, '[se]': 6
+    'b': 3, 'c': 4, 'n': 5, 'p': 5, 'as': 5,
+    'o': 6, 's': 6, 'se': 6
 }
 
 
-def _parse_bracketed_char(char):
-    i = 1
+def _find_element(char):
+    if char[0] != '[':
+        return 0, len(char)
 
-    number = ''
-    while char[i].isdigit():
-        number += char[i]
+    i = 1
+    while char[i].isdigit():  # skip isotope number
         i += 1
 
     if char[i + 1].isalpha() and char[i + 1] != 'H':
-        atom = char[i: i + 2]
-        i += 2
+        return i, i + 2
     else:
-        atom = char[i]
+        return i, i + 1
+
+
+def _parse_char(char):
+    if char[0] != '[':
+        return char, 0, 0
+
+    atom_start, atom_end = _find_element(char)
+    i = atom_end
+
+    # skip chirality
+    if char[i] == '@':  # e.g. @
+        i += 1
+    if char[i] == '@':  # e.g. @@
         i += 1
 
-    chiral = ''
-    if char[i] == '@':
-        chiral = '@'
-        if char[i + 1] == '@':
-            chiral = '@@'
-            i += 1
-        i += 1
-
-    h_count = 0
+    h_count = 0  # hydrogen count
     if char[i] == 'H':
         h_count = 1
 
@@ -112,63 +116,42 @@ def _parse_bracketed_char(char):
             h_count = int(char[i])
             i += 1
 
-    charge = 0
+    charge = 0  # charge count
     if char[i] in ('+', '-'):
         charge = 1 if char[i] == '+' else -1
 
         i += 1
-        magnitude = ''
-        while char[i].isdigit():
-            magnitude += char[i]
-            i += 1
-        if magnitude != '':
-            charge *= int(magnitude)
+        if char[i] in ('+', '-'):
+            while char[i] in ('+', '-'):
+                charge += (1 if char[i] == '+' else -1)
+                i += 1
 
-    class_note = char[i: -1]
+        elif char[i].isdigit():
+            s = i
+            while char[i].isdigit():
+                i += 1
+            charge *= int(char[s:i])
 
-    return [number, atom, chiral, h_count, charge, class_note]
-
-
-def _rejoin_bracketed_char(number, atom, chiral, h_count, charge, class_note):
-    # H count to character
-    if h_count == 0:
-        h_char = ''
-    elif h_count == 1:
-        h_char = 'H'
-    else:
-        h_char = f"H{h_count}"
-
-    # charge to character
-    if charge == 0:
-        charge_char = ''
-    elif abs(charge) == 1:
-        charge_char = '+' if charge > 0 else '-'
-    else:
-        sign = '+' if charge > 0 else '-'
-        charge_char = sign + abs(charge)
-
-    return f"[{number}{atom}{chiral}{h_char}{charge_char}{class_note}]"
+    return char[atom_start: atom_end], h_count, charge
 
 
 def _capitalize(char):
-    if char[0] == '[':
-        char_parts = _parse_bracketed_char(char)
-        char_parts[1] = char_parts[1].capitalize()
-        return _rejoin_bracketed_char(*char_parts)
-
-    return char.upper()
+    c, _ = _find_element(char)
+    return char[:c] + char[c].upper() + char[c + 1:]
 
 
 def _is_aromatic(char):
-    atom = char
-    if char[0] == '[':
-        char_parts = _parse_bracketed_char(char)
-        atom = char_parts[1]
+    s, e = _find_element(char)
 
-    if atom[0].isupper():
+    if e == len(char):  # optimization to prevent string copying
+        element = char
+    else:
+        element = char[s: e]
+
+    if element[0].isupper():
         return False
 
-    if atom not in _aromatic_valences:
+    if element not in _aromatic_valences:
         raise ValueError(f"Kekulization Failed: aromatic symbol {char} "
                          f"not recognized.")
 
@@ -176,18 +159,13 @@ def _is_aromatic(char):
 
 
 def _in_pi_subgraph(char, bonds):
+    atom, h_count, charge = _parse_char(char)
+
     used_electrons = 0
     for b in bonds:
         used_electrons += get_num_from_bond(b)
 
-    atom = char
-    h_count = 0
-    charge = 0
-
-    if char[0] == '[':
-        _, atom, _, h_count, charge, _ = _parse_bracketed_char(char)
-
-    if char == 'c' and len(bonds) == 2:
+    if char == 'c' and len(bonds) == 2:  # e.g. c1ccccc1
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:
@@ -214,13 +192,26 @@ class MolecularGraph:
     def get_bond_char(self, idx):
         return self.smiles_chars[idx][0]
 
+    def get_nodes_by_num_edges(self):
+        ends = []
+        middles = []
+
+        for idx, edges in self.graph.items():
+            if len(edges) > 1:
+                middles.append(idx)
+            else:
+                ends.append(idx)
+
+        ends.extend(middles)
+        return ends
+
     def set_bond_char(self, bond_char, idx):
         self.smiles_chars[idx][0] = bond_char
 
     def set_atom_char(self, atom_char, idx):
         self.smiles_chars[idx][1] = atom_char
 
-    def add_edge(self, idx_a, idx_b, bond_idx):
+    def add_bond(self, idx_a, idx_b, bond_idx):
 
         atom_a = self.get_atom_char(idx_a)
         atom_b = self.get_atom_char(idx_b)
@@ -241,7 +232,7 @@ class MolecularGraph:
             self.set_bond_char('', bond_idx)
             bond_char = ''
 
-        edge = Edge(idx_a, idx_b, bond_char, bond_idx)
+        edge = Bond(idx_a, idx_b, bond_char, bond_idx)
 
         self.graph.setdefault(idx_a, []).append(edge)
         self.graph.setdefault(idx_b, []).append(edge)
@@ -330,7 +321,7 @@ class MolecularGraph:
                     self.set_bond_char(bond_char, bond_idx - 1)
 
 
-class Edge:
+class Bond:
 
     def __init__(self, idx_a, idx_b, bond_char, bond_idx):
         self.idx_a = idx_a
