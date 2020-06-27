@@ -13,7 +13,8 @@ def kekulize_parser(smiles_gen):
     rings = {}
     _build_molecular_graph(mol_graph, smiles_chars, rings)
 
-    _kekulize(mol_graph)
+    if mol_graph.aro_indices:
+        _kekulize(mol_graph)
 
     for x in mol_graph.smiles_chars:
         yield tuple(x)
@@ -61,7 +62,6 @@ def _kekulize(mol_graph):
     mol_graph.prune_to_pi_subgraph()
 
     visited = set()
-
     for i in mol_graph.graph.keys():
         matched = set()
 
@@ -321,7 +321,13 @@ class MolecularGraph:
         # write bonds
         for edge_list in self.graph.values():
             for edge in edge_list:
-                self.set_bond_char(edge.bond_char, edge.bond_idx)
+                bond_char = edge.bond_char
+                bond_idx = edge.bond_idx
+
+                self.set_bond_char(bond_char, bond_idx)
+                if bond_idx > 0 and \
+                        self.smiles_chars[bond_idx - 1][2] == BRANCH_TYPE:
+                    self.set_bond_char(bond_char, bond_idx - 1)
 
 
 class Edge:

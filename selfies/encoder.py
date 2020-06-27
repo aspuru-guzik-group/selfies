@@ -1,8 +1,7 @@
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from rdkit.Chem import Kekulize, MolFromSmiles, MolToSmiles
-
 from selfies.grammar_rules import get_chars_from_n, get_num_from_bond
+from selfies.kekulize import kekulize_parser
 
 
 def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
@@ -54,16 +53,6 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
         are also not supported.
 
     """
-
-    # TODO: remove me later
-    if 'c' in smiles:
-        m = MolFromSmiles(smiles)
-        if m is None:
-            return None
-
-        Kekulize(m)
-        smiles = MolToSmiles(m, kekuleSmiles=True)
-    # TODO: remove me later
 
     try:
         all_selfies = []  # process dot-separated fragments separately
@@ -157,6 +146,10 @@ def _translate_smiles(smiles: str) -> str:
     """
 
     smiles_gen = _parse_smiles(smiles)
+
+    char_set = set(smiles)
+    if any(c in char_set for c in ['c', 'n', 'o', 'p', 'a', 's']):
+        smiles_gen = kekulize_parser(smiles_gen)
 
     # a simple mutable counter to track which atom was the i-th derived atom
     derive_counter = [0]
