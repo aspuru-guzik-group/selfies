@@ -130,7 +130,7 @@ def get_next_state(char: str, state: int) -> Tuple[str, int]:
         return state_dict[char]
 
     else:  # unknown SELFIES character
-        derived_char = _process_unknown_char(char)
+        derived_char = _process_unknown_char(char, state)
         new_state = state_dict['[?]'][1] - get_num_from_bond(char[1])
         return derived_char, new_state
 
@@ -142,18 +142,20 @@ _bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
                         '[F]', '[Cl]', '[Br]', '[I]'}
 
 
-def _process_unknown_char(char: str) -> str:
+def _process_unknown_char(char: str, state: int) -> str:
     """Attempts to convert an unknown SELFIES character ``char`` into a
     proper SMILES character.
 
     :param char: an unrecognized SELFIES character.
+    :param state: the current derivation state.
     :return: the processed SMILES character.
     """
 
     processed = ""
 
-    if char[0: 2] in {'[=', '[#', '[\\', '[/', '[-'}:
-        processed += char[1]
+    if char[1: 2] in {'=', '#', '\\', '/', '-'}:
+        if state != 0:
+            processed += char[1]
         char = "[" + char[2:]
 
     if char in _bracket_less_smiles:
