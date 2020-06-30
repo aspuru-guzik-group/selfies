@@ -12,7 +12,8 @@ test_sets = [
     ('test_sets/130K_QM9.txt', 'smiles'),
     ('test_sets/51K_NonFullerene.txt', 'smiles'),
     ('test_sets/250k_ZINC.txt', 'smiles'),
-    ('test_sets/8k_Tox21.txt', 'smiles')
+    ('test_sets/8k_Tox21.txt', 'smiles'),
+    ('test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
 ]  # add if desired ('22M_eMolecule.smi', 'isosmiles')
 
 @pytest.mark.parametrize("test_path, column_name", test_sets)
@@ -38,17 +39,24 @@ def test_kekulize_parser(test_path, column_name):
         for smiles in chunk[column_name]:
 
             try:
-                kekule_gen = kekulize_parser(_parse_smiles(smiles))
 
-                kekule_smiles = ""
-                for bond, char, char_type in kekule_gen:
-                    if char_type == BRANCH_TYPE:
-                        bond = ''
-                    kekule_smiles += bond
+                smi_fragment = []
 
-                    if char_type == RING_TYPE and len(char) == 2:
-                        kekule_smiles += "%"
-                    kekule_smiles += char
+                for smi in smiles.split('.'):
+                    kekule_gen = kekulize_parser((_parse_smiles(smi)))
+
+                    k_smiles = ""
+                    for bond, char, char_type in kekule_gen:
+                        if char_type == BRANCH_TYPE:
+                            bond = ''
+                        k_smiles += bond
+
+                        if char_type == RING_TYPE and len(char) == 2:
+                            k_smiles += "%"
+                        k_smiles += char
+                    smi_fragment.append(k_smiles)
+
+                kekule_smiles = '.'.join(smi_fragment)
 
                 can_smiles = MolToSmiles(MolFromSmiles(smiles))
                 can_kekule = MolToSmiles(MolFromSmiles(kekule_smiles,
@@ -68,5 +76,5 @@ def test_kekulize_parser(test_path, column_name):
 
     assert not error_found_flag
 
-if __name__ == '__main__':
-   pytest.main()
+
+
