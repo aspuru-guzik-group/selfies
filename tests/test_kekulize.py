@@ -37,17 +37,25 @@ def test_kekulize_parser(test_path, column_name):
         for smiles in chunk[column_name]:
 
             try:
-                kekule_gen = kekulize_parser(_parse_smiles(smiles))
+                kekule_fragments = []
 
-                kekule_smiles = ""
-                for bond, char, char_type in kekule_gen:
-                    if char_type == BRANCH_TYPE:
-                        bond = ''
-                    kekule_smiles += bond
+                for fragment in smiles.split("."):
 
-                    if char_type == RING_TYPE and len(char) == 2:
-                        kekule_smiles += "%"
-                    kekule_smiles += char
+                    kekule_gen = kekulize_parser(_parse_smiles(fragment))
+
+                    k = ""
+                    for bond, char, char_type in kekule_gen:
+                        if char_type == BRANCH_TYPE:
+                            bond = ''
+                        k += bond
+
+                        if char_type == RING_TYPE and len(char) == 2:
+                            k += "%"
+                        k += char
+
+                    kekule_fragments.append(k)
+
+                kekule_smiles = '.'.join(kekule_fragments)
 
                 can_smiles = MolToSmiles(MolFromSmiles(smiles))
                 can_kekule = MolToSmiles(MolFromSmiles(kekule_smiles,
