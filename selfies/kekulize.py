@@ -9,8 +9,8 @@ BRANCH_TYPE = 2
 RING_TYPE = 3
 
 
-def kekulize_parser(smiles_gen: Iterable[str, str, int]) \
-        -> Iterable[str, str, int]:
+def kekulize_parser(smiles_gen: Iterable[Tuple[str, str, int]]) \
+        -> Iterable[Tuple[str, str, int]]:
     """Kekulizes a SMILES in the form of an iterable.
 
     This method intercepts the output of ``encoder._parse_smiles``, and
