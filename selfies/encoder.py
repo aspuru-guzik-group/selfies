@@ -1,8 +1,7 @@
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from rdkit.Chem import Kekulize, MolFromSmiles, MolToSmiles
-
 from selfies.grammar_rules import get_chars_from_n, get_num_from_bond
+from selfies.kekulize import kekulize_parser
 
 
 def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
@@ -55,19 +54,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
 
     """
 
-    # TODO: remove me later
-    if 'c' in smiles:
-        m = MolFromSmiles(smiles)
-        if m is None:
-            return None
-
-        Kekulize(m)
-        smiles = MolToSmiles(m, kekuleSmiles=True)
-    # TODO: remove me later
-
     try:
-        smiles.replace('-', '')  # remove explicit single bonds
-
         all_selfies = []  # process dot-separated fragments separately
         for s in smiles.split("."):
             all_selfies.append(_translate_smiles(s))
@@ -108,13 +95,11 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
 
         bond = ''
 
-        if smiles[i] in {'/', '\\', '=', '#'}:
+        if smiles[i] in {'-', '/', '\\', '=', '#', ":"}:
             bond = smiles[i]
             i += 1
-        elif smiles[i] == '-':
-            i += 1
 
-        if 'A' <= smiles[i] <= 'Z' or smiles[i] == '*':  # elements or wildcard
+        if smiles[i].isalpha() or smiles[i] == '*':  # elements or wildcard
             if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter organic elements
                 char = smiles[i: i + 2]
                 char_type = ATOM_TYPE
@@ -124,7 +109,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
                 char_type = ATOM_TYPE
                 i += 1
 
-        elif smiles[i] in ['(', ')']:  # open and closed branch brackets
+        elif smiles[i] in ('(', ')'):  # open and closed branch brackets
             bond = smiles[i + 1]
             char = smiles[i]
             char_type = BRANCH_TYPE
@@ -132,11 +117,11 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
 
         elif smiles[i] == '[':  # atoms encased in brackets (e.g. [NH])
             r_idx = smiles.find(']', i + 1)
-            char = smiles[i + 1: r_idx] + "expl"
+            char = smiles[i: r_idx + 1]
             char_type = ATOM_TYPE
             i = r_idx + 1
 
-        elif '0' <= smiles[i] <= '9':  # one-digit ring number
+        elif smiles[i].isdigit():  # one-digit ring number
             char = smiles[i]
             char_type = RING_TYPE
             i += 1
@@ -161,6 +146,10 @@ def _translate_smiles(smiles: str) -> str:
     """
 
     smiles_gen = _parse_smiles(smiles)
+
+    char_set = set(smiles)
+    if any(c in char_set for c in ['c', 'n', 'o', 'p', 'a', 's']):
+        smiles_gen = kekulize_parser(smiles_gen)
 
     # a simple mutable counter to track which atom was the i-th derived atom
     derive_counter = [0]
@@ -196,15 +185,24 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
     selfies = ""
     selfies_len = 0
 
-    for i, (bond, char, char_type) in enumerate(smiles_gen):
+    for bond, char, char_type in smiles_gen:
+
+        if bond == '-':  # ignore explicit single bonds
+            bond = ''
 
         if char_type == ATOM_TYPE:
-            selfies += f"[{bond}{char}]"
+            if char[0] == '[':
+                selfies += f"[{bond}{char[1:-1]}expl]"
+            else:
+                selfies += f"[{bond}{char}]"
             counter[0] += 1
             selfies_len += 1
 
         elif char_type == BRANCH_TYPE:
             if char == '(':
+
+                # NOTE: looping inside a loop on a generator will produce
+                # expected behaviour in this case.
 
                 branch, branch_len = \
                     _translate_smiles_derive(smiles_gen, rings, counter)
@@ -217,7 +215,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 selfies_len += 1 + len(N_as_chars) + branch_len
 
             else:  # char == ')'
-                return selfies, selfies_len
+                break
 
         else:  # char_type == RING_TYPE
             ring_id = int(char)
