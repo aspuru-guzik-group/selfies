@@ -98,7 +98,7 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
 
         # create random SELFIES and decode
         rand_len = random.randint(1, max_len)
-        rand_mol = ''.join(random.choice(alphabet) for _ in range(rand_len))
+        rand_mol = ''.join(random.choices(alphabet, k=rand_len))
         smiles = sf.decoder(rand_mol)
 
         # check if SMILES is valid
@@ -117,7 +117,7 @@ def test_nop_char_decoder(trials, max_len, hard_alphabet):
 
     sf.set_alphabet()
 
-    alphabet = set(hard_alphabet)
+    alphabet = list(hard_alphabet)
     alphabet.remove('[nop]')
 
     for _ in range(trials):
@@ -125,7 +125,7 @@ def test_nop_char_decoder(trials, max_len, hard_alphabet):
         # create random SELFIES with and without [nop]
         rand_len = random.randint(1, max_len)
 
-        rand_mol = list(random.sample(alphabet, rand_len))
+        rand_mol = random.choices(alphabet, k=rand_len)
         rand_mol.extend(['[nop]'] * rand_len)
         random.shuffle(rand_mol)
 
