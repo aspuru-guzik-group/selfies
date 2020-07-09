@@ -240,8 +240,8 @@ def latent_space_quality(vae_encoder, vae_decoder, type_of_encoding,
     for _ in range(1, sample_num + 1):
 
         molecule_pre = ''
-        for ii in sample_latent_space(vae_encoder, vae_decoder, sample_len):
-            molecule_pre += alphabet[ii]
+        for i in sample_latent_space(vae_encoder, vae_decoder, sample_len):
+            molecule_pre += alphabet[i]
         molecule = molecule_pre.replace(' ', '')
 
         if type_of_encoding == 1:  # if SELFIES, decode to SMILES

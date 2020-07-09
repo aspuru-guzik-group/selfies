@@ -3,7 +3,7 @@ Code Documentation
 
 .. currentmodule:: selfies
 
-SELFIES
+Core Methods
 ------------------------
 .. autofunction:: encoder
 .. autofunction:: decoder
