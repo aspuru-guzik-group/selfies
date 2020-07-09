@@ -8,7 +8,7 @@ def len_selfies(selfies: str) -> int:
     and not the length of the string itself (i.e. ``len(selfies)``).
 
     :param selfies: A SELFIES.
-    :return: The character length of **selfies**.
+    :return: The character length of ``selfies``.
 
     :Example:
 
@@ -29,7 +29,7 @@ def split_selfies(selfies: str) -> Iterable[str]:
     dot-bond character.
 
     :param selfies: The SELFIES to be read.
-    :return: An iterable of the characters of **selfies** in the same order
+    :return: An iterable of the characters of ``selfies`` in the same order
         they appear in the string.
 
     :Example:
@@ -65,7 +65,7 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     constructed from characters from that set. Then, the set is returned.
 
     :param selfies_iter: An iterable of SELFIES.
-    :return: The SElFIES alphabet built from the SELFIES in **selfies_iter**.
+    :return: The SElFIES alphabet built from the SELFIES in ``selfies_iter``.
 
     :Example:
 
