@@ -32,7 +32,6 @@ mario.krenn@utoronto.ca and alan@aspuru.com
 """
 import os, sys
 sys.path.append('VAE_dependencies')
-sys.path.append('../../VAE_dependencies')
 print(sys.argv)
 
 import numpy as np
