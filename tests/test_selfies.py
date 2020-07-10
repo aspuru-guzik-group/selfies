@@ -1,20 +1,12 @@
 import faulthandler
-import os
 import random
 
-import pandas as pd
 import pytest
-from rdkit.Chem import MolFromSmiles, MolToSmiles
+from rdkit.Chem import MolFromSmiles
 
 import selfies as sf
 
 faulthandler.enable()
-
-test_sets = [
-    ('test_sets/130K_QM9.txt', 'smiles'),
-    ('test_sets/51K_NonFullerene.txt', 'smiles'),
-    ('test_sets/250k_ZINC.txt', 'smiles')
-]  # add if desired ('22M_eMolecule.smi', 'isosmiles')
 
 
 @pytest.fixture()
@@ -35,55 +27,6 @@ def hard_alphabet():
         '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'
     ])
     return alphabet
-
-
-@pytest.mark.parametrize("test_path, column_name", test_sets)
-def test_roundtrip_translation(test_path, column_name):
-    """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
-    SMILES examples in QM9, NonFullerene, Zinc, etc.
-    """
-
-    atom_dict = sf.get_atom_dict()
-    atom_dict['N'] = 6
-    sf.set_alphabet(atom_dict)
-
-    # file I/O
-    test_name = os.path.basename(test_path)
-    test_name = os.path.splitext(test_name)[0]
-
-    curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, test_path)
-    error_path = os.path.join(curr_dir, f"error_sets/errors_{test_name}.csv")
-
-    os.makedirs(os.path.dirname(error_path), exist_ok=True)
-    error_list = []
-    with open(error_path, "w+") as error_log:
-        error_log.write("In, Out\n")
-    error_found_flag = False
-
-    # roundtrip testing
-    for chunk in pd.read_csv(test_path, chunksize=10000, delimiter=' '):
-
-        for in_smiles in chunk[column_name]:
-
-            out_smiles = ""
-
-            try:
-                out_smiles = sf.decoder(sf.encoder(in_smiles))
-
-                if not is_same_mol(in_smiles, out_smiles):
-                    raise ValueError
-
-            except (Exception, ValueError):
-                error_list.append((in_smiles, out_smiles))
-
-        with open(error_path, "a") as error_log:
-            for error in error_list:
-                error_log.write(','.join(error) + "\n")
-        error_found_flag = error_found_flag or error_list
-        error_list = []
-
-    assert not error_found_flag
 
 
 def test_random_selfies_decoder(trials, max_len, hard_alphabet):
@@ -152,25 +95,3 @@ def test_get_alphabet_and_atom_dict():
     # The appropriate characters are in atom_dict()
     atom_dict = sf.get_atom_dict()
     assert '?' in atom_dict
-
-
-# Helper Methods
-
-def is_same_mol(smiles1, smiles2):
-    """Helper method that returns True if smiles1 and smiles2 correspond
-    to the same molecule.
-    """
-
-    if smiles1 is None or smiles2 is None:
-        return False
-
-    m1 = MolFromSmiles(smiles1)
-    m2 = MolFromSmiles(smiles2)
-
-    if m1 is None or m2 is None:
-        return False
-
-    can1 = MolToSmiles(m1)
-    can2 = MolToSmiles(m2)
-
-    return can1 == can2

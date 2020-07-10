@@ -78,8 +78,5 @@ def time_kekulize(file_path: str, sample_size: int = -1):
 if __name__ == '__main__':
 
     # temporary example
-    # time_roundtrip('test_sets/130K_QM9.txt')
-
-    time_kekulize('test_sets/130K_QM9.txt')
-    time_kekulize('test_sets/51K_NonFullerene.txt')
+    time_roundtrip('test_sets/250K_ZINC.txt')
     time_kekulize('test_sets/250K_ZINC.txt')
