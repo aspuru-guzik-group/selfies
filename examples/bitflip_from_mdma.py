@@ -34,6 +34,8 @@ rdBase.DisableLog('rdApp.error')
 
 
 def IsCorrectSMILES(smiles):
+    """Checks if the given SMILES is a valid SMILES, using RDKit MolFromSMILES.
+    """
     if len(smiles)==0:
         resMol=None
     else:
@@ -49,6 +51,8 @@ def IsCorrectSMILES(smiles):
 
 
 def tokenize_selfies(selfies):
+    """Constructs a list of tokens from a SELFIES string, seperated by brackets.
+    """
     location=selfies.find(']')
     all_tokens=[]
     while location>=0:
@@ -61,6 +65,8 @@ def tokenize_selfies(selfies):
 
 
 def detokenize_selfies(selfies_list):
+    """Constructs detokenized regular SELFIES string, given list of tokens.
+    """
     selfies=''
     for ii in range(len(selfies_list)):
         selfies=selfies+selfies_list[ii]
@@ -90,8 +96,6 @@ for c_num_of_mut in range(3):
             single_mut_err=single_mut_err+1
 
     print(c_num_of_mut+1, 'mutations with SMILES. Correct: ', num_repeat-single_mut_err, '/', num_repeat, '=', 1-single_mut_err/num_repeat)
-
-
 
 # SELFIES code
 mdma_selfies=encoder(mdma)
