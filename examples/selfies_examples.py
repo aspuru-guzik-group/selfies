@@ -73,9 +73,8 @@
 # =============================================================================
 
 from random import randint
-from selfies import encoder, decoder, selfies_alphabet
-
-
+from selfies import encoder, decoder, get_alphabet, set_alphabet, get_alphabet_from_selfies
+import random
 
 
 
@@ -118,21 +117,30 @@ print('equal: '+str(test_molecule4==smiles4)+'\n\n\n')
 #Create a random Molecule, test robustness
 
 
-my_alphabet=selfies_alphabet()                                                 # this is a very small alphabet from which the random selfies are generated
-                                                                               # This alphabet can be extended with additional elements. For example, see the list start_alphabet in the function smiles_to_selfies.
-                                                                               # Also when you run the three test-molecules above, you see the brackets that are used, and can use some of them.
+hard_alphabet=get_alphabet() # this is a very small alphabet from which the random selfies are generated
+print (hard_alphabet)
 
+trials=10 # Number of selfies to generate
+max_len = 30 # maximum length
+set_alphabet()  # re-initialize alphabet
+alphabet = tuple(hard_alphabet)
 
-len_of_molecule=50 # Number of selfies symbols of the random string. The final SMILES string will not necessarily be of the same size, because some elements of this alphabet stop the derivation (such as Flour, as it can form only a single bond)
+for _ in range(trials):
+    # create random SELFIES and decode
+    rand_len = random.randint(1, max_len)
+    rand_mol = ''.join(random.choices(alphabet, k=rand_len))
 
-rnd_selfies=''
-for ii in range(len_of_molecule):
-    rnd_selfies+=my_alphabet[randint(0,len(my_alphabet)-1)]
+    print('Random Molecule (SELFIES): ' + str(rand_mol))
+    print('Random Molecule (SMILES): ' + str(decoder(rand_mol)))
 
-smiles4=decoder(rnd_selfies)
-
-        
-    
-    
-print('Random Molecule: '+str(smiles4)+'\n')
-
+# rnd_selfies=''
+# for ii in range(len_of_molecule):
+#     rnd_selfies+=my_alphabet[randint(0,len(my_alphabet)-1)]
+#
+# smiles4=decoder(rnd_selfies)
+#
+#
+#
+#
+# print('Random Molecule: '+str(smiles4)+'\n')
+#
