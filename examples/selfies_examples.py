@@ -1,5 +1,5 @@
 # =============================================================================
-# 
+
 # SELFIES: a robust representation of semantically constrained graphs with an example application in chemistry
 #               v0.2.4, 01. October 2019
 # by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, Alan Aspuru-Guzik
@@ -17,7 +17,6 @@
 #
 # This file contains the encoder (SMILES -> SELFIES) and decoder (SELFIES -> SMILES),
 # as well as an example for creating random SELFIES.
-# 
 #
 # fully tested with Python 3.7.1 on
 #     - 134.000 molecules at QM9 database (https://www.nature.com/articles/sdata201422)
@@ -42,12 +41,12 @@
 #           -> fixed bug which happens when three rings start at one node, and two of them form a double ring
 #           -> enabled rings with sizes of up to 8000 SELFIES symbols
 #           -> bugfix for tiny ring to RDkit syntax conversion, spanning multiple branches
-#       - we thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin and Andrew Brereton for suggestions and bug reports 
+#       - we thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin and Andrew Brereton for suggestions and bug reports
 #
 # 0.2.2 (19.09.2019):
 #       - added:
 #           -> enabled [C@],[C@H],[C@@],[C@@H],[H] to use in a semantic constrained way
-#       - we thank Andrew Brereton for suggestions and bug reports 
+#       - we thank Andrew Brereton for suggestions and bug reports
 #
 # 0.2.0 (02.09.2019):
 #       - added:
@@ -62,10 +61,10 @@
 #            -> Decoder+Encoder: allowing for explicit brackets for organic atoms, for instance [I]
 #            -> Encoder: explicit single/double bond for non-canconical SMILES input issue fixed
 #            -> Decoder: bug fix for [Branch*] in state X1
-#       - we thank Benjamin Sanchez-Lengeling, Theophile Gaudin and Zhenpeng Yao for suggestions and bug reports 
+#       - we thank Benjamin Sanchez-Lengeling, Theophile Gaudin and Zhenpeng Yao for suggestions and bug reports
 #
-# 0.1.1 (04.06.2019): 
-#       - initial release    
+# 0.1.1 (04.06.2019):
+#       - initial release
 #
 #
 # For comments, bug reports or feature ideas, please send an email to
@@ -76,54 +75,51 @@ from random import randint
 from selfies import encoder, decoder, get_alphabet, set_alphabet, get_alphabet_from_selfies
 import random
 
-
-
 # Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
-test_molecule1='CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1' # non-fullerene acceptors for organic solar cells
-selfies1=encoder(test_molecule1)
-smiles1=decoder(selfies1)
+
+# test molecule 1: non-fullerene acceptors for organic solar cells
+test_molecule1 = 'CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1'
+selfies1 = encoder(test_molecule1)
+smiles1 = decoder(selfies1)
 print('test_molecule1: '+test_molecule1+'\n')
 print('selfies1: '+selfies1+'\n')
 print('smiles1: '+smiles1+'\n')
-print('equal: '+str(test_molecule1==smiles1)+'\n\n\n')
+print('equal: '+str(test_molecule1 == smiles1)+'\n\n\n')
 
-test_molecule2='CC(C)c1noc(-c2cc[nH+]c(N3CCN(C(=O)[C@H]4C[C@H]4C)CC3)c2)n1' # from ZINC database
-selfies2=encoder(test_molecule2)
-smiles2=decoder(selfies2)
+test_molecule2 = 'CC(C)c1noc(-c2cc[nH+]c(N3CCN(C(=O)[C@H]4C[C@H]4C)CC3)c2)n1'  # from ZINC database
+selfies2 = encoder(test_molecule2)
+smiles2 = decoder(selfies2)
 print('test_molecule2: '+test_molecule2+'\n')
 print('selfies2: '+selfies2+'\n')
 print('smiles2: '+smiles2+'\n')
-print('equal: '+str(test_molecule2==smiles2)+'\n\n\n')
+print('equal: '+str(test_molecule2 == smiles2)+'\n\n\n')
 
 
-test_molecule3='CCOC(=O)C1(C(=O)OCC)C23c4c5c6c7c8c4-c4c2c2c9c%10c4C4%11c%12c-%10c%10c%13c%14c%15c%16c%17c%18c%19c%20c%21c%22c%23c%24c(c-7c(c7c%12c%13c(c7%24)c(c%19%23)c%18%14)C84C%11(C(=O)OCC)C(=O)OCC)C%224C(C(=O)OCC)(C(=O)OCC)C64c4c-5c5c6c(c4-%21)C%204C(C(=O)OCC)(C(=O)OCC)C%174c4c-6c(c-2c(c4-%16)C92C(C(=O)OCC)(C(=O)OCC)C%10%152)C513' # from PubChem
-selfies3=encoder(test_molecule3)
-smiles3=decoder(selfies3)
+test_molecule3 = 'CCOC(=O)C1(C(=O)OCC)C23c4c5c6c7c8c4-c4c2c2c9c%10c4C4%11c%12c-%10c%10c%13c%14c%15c%16c%17c%18c%19c%20c%21c%22c%23c%24c(c-7c(c7c%12c%13c(c7%24)c(c%19%23)c%18%14)C84C%11(C(=O)OCC)C(=O)OCC)C%224C(C(=O)OCC)(C(=O)OCC)C64c4c-5c5c6c(c4-%21)C%204C(C(=O)OCC)(C(=O)OCC)C%174c4c-6c(c-2c(c4-%16)C92C(C(=O)OCC)(C(=O)OCC)C%10%152)C513'  # from PubChem
+selfies3 = encoder(test_molecule3)
+smiles3 = decoder(selfies3)
 print('test_molecule3: '+test_molecule3+'\n')
 print('selfies3: '+selfies3+'\n')
 print('smiles3: '+smiles3+'\n')
-print('equal: '+str(test_molecule3==smiles3)+'\n\n\n')
+print('equal: '+str(test_molecule3 == smiles3)+'\n\n\n')
 
-test_molecule4='Cc1c(C)c(S(=O)(=O)NC(=N)NCCC[C@H](NC(=O)[C@@H]2CCCN2C(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](C)NC(=O)[C@@H]2CCCN2C(=O)[C@@H]2CCCN2C(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@@H](NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](Cc2cn(C(=O)OC(C)(C)C)cn2)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@@H]2CCCN2C(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](Cc2ccccc2)NC(=O)[C@H](COC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](COC(C)(C)C)NC(=O)CNC(=O)OC(C)(C)C)C(C)C)C(=O)O)c(C)c2c1OC(C)(C)CC2'
-selfies4=encoder(test_molecule4)
-smiles4=decoder(selfies4)
+test_molecule4 = 'Cc1c(C)c(S(=O)(=O)NC(=N)NCCC[C@H](NC(=O)[C@@H]2CCCN2C(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](C)NC(=O)[C@@H]2CCCN2C(=O)[C@@H]2CCCN2C(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@H](CCCCNC(=O)OC(C)(C)C)NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@@H](NC(=O)[C@H](CCCNC(=N)NS(=O)(=O)c2c(C)c(C)c3c(c2C)CCC(C)(C)O3)NC(=O)[C@H](CCC(=O)NC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](Cc2cn(C(=O)OC(C)(C)C)cn2)NC(=O)[C@H](CCC(=O)OC(C)(C)C)NC(=O)[C@@H]2CCCN2C(=O)[C@H](COC(C)(C)C)NC(=O)[C@H](CC(C)C)NC(=O)[C@H](Cc2ccccc2)NC(=O)[C@H](COC(c2ccccc2)(c2ccccc2)c2ccccc2)NC(=O)[C@H](COC(C)(C)C)NC(=O)CNC(=O)OC(C)(C)C)C(C)C)C(=O)O)c(C)c2c1OC(C)(C)CC2'
+selfies4 = encoder(test_molecule4)
+smiles4 = decoder(selfies4)
 print('test_molecule4: '+test_molecule4+'\n')
 print('selfies4: '+selfies4+'\n')
 print('smiles4: '+smiles4+'\n')
-print('equal: '+str(test_molecule4==smiles4)+'\n\n\n')
+print('equal: '+str(test_molecule4 == smiles4)+'\n\n\n')
 
+# Create a random Molecule, test robustness
 
+init_alphabet = get_alphabet()  # this is a very small alphabet from which the random selfies are generated
+print(init_alphabet)
 
-#Create a random Molecule, test robustness
-
-
-hard_alphabet=get_alphabet() # this is a very small alphabet from which the random selfies are generated
-print (hard_alphabet)
-
-trials=10 # Number of selfies to generate
-max_len = 30 # maximum length
+trials = 10  # Number of selfies to generate
+max_len = 30  # maximum length
 set_alphabet()  # re-initialize alphabet
-alphabet = tuple(hard_alphabet)
+alphabet = tuple(init_alphabet)
 
 for _ in range(trials):
     # create random SELFIES and decode
