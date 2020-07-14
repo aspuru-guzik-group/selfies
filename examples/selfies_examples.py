@@ -72,7 +72,7 @@
 # =============================================================================
 
 from random import randint
-from selfies import encoder, decoder, get_alphabet, set_alphabet, get_alphabet_from_selfies
+from selfies import encoder, decoder, get_alphabet, set_alphabet, get_alphabet_from_selfies, get_atom_dict
 import random
 
 # Now we encode three molecules from SMILES -> SELFIES, and decode them from SELFIES -> SMILES
@@ -128,6 +128,14 @@ for _ in range(trials):
 
     print('Random Molecule (SELFIES): ' + str(rand_mol))
     print('Random Molecule (SMILES): ' + str(decoder(rand_mol)))
+
+# get current dictionary dictionary **atom_dict** of atom(s) and/or ion(s) and their corresponding bond capacities.
+# this dictionary can then be used or modified to form a new SELFIES alphabet
+atom_dict = get_atom_dict()
+print('Atom + Bond Capacity Dictionary: ' + str(atom_dict))
+set_alphabet(atom_dict)
+
+
 
 # rnd_selfies=''
 # for ii in range(len_of_molecule):
