@@ -10,8 +10,8 @@ import selfies as sf
 # Test SMILES: non-fullerene acceptors for organic solar cells.
 smiles = "CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)" \
          "C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1"
-encoded_selfies = sf.encoder(smiles)
-decoded_smiles = sf.decoder(encoded_selfies)
+encoded_selfies = sf.encoder(smiles)  # SMILES --> SEFLIES
+decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
 
 print(f"Original SMILES: {smiles}")
 print(f"Translated SELFIES: {encoded_selfies}")
@@ -29,13 +29,12 @@ print()
 
 # 2. Let's view the SELFIES alphabet.
 
-# The default alphabet that SELFIES runs on.
-default_alphabet = sf.get_alphabet()
-print(f"Default Alphabet:\n {default_alphabet}")
+new_alphabet = sf.get_alphabet()
+print(f"Default Alphabet:\n {new_alphabet}")
 print()
 
-default_atom_dict = sf.get_atom_dict()
-print(f"Default Atom Dict:\n {default_atom_dict}")
+new_atom_dict = sf.get_atom_dict()
+print(f"Default Atom Dict:\n {new_atom_dict}")
 print()
 
 # 3. Let's customize the SELFIES alphabet
@@ -51,7 +50,7 @@ print(f"\t [Li]=CC --> {sf.decoder(li_compound)}")
 
 # Now we add [Li] to the SELFIES alphabet, and restrict it to 1 bond only
 # Also, let's restrict S to 2 bonds (instead of its default 6).
-atom_dict = default_atom_dict
+atom_dict = new_atom_dict
 atom_dict['[Li]'] = 1
 atom_dict['S'] = 2
 
@@ -61,5 +60,20 @@ sf.set_alphabet(atom_dict)  # update alphabet
 print("Customized SELFIES:")
 print(f"\t CS=CC#S --> {sf.decoder(c_s_compound)}")
 print(f"\t [Li]=CC --> {sf.decoder(li_compound)}")
+print()
+# Notice that all the bond constraints are met.
 
-# Notice that all the bond constraints are met
+# Let's check on the SELFIES alphabet an atom dict to see if they
+# are updated. Note that [Li] is now in the SELFIES alphabet (see
+# [Liexpl], [=Liexpl], [#Liexpl], ...)
+
+new_alphabet = sf.get_alphabet()
+print(f"Updated Alphabet:\n {new_alphabet}")
+print()
+
+new_atom_dict = sf.get_atom_dict()
+print(f"Updated Atom Dict:\n {new_atom_dict}")
+print()
+
+# 4. Let's revert the SELFIES alphabet back to the default settings
+sf.set_alphabet()
