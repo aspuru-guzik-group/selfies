@@ -22,5 +22,7 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6'
+    python_requires='>=3.6',
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest']
 )

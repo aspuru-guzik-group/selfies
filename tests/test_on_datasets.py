@@ -12,18 +12,19 @@ import selfies as sf
 from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
+import random
 faulthandler.enable()
 
 test_sets = [
-    # ('test_sets/130K_QM9.txt', 'smiles'),
-    # ('test_sets/51K_NonFullerene.txt', 'smiles'),
+    ('test_sets/130K_QM9.txt', 'smiles'),
+    ('test_sets/51K_NonFullerene.txt', 'smiles'),
     ('test_sets/250k_ZINC.txt', 'smiles')
     # ('22M_eMolecule.smi', 'isosmiles')
 ]
 
 
 @pytest.mark.parametrize("test_path, column_name", test_sets)
-def test_roundtrip_translation(test_path, column_name):
+def test_roundtrip_translation(test_path, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
@@ -45,9 +46,18 @@ def test_roundtrip_translation(test_path, column_name):
         error_log.write("In, Out\n")
     error_found_flag = False
 
-    # roundtrip testing
-    for chunk in pd.read_csv(test_path, chunksize=10000, delimiter=' '):
+    # make pandas reader
+    N = sum(1 for _ in open(test_path)) - 1
+    S = dataset_samples if dataset_samples > 0 else -1
+    skip = sorted(random.sample(range(1, N + 1), N - S))
+    reader = pd.read_csv(test_path,
+                         chunksize=10000,
+                         header=0,
+                         delimiter=' ',
+                         skiprows=skip)
 
+    # roundtrip testing
+    for chunk in reader:
         for in_smiles in chunk[column_name]:
 
             out_smiles = sf.decoder(sf.encoder(in_smiles))
@@ -65,7 +75,7 @@ def test_roundtrip_translation(test_path, column_name):
 
 
 @pytest.mark.parametrize("test_path, column_name", test_sets)
-def test_kekulize_parser(test_path, column_name):
+def test_kekulize_parser(test_path, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
     """
@@ -84,8 +94,18 @@ def test_kekulize_parser(test_path, column_name):
         error_log.write("In\n")
     error_found_flag = False
 
+    # make pandas reader
+    N = sum(1 for _ in open(test_path)) - 1
+    S = dataset_samples if dataset_samples > 0 else -1
+    skip = sorted(random.sample(range(1, N + 1), N - S))
+    reader = pd.read_csv(test_path,
+                         chunksize=10000,
+                         header=0,
+                         delimiter=' ',
+                         skiprows=skip)
+
     # kekulize testing
-    for chunk in pd.read_csv(test_path, chunksize=10000, delimiter=' '):
+    for chunk in reader:
         for smiles in chunk[column_name]:
 
             # build kekulized SMILES
