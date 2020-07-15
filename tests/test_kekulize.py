@@ -4,15 +4,17 @@ import pandas as pd
 import pytest
 from rdkit.Chem import MolFromSmiles, MolToSmiles
 
+import selfies
 from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
 test_sets = [
     ('test_sets/130K_QM9.txt', 'smiles'),
     ('test_sets/51K_NonFullerene.txt', 'smiles'),
-    ('test_sets/250k_ZINC.txt', 'smiles')
+    ('test_sets/250k_ZINC.txt', 'smiles'),
+    ('test_sets/8k_Tox21.txt', 'smiles'),
+    ('test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
 ]  # add if desired ('22M_eMolecule.smi', 'isosmiles')
-
 
 @pytest.mark.parametrize("test_path, column_name", test_sets)
 def test_kekulize_parser(test_path, column_name):
@@ -37,6 +39,24 @@ def test_kekulize_parser(test_path, column_name):
         for smiles in chunk[column_name]:
 
             try:
+
+                smi_fragment = []
+
+                for smi in smiles.split('.'):
+                    kekule_gen = kekulize_parser((_parse_smiles(smi)))
+
+                    k_smiles = ""
+                    for bond, char, char_type in kekule_gen:
+                        if char_type == BRANCH_TYPE:
+                            bond = ''
+                        k_smiles += bond
+
+                        if char_type == RING_TYPE and len(char) == 2:
+                            k_smiles += "%"
+                        k_smiles += char
+                    smi_fragment.append(k_smiles)
+
+                kekule_smiles = '.'.join(smi_fragment)
                 kekule_fragments = []
 
                 for fragment in smiles.split("."):
@@ -74,3 +94,6 @@ def test_kekulize_parser(test_path, column_name):
         error_list = []
 
     assert not error_found_flag
+
+
+
