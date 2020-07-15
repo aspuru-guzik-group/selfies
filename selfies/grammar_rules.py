@@ -57,10 +57,10 @@ def get_atom_dict() -> Dict[str, int]:
 
 def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     """Sets the alphabet the ``selfies`` is operating on based on
-    **atom_dict**.
+    ``atom_dict``.
 
     The SELFIES alphabet and grammar is built dynamically from a dictionary
-    **atom_dict** of atom(s) and/or ion(s) and their corresponding bond
+    ``atom_dict`` of atom(s) and/or ion(s) and their corresponding bond
     capacities. The key of the dictionary is a SMILES string representing
     either a single atom, or some atom(s) and/or ion(s) enclosed by square
     brackets. The corresponding value is the number of bonds that
@@ -75,18 +75,18 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     ``'IC'`` respectively, because ``I`` has been configured to make one bond
     maximally.
 
-    If a SMILES key is not specified in **atom_dict**, it will by default be
+    If a SMILES key is not specified in ``atom_dict``, it will by default be
     constrained to 8 bonds. To change the default setting for unrecognized
     characters, set ``atom_dict['?']`` to the desired integer (between 1 and 8
     inclusive). Note that ``selfies.decoder`` only recognizes the exact
-    character string specified in **atom_dict**. For example, ``'[Fe+2]'`` will
-    not be constrained if it is not in **atom_dict**, even if ``'[Fe++]'`` is
+    character string specified in ``atom_dict``. For example, ``'[Fe+2]'`` will
+    not be constrained if it is not in ``atom_dict``, even if ``'[Fe++]'`` is
     a key in the dictionary.
 
     :param atom_dict: a dictionary of the atom(s) or ions that the new SELFIES
         alphabet will be built upon, with the value being the
         maximum bond capacity of the atom or ion. Defaults to ``None``. In that
-        case, a default dictionary will be used for **atom_dict**.
+        case, a default dictionary will be used for ``atom_dict``.
     :return: ``None``.
     """
 
