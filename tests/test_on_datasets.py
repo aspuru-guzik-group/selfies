@@ -13,12 +13,15 @@ from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
 import random
+
 faulthandler.enable()
 
 test_sets = [
     ('test_sets/130K_QM9.txt', 'smiles'),
     ('test_sets/51K_NonFullerene.txt', 'smiles'),
-    ('test_sets/250k_ZINC.txt', 'smiles')
+    ('test_sets/250k_ZINC.txt', 'smiles'),
+    ('test_sets/8k_Tox21.txt', 'smiles'),
+    ('test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
     # ('22M_eMolecule.smi', 'isosmiles')
 ]
 
@@ -48,7 +51,7 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if dataset_samples > 0 else -1
+    S = dataset_samples if (0 < dataset_samples <= N) else 0
     skip = sorted(random.sample(range(1, N + 1), N - S))
     reader = pd.read_csv(test_path,
                          chunksize=10000,
