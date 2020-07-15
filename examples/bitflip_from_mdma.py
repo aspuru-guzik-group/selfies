@@ -67,6 +67,8 @@ def detokenize_selfies(selfies_list):
 
     return selfies
 
+
+
 mdma='CNC(C)CC1=CC=C2C(=C1)OCO2'
 smiles_symbols='FONC()=#12345' # with this alphabet, the whole QM9 db can be translated (except of ions and stereochemistry)
 
