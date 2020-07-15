@@ -90,7 +90,7 @@ for c_num_of_mut in range(3):
             single_mut_err=single_mut_err+1
 
     print(c_num_of_mut+1, 'mutations with SMILES. Correct: ', num_repeat-single_mut_err, '/', num_repeat, '=', 1-single_mut_err/num_repeat)
-  
+
 
 
 # SELFIES code
