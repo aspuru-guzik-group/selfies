@@ -54,7 +54,8 @@ tox
 ```
 
 By default, SELFIES is tested against a random subset
-(size ``dataset_samples``) of various datasets:
+(of size ``dataset_samples``) on various datasets:
+
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
@@ -62,13 +63,15 @@ By default, SELFIES is tested against a random subset
  * 93K molecules from PubChem MUV
  
 Other tests are random and repeated ``trials`` number of times. 
-These can be passed in as arguemnts 
+These can be specified as arguments 
 
 ```bash
 tox -- --trials 100 --dataset_samples 100
 ```
 
-where ``--trials=10000`` and ``--dataset_samples=10000`` by default. 
+where ``--trials=10000`` and ``--dataset_samples=10000`` by default. Note that 
+if ``dataset_samples`` is negative or exceeds the length of the dataset, 
+the whole dataset is used. 
 
 
 
