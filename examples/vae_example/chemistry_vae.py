@@ -7,7 +7,7 @@ SELFIES: a robust representation of semantically constrained graphs with an
     by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich,
     Alan Aspuru-Guzik.
 
-    Variational Auto Encoder (VAE) for chemistry
+    Variational Autoencoder (VAE) for chemistry
         comparing SMILES and SELFIES representation using reconstruction
         quality, diversity and latent space validity as metrics of
         interest
@@ -16,55 +16,24 @@ information:
     ML framework: pytorch
     chemistry framework: RDKit
 
-
-    settings.yml
-        contains link to data file containing SMILES encoded molecule, and
-        hyperparameters of neural network model and training
-
     get_selfie_and_smiles_encodings_for_dataset
         generate complete encoding (inclusive alphabet) for SMILES and
         SELFIES given a data file
 
     VAEEncoder
-        fully connection, 3 layer neural network - encodes a one-hot
+        fully connected, 3 layer neural network - encodes a one-hot
         representation of molecule (in SMILES or SELFIES representation)
         to latent space
 
-    VAE_decode
+    VAEDecoder
         decodes point in latent space using an RNN
 
     latent_space_quality
         samples points from latent space, decodes them into molecules,
         calculates chemical validity (using RDKit's MolFromSmiles), calculates
         diversity
-
-    environment.yml
-        shows dependencies
-        Particularly important: RDKit and SELFIES (via 'pip install selfies')
-
-
-tested at:
-    - Python 3.7.1
-    - Python 3.6.8
-
-    CPU and GPU supported
-
-
-Note: semantic validity is only implemented so far for atoms described in
-    Table 2 of our paper. This corresponds to (non-ionic) QM9. Other chemical
-    constraints might generate additional mistakes. Syntactical constraints
-    are always fulfilled
-    - Aromatic Symbols: they have additional semantic constraints, thus to
-        reduce invalidity due to aromatic constraints, one can de-aromatize
-        molecules (aromatic symbols are simplifications in SMILES). Otherwise,
-        one could add the semantic constraints (this could be done in an
-        automated way, but is not implemented yet)
-
-
-For comments, bug reports or feature ideas, please send an email to
-mario.krenn@utoronto.ca and alan@aspuru.com
-
 """
+
 import os
 import sys
 import time
