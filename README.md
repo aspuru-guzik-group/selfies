@@ -46,22 +46,31 @@ from the ``docs/`` directory.
 
 ## Tests
 SELFIES uses `pytest` with `tox` as its testing framework.
-All tests can be found in  the `tests/` directory.
- 
-To run the test suite for  SELFIES, install ``tox`` and run:  
+All tests can be found in  the `tests/` directory. To run the test suite for 
+SELFIES, install ``tox`` and run:  
 
 ```bash
 tox
 ```
 
-By default, SELFIES is tested against a random fixed-size subset of 
-various datasets including:
+By default, SELFIES is tested against a random subset
+(size ``dataset_samples``) of various datasets:
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
- * 50K molecules from [Non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
+ * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from Tox21
- * 93K molecules from PubChem MUV 
-Other random 
+ * 93K molecules from PubChem MUV
+ 
+Other tests are random and repeated ``trials`` number of times. 
+These can be passed in as arguemnts 
+
+```bash
+tox -- --trials 100 --dataset_samples 100
+```
+
+where ``--trials=10000`` and ``--dataset_samples=10000`` by default. 
+
+
 
 ## License 
 
