@@ -21,7 +21,8 @@ using Conda.
     
 ### Tested at:
 - Python 3.7.1
-- Python 3.6.8               
+- Python 3.6.8 
+              
 CPU and GPU supported
 
 For comments, bug reports or feature ideas, please send an email to
