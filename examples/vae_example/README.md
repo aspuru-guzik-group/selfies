@@ -14,7 +14,7 @@ using Conda.
  * ``chemistry_vae.py``: the main file; contains the model definitions, 
     the data processing, and the training.
  * ``settings.yml``: a file containing the hyperparameters of the 
-    model and the training. Also configures the VAE to run on SMILES 
+    model and the training. Also configures the VAE to run on either SMILES 
     or SELFIES. 
  * ``data_loader.py``: contains helper methods that convert SMILES and SELFIES
     into integer-encoded or one-hot encoded vectors. 
