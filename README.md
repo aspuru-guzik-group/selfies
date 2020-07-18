@@ -12,7 +12,9 @@ learning models, in particular in generative models, for the generation of
 graphs with high semantical and syntactical validity (SELFIES has a validity 
 of >99.99% even for random strings). The code presented here is a concrete 
 application of SELFIES in chemistry, for the robust representation of
-molecule. See the paper at arXiv: https://arxiv.org/abs/1905.13741.
+molecule. See the paper at arXiv (https://arxiv.org/abs/1905.13741)
+by Mario Krenn, Florian Haese, AkshatKuman Nigam, Pascal Friederich, and
+Alan Aspuru-Guzik.
 
 
 ## Installation
