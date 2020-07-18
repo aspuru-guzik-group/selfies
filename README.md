@@ -74,6 +74,10 @@ if ``dataset_samples`` is negative or exceeds the length of the dataset,
 the whole dataset is used. 
 
 
+## Credits
+
+We thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin, Andrew Brereton,
+Benjamin Sanchez-Lengeling, and Zhenpeng Yao for suggestions and bug reports. 
 
 ## License 
 
