@@ -1,9 +1,9 @@
 # SELFIES Example: Variational Autoencoder (VAE) for Chemistry
 
 An implementation of a variational autoencoder that runs on both SMILES and 
-SELFIES. Included is code that compares SMILES and SELFIES representation
-using reconstruction quality, diversity, and latent space validity as metrics
-of interest. 
+SELFIES. Included is code that compares the SMILES and SELFIES representations
+for a VAE using reconstruction quality, diversity, and latent space validity 
+as metrics of interest. 
  
 ## Dependencies 
 Dependencies are ``pytorch``, ``rdkit``, and ``yaml``, which can be installed 
