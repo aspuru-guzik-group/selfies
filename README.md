@@ -11,8 +11,8 @@ functions. A main objective is to use SELFIES as direct input into machine
 learning models, in particular in generative models, for the generation of 
 graphs with high semantical and syntactical validity (SELFIES has a validity 
 of >99.99% even for random strings). The code presented here is a concrete 
-application of SELFIES in chemistry, for the robust representation of molecule. 
-See the paper at arXiv: https://arxiv.org/abs/1905.13741.
+application of SELFIES in chemistry, for the robust representation of
+molecule. See the paper at arXiv: https://arxiv.org/abs/1905.13741.
 
 
 ## Installation
@@ -22,7 +22,7 @@ Use pip to install selfies.
 pip install selfies
 ```
 
-## Code Examples
+## Usage
 
 ```python
 import selfies as sf
@@ -38,26 +38,30 @@ variational autoencoder that runs on the SELFIES language.
 genetic algorithm to achieve state-of-the-art performance for inverse design, 
 with the [code here](https://github.com/aspuru-guzik-group/GA).
 
-## Tests
-SELFIES uses `pytest` as its testing framework. All tests can be found in 
-the `tests/` directory.
+## Documentation 
 
-Many of the SELFIES tests use [RDKit](https://www.rdkit.org/), which can 
-be installed using Conda. To run the test suite for SELFIES, create a Conda
-environment with RDKit installed, and run from your command line:  
+The documentation can be found on ReadTheDocs. Alternatively, it can be built 
+from the ``docs/`` directory. 
+
+
+## Tests
+SELFIES uses `pytest` with `tox` as its testing framework.
+All tests can be found in  the `tests/` directory.
+ 
+To run the test suite for  SELFIES, install ``tox`` and run:  
 
 ```bash
-python setup.py test
+tox
 ```
 
-By default, SELFIES is tested against a random 10,000 molecule subset of 
+By default, SELFIES is tested against a random fixed-size subset of 
 various datasets including:
- * [QM9](https://www.nature.com/articles/sdata201422), 
- * [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
- * [Non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
- * Tox21
- * PubChem MUV 
-
+ * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
+ * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
+ * 50K molecules from [Non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
+ * 8K molecules from Tox21
+ * 93K molecules from PubChem MUV 
+Other random 
 
 ## License 
 

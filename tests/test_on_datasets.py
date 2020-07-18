@@ -99,7 +99,7 @@ def test_kekulize_parser(test_path, column_name, dataset_samples):
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if dataset_samples > 0 else -1
+    S = dataset_samples if (0 < dataset_samples <= N) else 0
     skip = sorted(random.sample(range(1, N + 1), N - S))
     reader = pd.read_csv(test_path,
                          chunksize=10000,
