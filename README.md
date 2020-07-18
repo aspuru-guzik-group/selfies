@@ -1,5 +1,9 @@
 # SELFIES
 
+![versions](https://img.shields.io/pypi/pyversions/selfies.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
 SELFIES (SELF-referencIng Embedded Strings) is a general-purpose, 
 sequence-based, robust representation of semantically constrained graphs. It
 is based on a Chomsky type-2 grammar, augmented with two self-referencing 
@@ -30,14 +34,13 @@ encoded_selfies = sf.encoder(benzene)  # SMILES --> SEFLIES
 decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
 ```
 
-More examples can be seen in the ``examples/`` directory, including a 
+* More examples can be seen in the ``examples/`` directory, including a 
 variational autoencoder that runs on the SELFIES language.
-
-This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
+* This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
 genetic algorithm to achieve state-of-the-art performance for inverse design, 
 with the [code here](https://github.com/aspuru-guzik-group/GA).
 
-### Tests
+## Tests
 SELFIES uses `pytest` as its testing framework. All tests can be found in 
 the `tests/` directory.
 
@@ -64,6 +67,5 @@ supported:
 
 
 ## License 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
