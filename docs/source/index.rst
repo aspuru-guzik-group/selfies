@@ -16,7 +16,7 @@ outputs with high validity.
 The code presented here is a concrete application of SELFIES in chemistry, for
 the robust representation of molecules (see the original paper on
 `arXiv <https://arxiv.org/abs/1905.13741>`_). This library is intended to
-be light-weight and easy to use, and also, allow users the flexiblity
+be light-weight and easy to use, and also, allow users the flexibility
 to customize the SELFIES language to their needs.
 
 For comments, bug reports or feature ideas, please send an email to
