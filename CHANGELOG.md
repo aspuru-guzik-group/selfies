@@ -3,7 +3,7 @@
 
 ---
 
-## 0.2.4 - 01-10-2019:
+## v0.2.4 - 01-10-2019:
 ### Added:
  *  Function ``get_alphabet()`` which returns a list of 29 selfies symbols
     whose arbitrary combination produce >99.99% valid molecules.
