@@ -60,7 +60,7 @@ import selfies as sf
 
 dataset = ['[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
 alphabet = sf.get_alphabet_from_selfies(dataset)
-alphabet.add('[nop]')  # '[nop]' is the padding symbol 
+alphabet.add('[nop]')  # '[nop]' is a special padding symbol 
 print(alphabet)  # {'[C]', '[F]', '[nop]', '[O]', '[=O]'}
 
 pad_to_len = 5
