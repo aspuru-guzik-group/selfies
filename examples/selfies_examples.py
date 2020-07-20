@@ -37,6 +37,9 @@ new_atom_dict = sf.get_atom_dict()
 print(f"Default Atom Dict:\n {new_atom_dict}")
 print()
 
+
+
+# Advanced Useage:
 # 3. Let's customize the SELFIES alphabet
 
 # We have two compounds here, C#S and Li=CCC in SELFIES form
