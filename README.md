@@ -36,7 +36,7 @@ The ``selfies`` library has 5 standard functions:
 | ``selfies.decoder`` | Translates a SELFIES into an equivalent SMILES. |
 | ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  | 
 | ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
-| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES |  
+| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. |  
 
 Please read the documentation for more detailed descriptions of these 
 functions, and to view the advanced functions, which allow users to
@@ -53,6 +53,33 @@ benzene = "C1=CC=CC=C1"
 encoded_selfies = sf.encoder(benzene)  # SMILES --> SEFLIES
 decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
 ```
+
+Integer encoding: 
+```python
+import selfies as sf
+
+dataset = ['[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
+alphabet = sf.get_alphabet_from_selfies(dataset)
+alphabet.add('[nop]')  # '[nop]' is the padding symbol 
+print(alphabet)  # {'[=O]', '[F]', '[O]', '[C], [nop]'}
+
+pad_to_len = 5
+symbol_to_idx = {c: i for i, c in enumerate(sorted(alphabet))}
+
+# SELFIES to integer encode
+dimethyl_ether = '[C][O][C]'
+
+# pad the SELFIES 
+dimethyl_ether += '[nop]' * (pad_to_len - sf.len_selfies(dimethyl_ether))
+
+# integer encode the SELFIES 
+int_encoded = []
+for symbol in sf.split_selfies(dimethyl_ether):
+    int_encoded.append(symbol_to_idx[symbol])
+    
+print(int_encoded)  # [1, 3, 1, 4, 4]
+```
+
 
 * More examples can be found in the ``examples/`` directory, including a 
 variational autoencoder that runs on the SELFIES language.
