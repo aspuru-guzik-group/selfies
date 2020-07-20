@@ -44,7 +44,7 @@ customize the SELFIES language.
 
 ### Examples
 
-Translation: 
+Translation between SELFIES and SMILES: 
 
 ```python
 import selfies as sf
@@ -54,7 +54,7 @@ encoded_selfies = sf.encoder(benzene)  # SMILES --> SEFLIES
 decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
 ```
 
-Integer encoding: 
+Integer encoding a SELFIES: 
 ```python
 import selfies as sf
 
