@@ -80,6 +80,7 @@ for symbol in sf.split_selfies(dimethyl_ether):
 print(int_encoded)  # [1, 3, 1, 4, 4]
 ```
 
+### More Examples
 
 * More examples can be found in the ``examples/`` directory, including a 
 variational autoencoder that runs on the SELFIES language.
