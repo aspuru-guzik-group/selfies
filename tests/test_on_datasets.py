@@ -119,14 +119,14 @@ def test_kekulize_parser(test_path, column_name, dataset_samples):
                 kekule_gen = kekulize_parser(_parse_smiles(fragment))
 
                 k = []
-                for bond, char, char_type in kekule_gen:
-                    if char_type == BRANCH_TYPE:
+                for bond, symbol, symbol_type in kekule_gen:
+                    if symbol_type == BRANCH_TYPE:
                         bond = ''
                     k.append(bond)
 
-                    if char_type == RING_TYPE and len(char) == 2:
+                    if symbol_type == RING_TYPE and len(symbol) == 2:
                         k.append('%')
-                    k.append(char)
+                    k.append(symbol)
 
                 kekule_fragments.append(''.join(k))
 
