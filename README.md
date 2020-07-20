@@ -26,6 +26,26 @@ pip install selfies
 
 ## Usage
 
+### Standard Methods 
+
+The ``selfies`` library has 5 standard functions: 
+
+| Function | Description |
+| -------- | ----------- |
+| ``selfies.encoder`` | Translates a SMILES into an equivalent SELFIES. | 
+| ``selfies.decoder`` | Translates a SELFIES into an equivalent SMILES. |
+| ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  | 
+| ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
+| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES |  
+
+Please read the documentation for more detailed descriptions of these 
+functions, and to view the advanced functions, which allow users to
+customize the SELFIES language.
+
+### Exmples
+
+Translation: 
+
 ```python
 import selfies as sf
     
@@ -43,7 +63,7 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 ## Documentation 
 
 The documentation can be found on ReadTheDocs. Alternatively, it can be built 
-from the ``docs/`` directory. 
+from the ``docs/`` directory.
 
 
 ## Tests
