@@ -64,7 +64,7 @@ alphabet.add('[nop]')  # '[nop]' is the padding symbol
 print(alphabet)  # {'[C]', '[F]', '[nop]', '[O]', '[=O]'}
 
 pad_to_len = 5
-symbol_to_idx = {c: i for i, c in enumerate(sorted(alphabet))}
+symbol_to_idx = {s: i for i, s in enumerate(sorted(alphabet))}
 
 # SELFIES to integer encode
 dimethyl_ether = '[C][O][C]'
