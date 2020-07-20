@@ -42,7 +42,7 @@ Please read the documentation for more detailed descriptions of these
 functions, and to view the advanced functions, which allow users to
 customize the SELFIES language.
 
-### Exmples
+### Examples
 
 Translation: 
 
