@@ -63,6 +63,9 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     of SELFIES characters such that every SELFIES in the iterable can be
     constructed from characters from that set. Then, the set is returned.
 
+    Note that the character ``.`` will not be added as a member of the
+    returned set, even if it appears in the input.
+
     :param selfies_iter: An iterable of SELFIES.
     :return: The SElFIES alphabet built from the SELFIES in ``selfies_iter``.
 
@@ -72,7 +75,7 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     >>> selfies_list = ['[C][F][O]', '[C].[O]', '[F][F]']
     >>> alphabet = selfies.get_alphabet_from_selfies(selfies_list)
     >>> sorted(list(alphabet))
-    ['.', '[C]', '[F]', '[O]']
+    ['[C]', '[F]', '[O]']
     """
 
     alphabet = set()
@@ -80,5 +83,7 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     for s in selfies_iter:
         for char in split_selfies(s):
             alphabet.add(char)
+
+    alphabet.remove('.')
 
     return alphabet
