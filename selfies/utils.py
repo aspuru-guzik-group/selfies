@@ -62,7 +62,6 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     From an iterable of SELFIES, constructs the minimum-sized set
     of SELFIES characters such that every SELFIES in the iterable can be
     constructed from characters from that set. Then, the set is returned.
-
     Note that the character ``.`` will not be added as a member of the
     returned set, even if it appears in the input.
 
