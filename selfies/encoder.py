@@ -42,15 +42,15 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     >>> selfies.encoder('C=CF')
     '[C][=C][F]'
 
-    .. warning:: Currently, :code:`selfies.encoder` first splits a
+    .. note:: Currently, :code:`selfies.encoder` first splits a
         SMILES by the dot-bond character, translates each fragment separately,
         and then rejoins them. Thus, SMILES such as C1.C2.C12 (propane) and
         c1cc([O-].[Na+])ccc1 (sodium phenoxide) are **not** supported because
         their fragments (e.g. C1, c1cc([O-], C12) are not valid SMILES.
-        However, [Na+].[O-]c1ccccc1 and [K].Cl are supported.
+        However, [Na+].[O-]c1ccccc1 and [K+].[Cl-] are supported.
 
-        SMILES with ring numbering between atoms that are over 4000 atoms apart
-        are also not supported.
+        SMILES with ring numbering between atoms that are over
+        ``16 ** 3 = 4096`` atoms apart are also not supported.
 
     """
 
