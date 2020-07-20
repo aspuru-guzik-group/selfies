@@ -13,6 +13,8 @@ def len_selfies(selfies: str) -> int:
     :Example:
 
     >>> import selfies
+    >>> selfies.len_selfies('[C][O][C]')
+    3
     >>> selfies.len_selfies('[C][=C][F].[C]')
     5
     """
@@ -35,13 +37,10 @@ def split_selfies(selfies: str) -> Iterable[str]:
     :Example:
 
     >>> import selfies
-    >>> selfies_iter = selfies.split_selfies('[C].[=C]')
-    >>> next(selfies_iter)
-    '[C]'
-    >>> next(selfies_iter)
-    '.'
-    >>> next(selfies_iter)
-    '[=C]'
+    >>> list(selfies.split_selfies('[C][O][C]'))
+    ['[C]', '[O]', '[C]']
+    >>> list(selfies.split_selfies('[C][=C][F].[C]'))
+    ['[C]', '[=C]', '[F]', '.', '[C]']
     """
 
     left_idx = selfies.find('[')
