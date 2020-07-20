@@ -33,8 +33,8 @@ def get_alphabet() -> Set[str]:
         '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
         '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
     ])
-    alphabet.remove('[?]')
-    alphabet.remove('[epsilon]')
+    alphabet.discard('[?]')
+    alphabet.discard('[epsilon]')
     alphabet.add('[nop]')
 
     return alphabet

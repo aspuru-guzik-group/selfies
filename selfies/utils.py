@@ -83,6 +83,6 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
         for char in split_selfies(s):
             alphabet.add(char)
 
-    alphabet.remove('.')
+    alphabet.discard('.')
 
     return alphabet
