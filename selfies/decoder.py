@@ -1,4 +1,4 @@
-from selfies.grammar_rules import get_bond_from_num, get_n_from_chars, \
+from selfies.grammar_rules import get_bond_from_num, get_n_from_symbols, \
     get_next_branch_state, get_next_state, get_num_from_bond
 
 from typing import Optional, Iterable, List, Union, Tuple
@@ -46,42 +46,42 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
 
 
 def _parse_selfies(selfies: str) -> Iterable[str]:
-    """Parses a SELFIES into its characters.
+    """Parses a SELFIES into its symbols.
 
-    A generator, which parses a SELFIES and yields its characters
-    one-by-one. When no characters are left in the SELFIES, the empty
+    A generator, which parses a SELFIES and yields its symbols
+    one-by-one. When no symbols are left in the SELFIES, the empty
     string is infinitely yielded. As a precondition, the input SELFIES contains
-    no dots, so all characters are enclosed by square brackets, e.g. [X].
+    no dots, so all symbols are enclosed by square brackets, e.g. [X].
 
     :param selfies: the SElFIES string to be parsed.
-    :return: an iterable of the characters of the SELFIES.
+    :return: an iterable of the symbols of the SELFIES.
     """
 
     left_idx = selfies.find('[')
 
     while 0 <= left_idx < len(selfies):
         right_idx = selfies.find(']', left_idx + 1)
-        next_char = selfies[left_idx: right_idx + 1]
+        next_symbol = selfies[left_idx: right_idx + 1]
         left_idx = right_idx + 1
 
-        if next_char != '[nop]':  # skip [nop]
-            yield next_char
+        if next_symbol != '[nop]':  # skip [nop]
+            yield next_symbol
 
-    while True:  # no more characters left
+    while True:  # no more symbols left
         yield ''
 
 
-def _parse_selfies_chars(selfies_chars: List[str]) -> Iterable[str]:
+def _parse_selfies_symbols(selfies_symbols: List[str]) -> Iterable[str]:
     """Equivalent to ``_parse_selfies``, except the input SELFIES is presented
-    as a list of SELFIES characters, as opposed to a string.
+    as a list of SELFIES symbols, as opposed to a string.
 
-    :param selfies_chars: a list of SELFIES characters represented.
-    :return: an iterable of the characters of the SELFIES.
+    :param selfies_symbols: a SELFIES represented as a list of SELFIES symbols.
+    :return: an iterable of the symbols of the SELFIES.
     """
-    for char in selfies_chars:
+    for symbol in selfies_symbols:
 
-        if char != '[nop]':
-            yield char
+        if symbol != '[nop]':
+            yield symbol
 
     while True:
         yield ''
@@ -117,7 +117,7 @@ def _translate_selfies(selfies: str) -> str:
     # each element of <rings> is a tuple of size three that represents the
     # rings to be made, in the same order they appear in the SELFIES (left
     # to right). If the i-th ring is between the j-th and k-th derived atoms
-    # (j <= k) and has bond character s ('=', '#', '\', etc.), then
+    # (j <= k) and has bond symbol s ('=', '#', '\', etc.), then
     # rings[i] = (j, k, s).
     rings = []
 
@@ -131,12 +131,12 @@ def _translate_selfies(selfies: str) -> str:
         rb_locs[rb] = rb_locs.get(rb, 0) + 1
 
     smiles = ""
-    for i, char in enumerate(derived):  # construct SMILES from <derived>
+    for i, d in enumerate(derived):  # construct SMILES from <derived>
 
         if i in lb_locs:
             smiles += '(' * lb_locs[i]
 
-        smiles += char[0]
+        smiles += d[0]
 
         if i in rb_locs:
             smiles += ')' * rb_locs[i]
@@ -145,6 +145,7 @@ def _translate_selfies(selfies: str) -> str:
 
 
 # flake8: noqa: C901
+# noinspection PyTypeChecker
 def _translate_selfies_derive(selfies_gen: Iterable[str],
                               init_state: int,
                               derived: List[List[Union[str, int]]],
@@ -153,12 +154,12 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
                               rings: List[Tuple[int, int, str]]) -> None:
     """Recursive helper for _translate_selfies.
 
-    Derives the SMILES characters one-by-one from a SELFIES, and
+    Derives the SMILES symbols one-by-one from a SELFIES, and
     populates derived, branches, and rings. The main chain and side branches
     of the SELFIES are translated recursively. Rings are not actually
     translated, but saved to the rings list to be added later.
 
-    :param selfies_gen: an iterable of the characters of the SELFIES to be
+    :param selfies_gen: an iterable of the symbols of the SELFIES to be
         translated, created by ``_parse_selfies``.
     :param init_state: the initial derivation state.
     :param derived: see ``derived`` in ``_translate_selfies``.
@@ -169,32 +170,32 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
     :return: ``None``.
     """
 
-    curr_char = next(selfies_gen)
+    curr_symbol = next(selfies_gen)
     state = init_state
 
-    while curr_char != '' and state >= 0:
+    while curr_symbol != '' and state >= 0:
 
-        # Case 1: Branch character (e.g. [Branch1_2])
-        if 'Branch' in curr_char:
+        # Case 1: Branch symbol (e.g. [Branch1_2])
+        if 'Branch' in curr_symbol:
 
             branch_init_state, new_state = \
-                get_next_branch_state(curr_char, state)
+                get_next_branch_state(curr_symbol, state)
 
             if state <= 1 or state >= 9991:  # state = 0, 1, 9991, 9992, 9993
-                pass  # ignore no characters
+                pass  # ignore no symbols
 
             else:
-                L = int(curr_char[-4])  # corresponds to [BranchL_X]
+                L = int(curr_symbol[-4])  # corresponds to [BranchL_X]
                 L_symbols = []
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_n_from_chars(*L_symbols)
+                N = get_n_from_symbols(*L_symbols)
 
-                branch_chars = []
+                branch_symbols = []
                 for _ in range(N + 1):
-                    branch_chars.append(next(selfies_gen))
-                branch_gen = _parse_selfies_chars(branch_chars)
+                    branch_symbols.append(next(selfies_gen))
+                branch_gen = _parse_selfies_symbols(branch_symbols)
 
                 branch_start = len(derived)
                 _translate_selfies_derive(branch_gen, branch_init_state,
@@ -205,45 +206,45 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
                 if branch_start <= branch_end:
                     branches.append((branch_start, branch_end))
 
-        # Case 2: Ring character (e.g. [Ring2])
-        elif 'Ring' in curr_char:
+        # Case 2: Ring symbol (e.g. [Ring2])
+        elif 'Ring' in curr_symbol:
 
             new_state = state
 
             if state == 0 or state >= 9991:  # state = 0, 9991, 9992, 9993
-                pass  # ignore no characters
+                pass  # ignore no symbols
 
             else:
-                L = int(curr_char[-2])  # corresponds to [RingL]
+                L = int(curr_symbol[-2])  # corresponds to [RingL]
                 L_symbols = []
                 for _ in range(L):
                     L_symbols.append(next(selfies_gen))
 
-                N = get_n_from_chars(*L_symbols)
+                N = get_n_from_symbols(*L_symbols)
 
                 left_idx = max(0, len(derived) - 1 - (N + 1))
                 right_idx = len(derived) - 1
 
-                bond_char = ''
-                if curr_char[1:5] == 'Expl':
-                    bond_char = curr_char[5]
+                bond_symbol = ''
+                if curr_symbol[1:5] == 'Expl':
+                    bond_symbol = curr_symbol[5]
 
-                rings.append((left_idx, right_idx, bond_char))
+                rings.append((left_idx, right_idx, bond_symbol))
 
-        # Case 3: regular character (e.g. [N], [=C], [F])
+        # Case 3: regular symbol (e.g. [N], [=C], [F])
         else:
-            new_char, new_state = get_next_state(curr_char, state)
+            new_symbol, new_state = get_next_state(curr_symbol, state)
 
-            if new_char != '':  # in case of [epsilon]
-                derived.append([new_char, new_state, prev_idx])
+            if new_symbol != '':  # in case of [epsilon]
+                derived.append([new_symbol, new_state, prev_idx])
 
                 if prev_idx >= 0:
-                    bond_num = get_num_from_bond(new_char[0])
+                    bond_num = get_num_from_bond(new_symbol[0])
                     derived[prev_idx][1] -= bond_num
 
                 prev_idx = len(derived) - 1
 
-        curr_char = next(selfies_gen)  # update character and state
+        curr_symbol = next(selfies_gen)  # update symbol and state
         state = new_state
 
 
@@ -262,14 +263,14 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
     # so that only valid rings are left and placed into <ring_locs>.
     ring_locs = {}
 
-    for left_idx, right_idx, bond_char in rings:
+    for left_idx, right_idx, bond_symbol in rings:
 
         if left_idx == right_idx:  # ring to the same atom forbidden
             continue
 
         left_end = derived[left_idx]
         right_end = derived[right_idx]
-        bond_num = get_num_from_bond(bond_char)
+        bond_num = get_num_from_bond(bond_symbol)
 
         if bond_num > left_end[1] or bond_num > right_end[1]:
             continue  # not enough available bonds to make the ring
@@ -278,18 +279,18 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
         # e.g. CC1C1C --> CC=CC
         if left_idx == right_end[2]:
 
-            right_char = right_end[0]
+            right_symbol = right_end[0]
 
-            if right_char[0] in {'-', '/', '\\', '=', '#'}:
-                old_bond = right_char[0]
+            if right_symbol[0] in {'-', '/', '\\', '=', '#'}:
+                old_bond = right_symbol[0]
             else:
                 old_bond = ''
 
-            # update bond multiplicity and character
+            # update bond multiplicity and symbol
             new_bond_num = min(bond_num + get_num_from_bond(old_bond), 3)
-            new_bond_char = get_bond_from_num(new_bond_num)
+            new_bond_symbol = get_bond_from_num(new_bond_num)
 
-            right_end[0] = new_bond_char + right_end[0][len(old_bond):]
+            right_end[0] = new_bond_symbol + right_end[0][len(old_bond):]
 
         # ring is formed between two atoms that are not bonded, e.g. C1CC1C
         else:
@@ -301,11 +302,11 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
 
                 new_bond_num = min(bond_num
                                    + get_num_from_bond(ring_locs[loc]), 3)
-                new_bond_char = get_bond_from_num(new_bond_num)
-                ring_locs[loc] = new_bond_char
+                new_bond_symbol = get_bond_from_num(new_bond_num)
+                ring_locs[loc] = new_bond_symbol
 
             else:
-                ring_locs[loc] = bond_char
+                ring_locs[loc] = bond_symbol
 
         left_end[1] -= bond_num
         right_end[1] -= bond_num
@@ -313,12 +314,12 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
     # finally, use <ring_locs> to add all the rings into <derived>
 
     ring_counter = 1
-    for (left_idx, right_idx), bond_char in ring_locs.items():
+    for (left_idx, right_idx), bond_symbol in ring_locs.items():
 
         ring_id = str(ring_counter)
         if len(ring_id) == 2:
             ring_id = "%" + ring_id
         ring_counter += 1  # increment
 
-        derived[left_idx][0] += bond_char + ring_id
-        derived[right_idx][0] += bond_char + ring_id
+        derived[left_idx][0] += bond_symbol + ring_id
+        derived[right_idx][0] += bond_symbol + ring_id

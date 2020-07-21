@@ -6,21 +6,21 @@ from selfies.state_library import build_state_dict, default_atom_dict
 def get_alphabet() -> Set[str]:
     """Returns the alphabet that ``selfies`` is currently operating on.
 
-    More specifically, the alphabet is the set of SELFIES characters that
+    More specifically, the alphabet is the set of SELFIES symbols that
     ``selfies`` recognizes and can apply semantic constraints to. ``selfies``
     initially operates upon a default alphabet, which can later be changed
     using ``selfies.set_alphabet``. After retrieving the alphabet, it is copied
     and returned as a set, i.e., mutating the returned set has no effect on
     the behaviour of ``selfies``.
 
-    Although the characters ``'[epsilon]'`` and ``'.'`` are always
+    Although the symbols ``'[epsilon]'`` and ``'.'`` are always
     recognized by ``selfies``, they will never be members of the returned set.
 
     :return: The alphabet that ``selfies`` is currently operating on.
 
     .. note:: In order to one-hot or integer encode SELFIES strings,
         ``selfies.get_alphabet`` may be a poor choice. This is because
-        ``selfies`` often includes many characters in its alphabet that never
+        ``selfies`` often includes many symbols in its alphabet that never
         actually appear in the input set. Instead,
         ``selfies.get_alphabet_from_selfies`` may be preferred.
     """
@@ -77,9 +77,9 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
 
     If a SMILES key is not specified in ``atom_dict``, it will by default be
     constrained to 8 bonds. To change the default setting for unrecognized
-    characters, set ``atom_dict['?']`` to the desired integer (between 1 and 8
+    symbols, set ``atom_dict['?']`` to the desired integer (between 1 and 8
     inclusive). Note that ``selfies.decoder`` only recognizes the exact
-    character string specified in ``atom_dict``. For example, ``'[Fe+2]'`` will
+    symbol string specified in ``atom_dict``. For example, ``'[Fe+2]'`` will
     not be constrained if it is not in ``atom_dict``, even if ``'[Fe++]'`` is
     a key in the dictionary.
 
@@ -103,36 +103,36 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
 # Character State Dict Functions ==============================================
 
 # _state_library is accessed through two keys, which are (1) the current
-# derivation state and (2) the current SELFIES character to be derived, or
-# '[?]' if the character is unknown. The corresponding value is a tuple of
-# (1) the derived SMILES character, and (2) the next derivation state.
+# derivation state and (2) the current SELFIES symbol to be derived, or
+# '[?]' if the symbol is unknown. The corresponding value is a tuple of
+# (1) the derived SMILES symbol, and (2) the next derivation state.
 
 _atom_dict = default_atom_dict
 _state_library = build_state_dict()
 
 
-def get_next_state(char: str, state: int) -> Tuple[str, int]:
-    """Enforces the grammar rules for standard SELFIES characters.
+def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
+    """Enforces the grammar rules for standard SELFIES symbols.
 
-    Given the current non-branch, non-ring character and current derivation
-    state, retrieves the derived SMILES character and the next derivation
+    Given the current non-branch, non-ring symbol and current derivation
+    state, retrieves the derived SMILES symbol and the next derivation
     state.
 
-    :param char: a SELFIES character that is not a Ring or Branch.
+    :param symbol: a SELFIES symbol that is not a Ring or Branch.
     :param state: the current derivation state.
-    :return: a tuple of (1) the derived character, and
+    :return: a tuple of (1) the derived symbol, and
         (2) the next derivation state.
     """
 
     state_dict = _state_library[state]
 
-    if char in state_dict:
-        return state_dict[char]
+    if symbol in state_dict:
+        return state_dict[symbol]
 
-    else:  # unknown SELFIES character
-        derived_char = _process_unknown_char(char, state)
-        new_state = state_dict['[?]'][1] - get_num_from_bond(char[1])
-        return derived_char, new_state
+    else:  # unknown SELFIES symbol
+        derived_symbol = _process_unknown_symbol(symbol, state)
+        new_state = state_dict['[?]'][1] - get_num_from_bond(symbol[1])
+        return derived_symbol, new_state
 
 
 # _bracket_less_smiles is a set of SELFIES symbols, whose
@@ -142,27 +142,27 @@ _bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
                         '[F]', '[Cl]', '[Br]', '[I]'}
 
 
-def _process_unknown_char(char: str, state: int) -> str:
-    """Attempts to convert an unknown SELFIES character ``char`` into a
-    proper SMILES character.
+def _process_unknown_symbol(symbol: str, state: int) -> str:
+    """Attempts to convert an unknown SELFIES symbol ``symbol`` into a
+    proper SMILES symbol.
 
-    :param char: an unrecognized SELFIES character.
+    :param symbol: an unrecognized SELFIES symbol.
     :param state: the current derivation state.
-    :return: the processed SMILES character.
+    :return: the processed SMILES symbol.
     """
 
     processed = ""
 
-    if char[1: 2] in {'=', '#', '\\', '/', '-'}:
+    if symbol[1: 2] in {'=', '#', '\\', '/', '-'}:
         if state != 0:
-            processed += char[1]
-        char = "[" + char[2:]
+            processed += symbol[1]
+        symbol = "[" + symbol[2:]
 
-    if char in _bracket_less_smiles:
-        char = char[1: -1]  # remove [ and ] brackets
+    if symbol in _bracket_less_smiles:
+        symbol = symbol[1: -1]  # remove [ and ] brackets
 
-    char = char.replace('expl]', ']')
-    processed += char
+    symbol = symbol.replace('expl]', ']')
+    processed += symbol
 
     return processed
 
@@ -191,24 +191,24 @@ _branch_state_library = {
 }
 
 
-def get_next_branch_state(branch_char: str, state: int) -> Tuple[int, int]:
-    """Enforces the grammar rules for SELFIES Branch characters.
+def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
+    """Enforces the grammar rules for SELFIES Branch symbols.
 
-    Given the branch character and current derivation state, retrieves
+    Given the branch symbol and current derivation state, retrieves
     the initial branch derivation state (i.e. the derivation state that the
     new branch begins on), and the next derivation state (i.e. the derivation
     state after the branch is created).
 
-    :param branch_char: the branch character (e.g. [Branch1_2], [Branch3_1])
+    :param branch_symbol: the branch symbol (e.g. [Branch1_2], [Branch3_1])
     :param state: the current derivation state.
     :return: a tuple of (1) the initial branch state, and
         (2) the next derivation state.
     """
 
-    branch_type = int(branch_char[-2])  # branches are of the form [BranchL_X]
+    branch_type = int(branch_symbol[-2])  # branches of the form [BranchL_X]
 
     if not (1 <= branch_type <= 3):
-        raise ValueError(f"Unknown branch character: {branch_char}")
+        raise ValueError(f"Unknown branch symbol: {branch_symbol}")
 
     return _branch_state_library[state][branch_type - 1]
 
@@ -220,78 +220,78 @@ _index_alphabet = ['[C]', '[Ring1]', '[Ring2]',
                    '[Branch2_1]', '[Branch2_2]', '[Branch2_3]',
                    '[O]', '[N]', '[=N]', '[=C]', '[#C]', '[S]', '[P]']
 
-# _alphabet_code takes as a key a SELFIES char, and its corresponding value
+# _alphabet_code takes as a key a SELFIES symbol, and its corresponding value
 # is the index of the key.
 
 _alphabet_code = {c: i for i, c in enumerate(_index_alphabet)}
 
 
-def get_n_from_chars(*chars: List[str]) -> int:
-    """Computes N from a list of SELFIES characters.
+def get_n_from_symbols(*symbols: List[str]) -> int:
+    """Computes N from a list of SELFIES symbols.
 
-    Converts a list of SELFIES characters [c_1, ..., c_n] into a number N.
-    This is done by converting each character c_n to an integer idx(c_n) via
+    Converts a list of SELFIES symbols [c_1, ..., c_n] into a number N.
+    This is done by converting each symbol c_n to an integer idx(c_n) via
     ``_alphabet_code``, and then treating the list as a number in base
-    len(_alphabet_code). If a character is unrecognized, it is given value 0 by
+    len(_alphabet_code). If a symbol is unrecognized, it is given value 0 by
     default.
 
-    :param chars: a list of SELFIES characters.
-    :return: the corresponding N for chars.
+    :param symbols: a list of SELFIES symbols.
+    :return: the corresponding N for ``symbols``.
     """
 
     N = 0
-    for i, c in enumerate(reversed(chars)):
+    for i, c in enumerate(reversed(symbols)):
         N_i = _alphabet_code.get(c, 0) * (len(_alphabet_code) ** i)
         N += N_i
     return N
 
 
-def get_chars_from_n(n: int) -> List[str]:
-    """Converts an integer n into a list of SELFIES characters that, if
-    passed into ``chars_to_index`` in that order, would have produced n.
+def get_symbols_from_n(n: int) -> List[str]:
+    """Converts an integer n into a list of SELFIES symbols that, if
+    passed into ``get_n_from_symbols`` in that order, would have produced n.
 
-    :param n: an integer from 0 to 4000 inclusive.
-    :return: a list of SELFIES characters representing n in base
+    :param n: an integer from 0 to 4095 inclusive.
+    :return: a list of SELFIES symbols representing n in base
         ``len(_alphabet_code)``.
     """
 
     if n == 0:
         return [_index_alphabet[0]]
 
-    chars = []
+    symbols = []
     base = len(_index_alphabet)
     while n:
-        chars.append(_index_alphabet[n % base])
+        symbols.append(_index_alphabet[n % base])
         n //= base
-    return chars[::-1]
+    return symbols[::-1]
 
 
 # Helper Methods ==============================================================
 
 
-def get_num_from_bond(bond_char: str) -> int:
-    """Retrieves the bond multiplicity from a SMILES character representing
-    a bond. If ``bond_char`` is not known, 1 is returned by default.
+def get_num_from_bond(bond_symbol: str) -> int:
+    """Retrieves the bond multiplicity from a SMILES symbol representing
+    a bond. If ``bond_symbol`` is not known, 1 is returned by default.
 
-    :param bond_char: a SMILES character representing a bond.
-    :return: the bond multiplicity of ``bond_char``, or 1 if
-        ``bond_char`` is not recognized.
+    :param bond_symbol: a SMILES symbol representing a bond.
+    :return: the bond multiplicity of ``bond_symbol``, or 1 if
+        ``bond_symbol`` is not recognized.
     """
 
-    if bond_char == "=":
+    if bond_symbol == "=":
         return 2
-    elif bond_char == "#":
+    elif bond_symbol == "#":
         return 3
     else:
         return 1
 
 
 def get_bond_from_num(n: int) -> str:
-    """Returns the SMILES character representing a bond with multiplicity
+    """Returns the SMILES symbol representing a bond with multiplicity
     ``n``. More specifically, ``'' = 1`` and ``'=' = 2`` and ``'#' = 3``.
 
     :param n: either 1, 2, 3.
-    :return: the SMILES character representing a bond with multiplicity ``n``.
+    :return: the SMILES symbol representing a bond with multiplicity ``n``.
     """
 
     return ('', '=', '#')[n - 1]

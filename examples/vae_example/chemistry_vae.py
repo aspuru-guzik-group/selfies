@@ -412,9 +412,9 @@ def get_selfie_and_smiles_encodings_for_dataset(file_path):
     print('--> Translating SMILES to SELFIES...')
     selfies_list = list(map(sf.encoder, smiles_list))
 
-    all_selfies_chars = sf.get_alphabet_from_selfies(selfies_list)
-    all_selfies_chars.add('[nop]')
-    selfies_alphabet = list(all_selfies_chars)
+    all_selfies_symbols = sf.get_alphabet_from_selfies(selfies_list)
+    all_selfies_symbols.add('[nop]')
+    selfies_alphabet = list(all_selfies_symbols)
 
     largest_selfies_len = max(sf.len_selfies(s) for s in selfies_list)
 

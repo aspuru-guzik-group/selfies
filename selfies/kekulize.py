@@ -28,78 +28,78 @@ def kekulize_parser(smiles_gen: Iterable[Tuple[str, str, int]]) \
 
     # save to list, so the iterator can be used across multiple functions
     # change elements from tuple -> list to allow in-place modifications
-    smiles_chars = list(map(list, smiles_gen))
+    smiles_symbols = list(map(list, smiles_gen))
 
-    mol_graph = MolecularGraph(smiles_chars)
+    mol_graph = MolecularGraph(smiles_symbols)
 
     rings = {}
-    _build_molecular_graph(mol_graph, smiles_chars, rings)
+    _build_molecular_graph(mol_graph, smiles_symbols, rings)
 
     if mol_graph.aro_indices:
         _kekulize(mol_graph)
 
-    for x in mol_graph.smiles_chars:  # return as iterator
+    for x in mol_graph.smiles_symbols:  # return as iterator
         yield tuple(x)
 
 
 def _build_molecular_graph(graph: MolecularGraph,
-                           smiles_chars: List[List[Union[str, int]]],
+                           smiles_symbols: List[List[Union[str, int]]],
                            rings: Dict[int, Tuple[int, int]],
                            prev_idx: int = -1,
                            curr_idx: int = -1) -> int:
     """From the iterator returned by ``encoder._parse_smiles``, builds
     a graph representation of the molecule.
 
-    This is done by iterating through ``smiles_chars``, and then adding bonds
-    to the molecular graph. Note that ``smiles_chars`` is mutated in this
+    This is done by iterating through ``smiles_symbols``, and then adding bonds
+    to the molecular graph. Note that ``smiles_symbols`` is mutated in this
     method, for convenience.
 
     :param graph: the MolecularGraph to be added to.
-    :param smiles_chars: a list created from the iterator returned
+    :param smiles_symbols: a list created from the iterator returned
         by ``encoder._parse_smiles``.
     :param rings: an, initially, empty dictionary used to keep track of
         rings to be made.
     :param prev_idx:
     :param curr_idx:
-    :return: the last index of ``smiles_char`` that was processed.
+    :return: the last index of ``smiles_symbols`` that was processed.
     """
 
-    while curr_idx + 1 < len(smiles_chars):
+    while curr_idx + 1 < len(smiles_symbols):
 
         curr_idx += 1
-        _, char, char_type = smiles_chars[curr_idx]
+        _, symbol, symbol_type = smiles_symbols[curr_idx]
 
-        if char_type == ATOM_TYPE:
+        if symbol_type == ATOM_TYPE:
             if prev_idx >= 0:
                 graph.add_bond(prev_idx, curr_idx, curr_idx)
             prev_idx = curr_idx
 
-        elif char_type == BRANCH_TYPE:
-            if char == '(':
-                curr_idx = _build_molecular_graph(graph, smiles_chars, rings,
+        elif symbol_type == BRANCH_TYPE:
+            if symbol == '(':
+                curr_idx = _build_molecular_graph(graph, smiles_symbols, rings,
                                                   prev_idx, curr_idx)
             else:
                 break
 
         else:
-            if char in rings:
-                left_idx, left_bond_idx = rings.pop(char)
+            if symbol in rings:
+                left_idx, left_bond_idx = rings.pop(symbol)
                 right_idx, right_bond_idx = prev_idx, curr_idx
 
                 # we mutate one bond index to be '', so that we
                 # can faithfully represent the bond to be localized at
                 # one index. For example, C=1CCCC=1 --> C1CCCC=1.
 
-                if smiles_chars[left_bond_idx][0] != '':
+                if smiles_symbols[left_bond_idx][0] != '':
                     bond_idx = left_bond_idx
-                    smiles_chars[right_bond_idx][0] = ''
+                    smiles_symbols[right_bond_idx][0] = ''
                 else:
                     bond_idx = right_bond_idx
-                    smiles_chars[left_bond_idx][0] = ''
+                    smiles_symbols[left_bond_idx][0] = ''
 
                 graph.add_bond(left_idx, right_idx, bond_idx)
             else:
-                rings[char] = (prev_idx, curr_idx)
+                rings[symbol] = (prev_idx, curr_idx)
 
     return curr_idx
 
@@ -121,7 +121,7 @@ def _kekulize(mol_graph: MolecularGraph) -> None:
         if not success:
             raise ValueError("Kekulization Failed.")
 
-    mol_graph.write_to_smiles_chars()
+    mol_graph.write_to_smiles_symbols()
 
 
 # Aromatic Helper Methods and Classes
@@ -134,126 +134,128 @@ _aromatic_valences = {
 }
 
 
-def _find_element(char: str) -> Tuple[int, int]:
-    """Returns the indices of the element component of a SMILES character.
+def _find_element(atom_symbol: str) -> Tuple[int, int]:
+    """Returns the indices of the element component of a SMILES atom symbol.
 
-    That is, if char[i:j] is the element substring of the SMILES character,
+    That is, if atom_symbol[i:j] is the element substring of the SMILES atom,
     then (i, j) is returned. For example:
         *   _find_element('b') = (0, 1).
         *   _find_element('B') = (0, 1).
         *   _find_element('[13C]') = (3, 4).
         *   _find_element('[nH+]') = (1, 2).
 
-    :param char: a SMILES character.
-    :return: a tuple of the indices of the element substring of ``char``.
+    :param atom_symbol: a SMILES atom.
+    :return: a tuple of the indices of the element substring of
+        ``atom_symbol``.
     """
 
-    if char[0] != '[':
-        return 0, len(char)
+    if atom_symbol[0] != '[':
+        return 0, len(atom_symbol)
 
     i = 1
-    while char[i].isdigit():  # skip isotope number
+    while atom_symbol[i].isdigit():  # skip isotope number
         i += 1
 
-    if char[i + 1].isalpha() and char[i + 1] != 'H':
+    if atom_symbol[i + 1].isalpha() and atom_symbol[i + 1] != 'H':
         return i, i + 2
     else:
         return i, i + 1
 
 
-def _parse_char(char: str) -> Tuple[str, int, int]:
-    """Parses a SMILES character and returns its element component,
-    hydrogen count, and charge.
+def _parse_atom_symbol(atom_symbol: str) -> Tuple[str, int, int]:
+    """Parses a SMILES atom symbol and returns its element component,
+    number of associated hydrogens, and charge.
 
     See http://opensmiles.org/opensmiles.html for the formal grammar
-    of SMILES characters. Note that only @ and @@ are currently supported
-    as chiral symbols.
+    of SMILES atom symbols. Note that only @ and @@ are currently supported
+    as chiral specifications.
 
-    :param char: a SMILES character.
-    :return: a tuple of (1) the element of ``char``, (2) the hydrogen count,
-        and (3) the charge.
+    :param atom_symbol: a SMILES atom symbol.
+    :return: a tuple of (1) the element of ``atom_symbol``, (2) the hydrogen
+        count, and (3) the charge.
     """
 
-    if char[0] != '[':
-        return char, 0, 0
+    if atom_symbol[0] != '[':
+        return atom_symbol, 0, 0
 
-    atom_start, atom_end = _find_element(char)
+    atom_start, atom_end = _find_element(atom_symbol)
     i = atom_end
 
     # skip chirality
-    if char[i] == '@':  # e.g. @
+    if atom_symbol[i] == '@':  # e.g. @
         i += 1
-    if char[i] == '@':  # e.g. @@
+    if atom_symbol[i] == '@':  # e.g. @@
         i += 1
 
     h_count = 0  # hydrogen count
-    if char[i] == 'H':
+    if atom_symbol[i] == 'H':
         h_count = 1
 
         i += 1
-        if char[i].isdigit():  # e.g. [CH2]
-            h_count = int(char[i])
+        if atom_symbol[i].isdigit():  # e.g. [CH2]
+            h_count = int(atom_symbol[i])
             i += 1
 
     charge = 0  # charge count
-    if char[i] in ('+', '-'):
-        charge = 1 if char[i] == '+' else -1
+    if atom_symbol[i] in ('+', '-'):
+        charge = 1 if atom_symbol[i] == '+' else -1
 
         i += 1
-        if char[i] in ('+', '-'):  # e.g. [Cu++]
-            while char[i] in ('+', '-'):
-                charge += (1 if char[i] == '+' else -1)
+        if atom_symbol[i] in ('+', '-'):  # e.g. [Cu++]
+            while atom_symbol[i] in ('+', '-'):
+                charge += (1 if atom_symbol[i] == '+' else -1)
                 i += 1
 
-        elif char[i].isdigit():  # e.g. [Cu+2]
+        elif atom_symbol[i].isdigit():  # e.g. [Cu+2]
             s = i
-            while char[i].isdigit():
+            while atom_symbol[i].isdigit():
                 i += 1
-            charge *= int(char[s:i])
+            charge *= int(atom_symbol[s:i])
 
-    return char[atom_start: atom_end], h_count, charge
+    return atom_symbol[atom_start: atom_end], h_count, charge
 
 
-def _capitalize(char: str) -> str:
-    """Capitalizes the element portion of an aromatic SMILES character,
-    converting it into a standard SMILES character.
+def _capitalize(atom_symbol: str) -> str:
+    """Capitalizes the element portion of an aromatic SMILES atom symbol,
+    converting it into a standard SMILES atom symbol.
 
-    :param char: an aromatic SMILES character.
-    :return: the capitalized ``char``.
+    :param atom_symbol: an aromatic SMILES atom symbol.
+    :return: the capitalized ``atom_symbol``.
     """
 
-    c, _ = _find_element(char)
-    return char[:c] + char[c].upper() + char[c + 1:]
+    s, _ = _find_element(atom_symbol)
+    return atom_symbol[:s] + atom_symbol[s].upper() + atom_symbol[s + 1:]
 
 
-def _is_aromatic(char: str) -> bool:
-    """Checks whether a SMILES character is an aromatic SMILES character.
+def _is_aromatic(atom_symbol: str) -> bool:
+    """Checks whether a SMILES atom symbol is an aromatic SMILES atom symbol.
 
-    An aromatic SMILES character is indicated by an element substring
+    An aromatic SMILES atom symbol is indicated by an element substring
     that is not capitalized.
 
-    :param char: a SMILES character.
-    :return: True, if ``char`` is an aromatic character, and False otherwise.
+    :param atom_symbol: a SMILES atom symbol.
+    :return: True, if ``atom_symbol`` is an aromatic atom symbol,
+        and False otherwise.
     """
 
-    s, e = _find_element(char)
+    s, e = _find_element(atom_symbol)
 
-    if e == len(char):  # optimization to prevent string copying
-        element = char
+    if e == len(atom_symbol):  # optimization to prevent string copying
+        element = atom_symbol
     else:
-        element = char[s: e]
+        element = atom_symbol[s: e]
 
     if element[0].isupper():  # check if element is capitalized
         return False
 
     if element not in _aromatic_valences:
-        raise ValueError(f"Kekulization Failed: aromatic symbol {char} "
+        raise ValueError(f"Kekulization Failed: aromatic symbol {atom_symbol} "
                          f"not recognized.")
     return True
 
 
-def _in_pi_subgraph(char: str, bonds: Tuple[str]) -> bool:
-    """Checks whether a SMILES character should be a node in the pi
+def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
+    """Checks whether a SMILES atom symbol should be a node in the pi
     subgraph, based on its bonds.
 
     More specifically, an atom should be a node in the pi subgraph if it has
@@ -262,23 +264,23 @@ def _in_pi_subgraph(char: str, bonds: Tuple[str]) -> bool:
     Reference: https://depth-first.com/articles/2020/02/10/a-comprehensive
                -treatment-of-aromaticity-in-the-smiles-language/
 
-    :param char: a SMILES character representing an atom.
-    :param bonds: the bonds connected to ``char``.
-    :return: True if ``char`` should be included in the pi subgraph,
+    :param atom_symbol: a SMILES atom symbol representing an atom.
+    :param bonds: the bonds connected to ``atom_symbol``.
+    :return: True if ``atom_symbol`` should be included in the pi subgraph,
         and False otherwise.
     """
 
-    atom, h_count, charge = _parse_char(char)
+    atom, h_count, charge = _parse_atom_symbol(atom_symbol)
 
     used_electrons = 0
     for b in bonds:
         used_electrons += get_num_from_bond(b)
 
-    if char == 'c' and len(bonds) == 2:  # e.g. c1ccccc1
+    if atom_symbol == 'c' and len(bonds) == 2:  # e.g. c1ccccc1
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:
-        raise ValueError(f"Kekulization Failed: {char} not supported.")
+        raise ValueError(f"Kekulization Failed: {atom_symbol} not supported.")
 
     elif h_count == 1:  # e.g. [nH]
         used_electrons += 1
@@ -291,50 +293,50 @@ def _in_pi_subgraph(char: str, bonds: Tuple[str]) -> bool:
 class MolecularGraph:
     """A molecular graph.
 
-    This molecular graph operates based on the ``smiles_chars`` data
+    This molecular graph operates based on the ``smiles_symbols`` data
     structure. Indices from this list represent nodes or edges, depending
     on whether they point to a SMILES atom(s) or bond.
 
-    :ivar smiles_chars: the list created from the iterator returned by
+    :ivar smiles_symbols: the list created from the iterator returned by
         ``encoder._parse_smiles``. Serves as the base data structure
         of this class, as everything is communicated through indices
         referring to elements of this list.
-    :ivar graph: the key is an index of the atom(s) from ``smiles_chars``.
+    :ivar graph: the key is an index of the atom(s) from ``smiles_symbols``.
         The value is a list of Bond objects representing the connected
         bonds. Represents the actual molecular graph.
-    :ivar aro_indices: a set of indices of atom(s) from ``smiles_chars``
+    :ivar aro_indices: a set of indices of atom(s) from ``smiles_symbols``
         that are aromatic in the molecular graph.
     """
-    smiles_chars: List[List[Union[str, int]]]
+    smiles_symbols: List[List[Union[str, int]]]
     graph: Dict[int, List[Bond]]
     aro_indices: Set[int]
 
-    def __init__(self, smiles_chars: List[List[Union[str, int]]]):
-        self.smiles_chars = smiles_chars
+    def __init__(self, smiles_symbols: List[List[Union[str, int]]]):
+        self.smiles_symbols = smiles_symbols
         self.graph = {}
         self.aro_indices = set()
 
-    def get_atom_char(self, idx: int) -> str:
-        """Getter that returns the SMILES character representing an atom(s)
+    def get_atom_symbol(self, idx: int) -> str:
+        """Getter that returns the SMILES symbol representing an atom
         at a specified index.
 
-        :param idx: an index in ``smiles_chars``.
-        :return: the SMILES character representing an atom(s) at index
-            ``idx`` in ``smiles_chars``.
+        :param idx: an index in ``smiles_symbols``.
+        :return: the SMILES symbol representing an atom at index
+            ``idx`` in ``smiles_symbols``.
         """
 
-        return self.smiles_chars[idx][1]
+        return self.smiles_symbols[idx][1]
 
-    def get_bond_char(self, idx: int) -> str:
-        """Getter that returns the SMILES character representing a bond at
+    def get_bond_symbol(self, idx: int) -> str:
+        """Getter that returns the SMILES symbol representing a bond at
         a specified index.
 
-        :param idx: an index in ``smiles_chars``.
-        :return: the SMILES character representing a bond at index
-            ``idx`` in ``smiles_chars``.
+        :param idx: an index in ``smiles_symbols``.
+        :return: the SMILES symbol representing a bond at index
+            ``idx`` in ``smiles_symbols``.
         """
 
-        return self.smiles_chars[idx][0]
+        return self.smiles_symbols[idx][0]
 
     def get_nodes_by_num_edges(self) -> List[int]:
         """Returns all nodes (or indices) stored in this molecular graph
@@ -362,27 +364,27 @@ class MolecularGraph:
         ends.extend(middles)
         return ends
 
-    def set_atom_char(self, atom_char: str, idx: int) -> None:
-        """Setter that updates the SMILES character representing an atom(s) at
+    def set_atom_symbol(self, atom_symbol: str, idx: int) -> None:
+        """Setter that updates the SMILES symbol representing an atom(s) at
         a specified index.
 
-        :param atom_char: the new value of the atom character at ``idx``.
-        :param idx: an index in ``smiles_chars``.
+        :param atom_symbol: the new value of the atom symbol at ``idx``.
+        :param idx: an index in ``smiles_symbols``.
         :return: None.
         """
 
-        self.smiles_chars[idx][1] = atom_char
+        self.smiles_symbols[idx][1] = atom_symbol
 
-    def set_bond_char(self, bond_char: str, idx: int) -> None:
-        """Setter that updates the SMILES character representing a bond at
+    def set_bond_symbol(self, bond_symbol: str, idx: int) -> None:
+        """Setter that updates the SMILES symbol representing a bond at
         a specified index.
 
-        :param bond_char: the new value of the bond character at ``idx``.
-        :param idx: an index in ``smiles_chars``.
+        :param bond_symbol: the new value of the bond symbol at ``idx``.
+        :param idx: an index in ``smiles_symbols``.
         :return: None.
         """
 
-        self.smiles_chars[idx][0] = bond_char
+        self.smiles_symbols[idx][0] = bond_symbol
 
     def add_bond(self, idx_a: int, idx_b: int, bond_idx: int) -> None:
         """Adds a bond (or edge) to this molecular graph between atoms
@@ -394,11 +396,11 @@ class MolecularGraph:
         :return: None.
         """
 
-        atom_a = self.get_atom_char(idx_a)
-        atom_b = self.get_atom_char(idx_b)
+        atom_a = self.get_atom_symbol(idx_a)
+        atom_b = self.get_atom_symbol(idx_b)
         atom_a_aro = (idx_a in self.aro_indices) or _is_aromatic(atom_a)
         atom_b_aro = (idx_b in self.aro_indices) or _is_aromatic(atom_b)
-        bond_char = self.get_bond_char(bond_idx)
+        bond_symbol = self.get_bond_symbol(bond_idx)
 
         if atom_a_aro:
             self.aro_indices.add(idx_a)
@@ -406,15 +408,15 @@ class MolecularGraph:
         if atom_b_aro:
             self.aro_indices.add(idx_b)
 
-        if bond_char == ':':
+        if bond_symbol == ':':
             self.aro_indices.add(idx_a)
             self.aro_indices.add(idx_b)
 
             # Note: ':' bonds are edited here to ''
-            self.set_bond_char('', bond_idx)
-            bond_char = ''
+            self.set_bond_symbol('', bond_idx)
+            bond_symbol = ''
 
-        edge = Bond(idx_a, idx_b, bond_char, bond_idx)
+        edge = Bond(idx_a, idx_b, bond_symbol, bond_idx)
 
         self.graph.setdefault(idx_a, []).append(edge)
         self.graph.setdefault(idx_b, []).append(edge)
@@ -438,8 +440,8 @@ class MolecularGraph:
         # remove non-pi subgraph nodes
         for i in self.aro_indices:
 
-            atom = self.get_atom_char(i)
-            bonds = tuple(edge.bond_char for edge in self.graph[i])
+            atom = self.get_atom_symbol(i)
+            bonds = tuple(edge.bond_symbol for edge in self.graph[i])
 
             if not _in_pi_subgraph(atom, bonds):
                 self.graph.pop(i)
@@ -449,7 +451,7 @@ class MolecularGraph:
 
             keep = list(filter(lambda e: (e.idx_a in self.graph) and
                                          (e.idx_b in self.graph) and
-                                         (e.bond_char == ''),
+                                         (e.bond_symbol == ''),
                                edges))
             self.graph[idx] = keep
 
@@ -500,7 +502,7 @@ class MolecularGraph:
             for c in candidates:
 
                 # match nodes connected by c
-                c.bond_char = '='
+                c.bond_symbol = '='
                 matched.add(c.idx_a)
                 matched.add(c.idx_b)
 
@@ -509,14 +511,14 @@ class MolecularGraph:
                 if success:
                     return True
                 else:  # the matching failed, so we must backtrack
-                    c.bond_char = ''
+                    c.bond_symbol = ''
                     matched.remove(c.idx_a)
                     matched.remove(c.idx_b)
 
             return False
 
-    def write_to_smiles_chars(self):
-        """Updates and mutates ``self.smiles_chars`` with the information
+    def write_to_smiles_symbols(self):
+        """Updates and mutates ``self.smiles_symbols`` with the information
          contained in ``self.graph``.
 
         After kekulizing the molecular graph, this method is called to
@@ -527,43 +529,43 @@ class MolecularGraph:
 
         # capitalize aromatic molecules
         for idx in self.aro_indices:
-            self.set_atom_char(_capitalize(self.get_atom_char(idx)), idx)
+            self.set_atom_symbol(_capitalize(self.get_atom_symbol(idx)), idx)
 
         # write bonds
         for edge_list in self.graph.values():
             for edge in edge_list:
-                bond_char = edge.bond_char
+                bond_symbol = edge.bond_symbol
                 bond_idx = edge.bond_idx
 
-                self.set_bond_char(bond_char, bond_idx)
+                self.set_bond_symbol(bond_symbol, bond_idx)
 
-                # branches record the next character as their bond, so we
+                # branches record the next symbol as their bond, so we
                 # must update accordingly
                 if (bond_idx > 0) and \
-                        (self.smiles_chars[bond_idx - 1][2] == BRANCH_TYPE):
-                    self.set_bond_char(bond_char, bond_idx - 1)
+                        (self.smiles_symbols[bond_idx - 1][2] == BRANCH_TYPE):
+                    self.set_bond_symbol(bond_symbol, bond_idx - 1)
 
 
 class Bond:
     """Represents a bond or edge in MolecularGraph.
 
-    Recall that the following indices are with respect to ``smiles_chars``
+    Recall that the following indices are with respect to ``smiles_symbols``
     in MolecularGraph.
 
     :ivar idx_a: the index of one atom or node of this bond.
     :ivar idx_b: the index of one atom or node of this bond.
-    :ivar bond_char: the SMILES character representing this bond (e.g. '#').
+    :ivar bond_symbol: the SMILES symbol representing this bond (e.g. '#').
     :ivar bond_idx: the index of this bond or edge.
     """
     idx_a: int
     idx_b: int
-    bond_char: str
+    bond_symbol: str
     bond_idx: int
 
-    def __init__(self, idx_a, idx_b, bond_char, bond_idx):
+    def __init__(self, idx_a, idx_b, bond_symbol, bond_idx):
         self.idx_a = idx_a
         self.idx_b = idx_b
-        self.bond_char = bond_char
+        self.bond_symbol = bond_symbol
         self.bond_idx = bond_idx
 
     def other_end(self, idx):

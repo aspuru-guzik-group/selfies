@@ -45,14 +45,14 @@ def selfies_to_hot(selfie, largest_selfie_len, alphabet):
     """Go from a single selfies string to a one-hot encoding.
     """
 
-    char_to_int = dict((c, i) for i, c in enumerate(alphabet))
+    symbol_to_int = dict((c, i) for i, c in enumerate(alphabet))
 
     # pad with [epsilon]
     selfie += '[nop]' * (largest_selfie_len - sf.len_selfies(selfie))
 
     # integer encode
-    char_list = sf.split_selfies(selfie)
-    integer_encoded = [char_to_int[char] for char in char_list]
+    symbol_list = sf.split_selfies(selfie)
+    integer_encoded = [symbol_to_int[symbol] for symbol in symbol_list]
 
     # one hot-encode the integer encoded selfie
     onehot_encoded = list()

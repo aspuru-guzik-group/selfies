@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from selfies.grammar_rules import get_chars_from_n, get_num_from_bond
+from selfies.grammar_rules import get_symbols_from_n, get_num_from_bond
 from selfies.kekulize import kekulize_parser
 
 
@@ -43,7 +43,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     '[C][=C][F]'
 
     .. note:: Currently, :code:`selfies.encoder` first splits a
-        SMILES by the dot-bond character, translates each fragment separately,
+        SMILES by the dot-bond symbol, translates each fragment separately,
         and then rejoins them. Thus, SMILES such as C1.C2.C12 (propane) and
         c1cc([O-].[Na+])ccc1 (sodium phenoxide) are **not** supported because
         their fragments (e.g. C1, c1cc([O-], C12) are not valid SMILES.
@@ -73,19 +73,19 @@ RING_TYPE = 3
 
 
 def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
-    """Parses a SMILES into its characters.
+    """Parses a SMILES into its symbols.
 
-    A generator, which parses a SMILES string and returns character(s) of it
+    A generator, which parses a SMILES string and returns its symbol(s)
     one-by-one as a tuple of:
-        (1) the bond character connecting the current character to the previous
-            SMILES character (e.g. '=', '', '#')
-        (2) the character(s) as a string (e.g. 'C', '12', '(')
-        (3) the type of character(s), represented as an integer that is either
-            ``ATOM_TYPE``, ``BRANCH_TYPE``, and ``RING_TYPE``.
+        (1) the bond symbol connecting the current atom/ring/branch symbol
+            to the previous atom/ring/branch symbol (e.g. '=', '', '#')
+        (2) the atom/ring/branch symbol as a string (e.g. 'C', '12', '(')
+        (3) the type of the symbol in (2), represented as an integer that is
+            either ``ATOM_TYPE``, ``BRANCH_TYPE``, and ``RING_TYPE``.
     As a precondition, we also assume ``smiles`` has no dots in it.
 
     :param smiles: the SMILES to be parsed.
-    :return: an iterable of the character(s) of the SELFIES along with
+    :return: an iterable of the symbol(s) of the SELFIES along with
         their types.
     """
 
@@ -101,40 +101,40 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
 
         if smiles[i].isalpha() or smiles[i] == '*':  # elements or wildcard
             if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter organic elements
-                char = smiles[i: i + 2]
-                char_type = ATOM_TYPE
+                symbol = smiles[i: i + 2]
+                symbol_type = ATOM_TYPE
                 i += 2
             else:
-                char = smiles[i]  # one letter elements (e.g. C, N, ...)
-                char_type = ATOM_TYPE
+                symbol = smiles[i]  # one letter elements (e.g. C, N, ...)
+                symbol_type = ATOM_TYPE
                 i += 1
 
         elif smiles[i] in ('(', ')'):  # open and closed branch brackets
             bond = smiles[i + 1]
-            char = smiles[i]
-            char_type = BRANCH_TYPE
+            symbol = smiles[i]
+            symbol_type = BRANCH_TYPE
             i += 1
 
         elif smiles[i] == '[':  # atoms encased in brackets (e.g. [NH])
             r_idx = smiles.find(']', i + 1)
-            char = smiles[i: r_idx + 1]
-            char_type = ATOM_TYPE
+            symbol = smiles[i: r_idx + 1]
+            symbol_type = ATOM_TYPE
             i = r_idx + 1
 
         elif smiles[i].isdigit():  # one-digit ring number
-            char = smiles[i]
-            char_type = RING_TYPE
+            symbol = smiles[i]
+            symbol_type = RING_TYPE
             i += 1
 
         elif smiles[i] == '%':  # two-digit ring number (e.g. %12)
-            char = smiles[i + 1: i + 3]
-            char_type = RING_TYPE
+            symbol = smiles[i + 1: i + 3]
+            symbol_type = RING_TYPE
             i += 3
 
         else:
             raise ValueError(f"Unknown symbol '{smiles[i]}' in SMILES.")
 
-        yield bond, char, char_type
+        yield bond, symbol, symbol_type
 
 
 def _translate_smiles(smiles: str) -> str:
@@ -156,7 +156,7 @@ def _translate_smiles(smiles: str) -> str:
 
     # a dictionary to keep track of the rings to be made. If a ring with id
     # X is connected to the i-th and j-th derived atoms (i < j) with bond
-    # character s, then after the i-th atom is derived, rings[X] = (s, i).
+    # symbol s, then after the i-th atom is derived, rings[X] = (s, i).
     # As soon as the j-th atom is derived, rings[X] is removed from <rings>,
     # and the ring is made.
     rings = {}
@@ -172,34 +172,34 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
     """Recursive helper for _translate_smiles.
 
     Derives the SELFIES from a SMILES, and returns a tuple of (1) the
-    translated SELFIES and (2) the character length of the outputted SELFIES.
+    translated SELFIES and (2) the symbol length of the translated SELFIES.
 
-    :param smiles_gen: an iterable of the characters (and their types)
+    :param smiles_gen: an iterable of the symbols (and their types)
         of the SMILES to be translated, created by ``_parse_smiles``.
     :param rings: See ``rings`` in ``_translate_smiles``.
     :param counter: a one-element list that serves as a mutable counter.
         See ``derived_counter`` in ``_translate_smiles``.
-    :return: A tuple of the translated SELFIES and its character length.
+    :return: A tuple of the translated SELFIES and its symbol length.
     """
 
     selfies = ""
     selfies_len = 0
 
-    for bond, char, char_type in smiles_gen:
+    for bond, symbol, symbol_type in smiles_gen:
 
         if bond == '-':  # ignore explicit single bonds
             bond = ''
 
-        if char_type == ATOM_TYPE:
-            if char[0] == '[':
-                selfies += f"[{bond}{char[1:-1]}expl]"
+        if symbol_type == ATOM_TYPE:
+            if symbol[0] == '[':
+                selfies += f"[{bond}{symbol[1:-1]}expl]"
             else:
-                selfies += f"[{bond}{char}]"
+                selfies += f"[{bond}{symbol}]"
             counter[0] += 1
             selfies_len += 1
 
-        elif char_type == BRANCH_TYPE:
-            if char == '(':
+        elif symbol_type == BRANCH_TYPE:
+            if symbol == '(':
 
                 # NOTE: looping inside a loop on a generator will produce
                 # expected behaviour in this case.
@@ -207,35 +207,35 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 branch, branch_len = \
                     _translate_smiles_derive(smiles_gen, rings, counter)
 
-                N_as_chars = get_chars_from_n(branch_len - 1)
+                N_as_symbols = get_symbols_from_n(branch_len - 1)
                 bond_num = get_num_from_bond(bond)
 
-                selfies += f"[Branch{len(N_as_chars)}_{bond_num}]"
-                selfies += ''.join(N_as_chars) + branch
-                selfies_len += 1 + len(N_as_chars) + branch_len
+                selfies += f"[Branch{len(N_as_symbols)}_{bond_num}]"
+                selfies += ''.join(N_as_symbols) + branch
+                selfies_len += 1 + len(N_as_symbols) + branch_len
 
-            else:  # char == ')'
+            else:  # symbol == ')'
                 break
 
-        else:  # char_type == RING_TYPE
-            ring_id = int(char)
+        else:  # symbol_type == RING_TYPE
+            ring_id = int(symbol)
 
             if ring_id in rings:
                 left_bond, left_end = rings.pop(ring_id)
                 right_bond, right_end = bond, counter[0]
 
                 ring_len = right_end - left_end
-                N_as_chars = get_chars_from_n(ring_len - 1)
+                N_as_symbols = get_symbols_from_n(ring_len - 1)
 
                 if left_bond != '':
-                    selfies += f"[Expl{left_bond}Ring{len(N_as_chars)}]"
+                    selfies += f"[Expl{left_bond}Ring{len(N_as_symbols)}]"
                 elif right_bond != '':
-                    selfies += f"[Expl{right_bond}Ring{len(N_as_chars)}]"
+                    selfies += f"[Expl{right_bond}Ring{len(N_as_symbols)}]"
                 else:
-                    selfies += f"[Ring{len(N_as_chars)}]"
+                    selfies += f"[Ring{len(N_as_symbols)}]"
 
-                selfies += ''.join(N_as_chars)
-                selfies_len += 1 + len(N_as_chars)
+                selfies += ''.join(N_as_symbols)
+                selfies_len += 1 + len(N_as_symbols)
 
             else:
                 rings[ring_id] = (bond, counter[0])
