@@ -100,7 +100,7 @@ def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
     _state_library = build_state_dict(atom_dict)
 
 
-# Character State Dict Functions ==============================================
+# Symbol State Dict Functions ==============================================
 
 # _state_library is accessed through two keys, which are (1) the current
 # derivation state and (2) the current SELFIES symbol to be derived, or
@@ -213,7 +213,7 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
     return _branch_state_library[state][branch_type - 1]
 
 
-# SELFIES Character to N Functions ============================================
+# SELFIES Symbol to N Functions ============================================
 
 _index_alphabet = ['[C]', '[Ring1]', '[Ring2]',
                    '[Branch1_1]', '[Branch1_2]', '[Branch1_3]',
