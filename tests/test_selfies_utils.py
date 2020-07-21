@@ -16,7 +16,7 @@ def test_cases():
 
 @pytest.fixture()
 def test_cases_alphabet():
-    return {'.', '[C]', '[nop]', '[epsilon]'}
+    return {'[C]', '[nop]', '[epsilon]'}
 
 
 def test_len_selfies(test_cases):
