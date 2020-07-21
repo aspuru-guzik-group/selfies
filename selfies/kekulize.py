@@ -449,9 +449,9 @@ class MolecularGraph:
         # remove irrelevant edges
         for idx, edges in self.graph.items():
 
-            keep = list(filter(lambda e: (e.idx_a in self.graph) and
-                                         (e.idx_b in self.graph) and
-                                         (e.bond_symbol == ''),
+            keep = list(filter(lambda e: (e.idx_a in self.graph)
+                                         and (e.idx_b in self.graph)
+                                         and (e.bond_symbol == ''),
                                edges))
             self.graph[idx] = keep
 
