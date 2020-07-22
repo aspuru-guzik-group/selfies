@@ -276,7 +276,7 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
     for b in bonds:
         used_electrons += get_num_from_bond(b)
 
-    if atom_symbol == 'c' and len(bonds) == 2:  # e.g. c1ccccc1
+    if (atom == 'c') and (h_count == 0) and (len(bonds) == 2):  # e.g. c1ccccc1
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:
@@ -480,13 +480,13 @@ class MolecularGraph:
 
             # recursively try to match adjacent nodes. If the matching
             # fails, then we must backtrack.
+            visited_save = visited.copy()
 
             visited.add(idx)
-
             for e in edges:
                 adj = e.other_end(idx)
                 if not self.dfs_assign_bonds(adj, visited, matched):
-                    visited.remove(idx)
+                    visited &= visited_save
                     return False
             return True
 
@@ -499,21 +499,21 @@ class MolecularGraph:
             if not candidates:
                 return False  # idx is unmatched, but all adj nodes are matched
 
-            for c in candidates:
+            for e in candidates:
 
                 # match nodes connected by c
-                c.bond_symbol = '='
-                matched.add(c.idx_a)
-                matched.add(c.idx_b)
+                e.bond_symbol = '='
+                matched.add(e.idx_a)
+                matched.add(e.idx_b)
 
                 success = self.dfs_assign_bonds(idx, visited, matched)
 
                 if success:
                     return True
                 else:  # the matching failed, so we must backtrack
-                    c.bond_symbol = ''
-                    matched.remove(c.idx_a)
-                    matched.remove(c.idx_b)
+                    e.bond_symbol = ''
+                    matched.remove(e.idx_a)
+                    matched.remove(e.idx_b)
 
             return False
 
