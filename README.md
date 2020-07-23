@@ -26,7 +26,7 @@ pip install selfies
 
 ## Usage
 
-### Standard Methods 
+### Standard Functions 
 
 The ``selfies`` library has 5 standard functions: 
 

@@ -7,18 +7,19 @@ from typing import Optional, Iterable, List, Union, Tuple
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     """Translates a SELFIES into a SMILES.
 
-    The SELFIES to SMILES translation operates based on the ``selfies``
-    alphabet and grammar, which can be changed using ``selfies.set_alphabet``.
-    Given the appropriate settings, the decoded SMILES will always be
-    syntactically and semantically correct. That is, the output SMILES will
-    satisfy the specified bond constraints. Additionally, ``selfies.decoder``
-    will attempt to preserve the atom and branch order of the input SELFIES.
+    The SELFIES to SMILES translation operates based on the :mod:`selfies`
+    grammar rules, which can be configured using
+    :func:`selfies.set_semantic_constraints`. Given the appropriate settings,
+    the decoded SMILES will always be syntactically and semantically correct.
+    That is, the output SMILES will satisfy the specified bond constraints.
+    Additionally, :func:`selfies.decoder` will attempt to preserve the
+    atom and branch order of the input SELFIES.
 
     :param selfies: The SELFIES to be translated.
     :param print_error: If True, error messages will be printed to console.
         Defaults to False.
-    :return: the SMILES translation of **selfies**. If an error occurs,
-        and **selfies** cannot be translated, ``None`` is returned instead.
+    :return: the SMILES translation of ``selfies``. If an error occurs,
+        and ``selfies`` cannot be translated, ``None`` is returned instead.
 
     :Example:
 
