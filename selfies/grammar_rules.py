@@ -34,15 +34,15 @@ def set_semantic_constraints(
         bond_constraints: Optional[Dict[str, int]] = None) -> None:
     """Configures the semantic constraints of ``selfies``.
 
-    The SELFIES alphabet and grammar is built dynamically from a dictionary
-    ``atom_dict`` of atom(s) and/or ion(s) and their corresponding bond
-    capacities. The key of the dictionary is a SMILES string representing
-    either a single atom, or some atom(s) and/or ion(s) enclosed by square
-    brackets. The corresponding value is the number of bonds that
-    the key can make, between 1 and 8 inclusive. For example, one may have:
+    The SELFIES grammar is enforced dynamically from a dictionary
+    ``bond_constraints``. The keys of the dictionary are atoms and/or ions
+    (e.g. ``I``, ``Fe+2``). To denote an ion, use the format ``E+C``
+    or ``E-C``, where ``E`` is an atom and ``C`` is a positive integer.
+    The corresponding value is the maximum number of bonds that atom or
+    ion can make, between 1 and 8 inclusive. For example, one may have:
 
-        * ``atom_dict['I'] = 1``
-        * ``atom_dict['[C@@H]'] = 3``
+        * ``bond_constraints['I'] = 1``
+        * ``bond_constraints['Fe+2'] = 4``
 
     ``selfies.decoder`` will only generate SMILES that respect the bond
     constraints specified by the dictionary. In the example above, both
@@ -50,18 +50,14 @@ def set_semantic_constraints(
     ``'IC'`` respectively, because ``I`` has been configured to make one bond
     maximally.
 
-    If a SMILES key is not specified in ``atom_dict``, it will by default be
-    constrained to 8 bonds. To change the default setting for unrecognized
-    symbols, set ``atom_dict['?']`` to the desired integer (between 1 and 8
-    inclusive). Note that ``selfies.decoder`` only recognizes the exact
-    symbol string specified in ``atom_dict``. For example, ``'[Fe+2]'`` will
-    not be constrained if it is not in ``atom_dict``, even if ``'[Fe++]'`` is
-    a key in the dictionary.
+    If an atom or ion is not specified in ``bond_constraints``, it will
+    by default be constrained to 8 bonds. To change the default setting
+    for unrecognized atoms or ions, set ``bond_constraints['?']`` to the
+    desired integer (between 1 and 8 inclusive).
 
-    :param bond_constraints: a dictionary of the atom(s) or ions that the new SELFIES
-        alphabet will be built upon, with the value being the
-        maximum bond capacity of the atom or ion. Defaults to ``None``. In that
-        case, a default dictionary will be used for ``atom_dict``.
+    :param bond_constraints: a dictionary representing the semantic
+        constraints the updated SELFIES will operate upon. Defaults to
+        ``None``; in this case, a default dictionary will be used.
     :return: ``None``.
     """
 

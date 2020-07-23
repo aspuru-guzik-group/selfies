@@ -32,9 +32,9 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
 
-    atom_dict = sf.get_semantic_constraints()
-    atom_dict['N'] = 6
-    sf.set_semantic_constraints(atom_dict)
+    constraints = sf.get_semantic_constraints()
+    constraints['N'] = 6
+    sf.set_semantic_constraints(constraints)
 
     # file I/O
     test_name = os.path.splitext(os.path.basename(test_path))[0]

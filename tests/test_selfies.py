@@ -18,11 +18,24 @@ def max_len():
 def hard_alphabet():
     """A challenging alphabet of SELFIES symbols.
     """
-
-    alphabet = {
-        '[epsilon]', '.', '[/C]', '[\\C]', '[/N]', '[\\N]',
-        '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'
-    }
+    alphabet = {'[I]', '[N]', '[\\O]', '[#NHexpl]', '[#O]', '[\\P]',
+                '[#C@@Hexpl]', '[=Br]', '[#C]', '[=C@expl]', '[Branch2_2]',
+                '[Branch2_3]', '[C@@Hexpl]', '[#P]', '[H]', '[/N]', '[=N]',
+                '[Ring3]', '[Branch1_2]', '[#C@Hexpl]', '[\\C@@Hexpl]', '[S]',
+                '[/C@@expl]', '[Branch1_3]', '[#N]', '[/F]', '[\\I]', '[=H]',
+                '[C]', '[/C@expl]', '[/P]', '[\\C@@expl]', '[Ring2]',
+                '[Ring1]', '[/S]', '[\\N]', '[Branch3_3]', '[P]', '[=Cl]',
+                '[\\C]', '[O]', '[#C@@expl]', '[Branch1_1]', '[C@expl]',
+                '[#H]', '[#Br]', '[=C@@expl]', '[=S]', '[=F]', '[#F]',
+                '[Branch2_1]', '[/Br]', '[/O]', '[\\Cl]', '[#C@expl]', '[=P]',
+                '[=C]', '[F]', '[/C@Hexpl]', '[=NHexpl]', '[/NHexpl]', '[\\S]',
+                '[/I]', '[Br]', '[/Cl]', '[\\F]', '[\\C@expl]', '[NHexpl]',
+                '[#S]', '[#I]', '[=O]', '[\\C@Hexpl]', '[/C]', '[=C@Hexpl]',
+                '[=C@@Hexpl]', '[Branch3_1]', '[nop]', '[/C@@Hexpl]',
+                '[Branch3_2]', '[\\Br]', '[\\H]', '[/H]', '[=I]', '[C@@expl]',
+                '[\\NHexpl]', '[#Cl]', '[Cl]', '[C@Hexpl]', '[epsilon]', '.',
+                '[/C]', '[\\C]', '[/N]', '[\\N]',
+                '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'}
 
     return alphabet
 
@@ -76,13 +89,13 @@ def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
         assert sf.decoder(with_nops) == sf.decoder(without_nops)
 
 
-def test_get_alphabet_and_atom_dict():
-    """Tests selfies.get_alphabet() and selfies.get_atom_dict().
+def test_get_semantic_constraints():
+    """Tests selfies.get_semantic_constraints().
     """
 
     # Getting the constraints does not return aliases
     assert sf.get_semantic_constraints() is not sf.get_semantic_constraints()
 
     # The appropriate symbols are in the constraints
-    atom_dict = sf.get_semantic_constraints()
-    assert '?' in atom_dict
+    constraints = sf.get_semantic_constraints()
+    assert '?' in constraints
