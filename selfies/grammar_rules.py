@@ -120,6 +120,7 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
 
     # calculate next state
     if state == 0:
+        bond = ''
         next_state = max_bonds
     else:
         if bond_num > min(state, max_bonds):
@@ -130,6 +131,7 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
         if next_state == 0:
             next_state = -1
 
+    print((bond + smiles_symbol), next_state)
     return (bond + smiles_symbol), next_state
 
 
@@ -155,7 +157,7 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
     if not (1 <= branch_type <= 3):
         raise ValueError(f"Unknown branch symbol: {branch_symbol}")
 
-    if 2 <= branch_type <= 8:
+    if 2 <= state <= 8:
         next_state = max(1, state - branch_type)
         branch_init_state = 9990 + (state - next_state)
         return branch_init_state, next_state

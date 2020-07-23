@@ -20,22 +20,22 @@ def hard_alphabet():
     """
     alphabet = {'[I]', '[N]', '[\\O]', '[#NHexpl]', '[#O]', '[\\P]',
                 '[#C@@Hexpl]', '[=Br]', '[#C]', '[=C@expl]', '[Branch2_2]',
-                '[Branch2_3]', '[C@@Hexpl]', '[#P]', '[H]', '[/N]', '[=N]',
-                '[Ring3]', '[Branch1_2]', '[#C@Hexpl]', '[\\C@@Hexpl]', '[S]',
-                '[/C@@expl]', '[Branch1_3]', '[#N]', '[/F]', '[\\I]', '[=H]',
-                '[C]', '[/C@expl]', '[/P]', '[\\C@@expl]', '[Ring2]',
-                '[Ring1]', '[/S]', '[\\N]', '[Branch3_3]', '[P]', '[=Cl]',
-                '[\\C]', '[O]', '[#C@@expl]', '[Branch1_1]', '[C@expl]',
-                '[#H]', '[#Br]', '[=C@@expl]', '[=S]', '[=F]', '[#F]',
-                '[Branch2_1]', '[/Br]', '[/O]', '[\\Cl]', '[#C@expl]', '[=P]',
-                '[=C]', '[F]', '[/C@Hexpl]', '[=NHexpl]', '[/NHexpl]', '[\\S]',
-                '[/I]', '[Br]', '[/Cl]', '[\\F]', '[\\C@expl]', '[NHexpl]',
-                '[#S]', '[#I]', '[=O]', '[\\C@Hexpl]', '[/C]', '[=C@Hexpl]',
-                '[=C@@Hexpl]', '[Branch3_1]', '[nop]', '[/C@@Hexpl]',
-                '[Branch3_2]', '[\\Br]', '[\\H]', '[/H]', '[=I]', '[C@@expl]',
-                '[\\NHexpl]', '[#Cl]', '[Cl]', '[C@Hexpl]', '[epsilon]', '.',
-                '[/C]', '[\\C]', '[/N]', '[\\N]',
-                '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'}
+                '[Branch2_3]', '[C@@Hexpl]', '[#P]', '[Hexpl]', '[/N]',
+                '[=N]', '[Ring3]', '[Branch1_2]', '[#C@Hexpl]', '[\\C@@Hexpl]',
+                '[S]', '[/C@@expl]', '[Branch1_3]', '[#N]', '[/F]', '[\\I]',
+                '[=Hexpl]', '[C]', '[/C@expl]', '[/P]', '[\\C@@expl]',
+                '[Ring2]', '[Ring1]', '[/S]', '[\\N]', '[Branch3_3]', '[P]',
+                '[=Cl]', '[\\C]', '[O]', '[#C@@expl]', '[Branch1_1]',
+                '[C@expl]', '[#Hexpl]', '[#Br]', '[=C@@expl]', '[=S]', '[=F]',
+                '[#F]', '[Branch2_1]', '[/Br]', '[/O]', '[\\Cl]', '[#C@expl]',
+                '[=P]', '[=C]', '[F]', '[/C@Hexpl]', '[=NHexpl]', '[/NHexpl]',
+                '[\\S]', '[/I]', '[Br]', '[/Cl]', '[\\F]', '[\\C@expl]',
+                '[NHexpl]', '[#S]', '[#I]', '[=O]', '[\\C@Hexpl]', '[/C]',
+                '[=C@Hexpl]', '[=C@@Hexpl]', '[Branch3_1]', '[nop]',
+                '[/C@@Hexpl]', '[Branch3_2]', '[\\Br]', '[\\Hexpl]',
+                '[/Hexpl]', '[=I]', '[C@@expl]', '[\\NHexpl]', '[#Cl]',
+                '[Cl]', '[C@Hexpl]', '[epsilon]', '.', '[/C]', '[\\C]', '[/N]',
+                '[\\N]', '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'}
 
     return alphabet
 
@@ -61,7 +61,7 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
         except Exception:
             is_valid = False
 
-        assert is_valid, f"Invalid SMILES {smiles} decoded from {sf}."
+        assert is_valid, f"Invalid SMILES {smiles} decoded from {rand_mol}."
 
 
 def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
