@@ -19,13 +19,11 @@ def hard_alphabet():
     """A challenging alphabet of SELFIES symbols.
     """
 
-    alphabet = sf.get_alphabet()
-
-    # add some challenging symbols
-    alphabet.update([
+    alphabet = {
         '[epsilon]', '.', '[/C]', '[\\C]', '[/N]', '[\\N]',
         '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'
-    ])
+    }
+
     return alphabet
 
 
@@ -34,7 +32,7 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
     symbols from the SELFIES alphabet are decoded into valid SMILES.
     """
 
-    sf.set_alphabet()  # re-set alphabet
+    sf.set_semantic_constraints()  # re-set alphabet
     alphabet = tuple(hard_alphabet)
 
     for _ in range(trials):
@@ -58,7 +56,7 @@ def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
     always skipped over.
     """
 
-    sf.set_alphabet()
+    sf.set_semantic_constraints()
 
     alphabet = list(hard_alphabet)
     alphabet.remove('[nop]')
@@ -82,16 +80,9 @@ def test_get_alphabet_and_atom_dict():
     """Tests selfies.get_alphabet() and selfies.get_atom_dict().
     """
 
-    # Getting the alphabet and atom_dict does not return aliases
-    assert sf.get_alphabet() is not sf.get_alphabet()
-    assert sf.get_atom_dict() is not sf.get_atom_dict()
+    # Getting the constraints does not return aliases
+    assert sf.get_semantic_constraints() is not sf.get_semantic_constraints()
 
-    # The appropriate symbols are in the alphabet
-    alphabet = sf.get_alphabet()
-    assert '[epsilon]' not in alphabet
-    assert '.' not in alphabet
-    assert '[nop]' in alphabet
-
-    # The appropriate symbols are in atom_dict()
-    atom_dict = sf.get_atom_dict()
+    # The appropriate symbols are in the constraints
+    atom_dict = sf.get_semantic_constraints()
     assert '?' in atom_dict

@@ -27,19 +27,15 @@ can_decoded_smiles = Chem.CanonSmiles(decoded_smiles)
 print(f"RDKit Equals: {can_smiles == can_decoded_smiles}")
 print()
 
-# 2. Let's view the SELFIES alphabet.
+# Advanced Usage: Customizing SELFIES
 
-new_alphabet = sf.get_alphabet()
-print(f"Default Alphabet:\n {new_alphabet}")
+# 2. Let's view the default SELFIES semantic constraints.
+
+default_constraints = sf.get_semantic_constraints()
+print(f"Default Constraints:\n {default_constraints}")
 print()
 
-new_atom_dict = sf.get_atom_dict()
-print(f"Default Atom Dict:\n {new_atom_dict}")
-print()
-
-
-# Advanced Usage:
-# 3. Let's customize the SELFIES alphabet
+# 3. Let's modify the SELFIES constraints
 
 # We have two compounds here, C#S and Li=CCC in SELFIES form
 c_s_compound = sf.encoder("CS=CC#S")
@@ -49,33 +45,27 @@ li_compound = sf.encoder("[Li]=CC")
 print("Default SELFIES:")
 print(f"\t CS=CC#S --> {sf.decoder(c_s_compound)}")
 print(f"\t [Li]=CC --> {sf.decoder(li_compound)}")
+print()
+# Since Li is not recognized by SELFIES, it is constrained to 8
+# bonds by default.
 
-# Now we add [Li] to the SELFIES alphabet, and restrict it to 1 bond only
+# Now we add Li to the SELFIES constraints, and restrict it to 1 bond only
 # Also, let's restrict S to 2 bonds (instead of its default 6).
-atom_dict = new_atom_dict
-atom_dict['[Li]'] = 1
-atom_dict['S'] = 2
+new_constraints = default_constraints
+new_constraints['Li'] = 1
+new_constraints['S'] = 2
 
-sf.set_alphabet(atom_dict)  # update alphabet
+sf.set_semantic_constraints(new_constraints)  # update constraints
+
+# Let's check on the SELFIES constraints to see if they are updated.
+print(f"Updated Constraints:\n {sf.get_semantic_constraints()}")
+print()
 
 # Under our new settings, they are translated as
-print("Customized SELFIES:")
+print("Updated SELFIES:")
 print(f"\t CS=CC#S --> {sf.decoder(c_s_compound)}")
 print(f"\t [Li]=CC --> {sf.decoder(li_compound)}")
-print()
 # Notice that all the bond constraints are met.
 
-# Let's check on the SELFIES alphabet an atom dict to see if they
-# are updated. Note that [Li] is now in the SELFIES alphabet (see
-# [Liexpl], [=Liexpl], [#Liexpl], ...)
-
-new_alphabet = sf.get_alphabet()
-print(f"Updated Alphabet:\n {new_alphabet}")
-print()
-
-new_atom_dict = sf.get_atom_dict()
-print(f"Updated Atom Dict:\n {new_atom_dict}")
-print()
-
-# 4. Let's revert the SELFIES alphabet back to the default settings
-sf.set_alphabet()
+# 4. Let's revert the SELFIES constraints back to the default settings
+sf.set_semantic_constraints()

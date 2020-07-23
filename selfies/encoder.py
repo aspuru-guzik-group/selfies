@@ -99,8 +99,8 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             bond = smiles[i]
             i += 1
 
-        if smiles[i].isalpha() or smiles[i] == '*':  # elements or wildcard
-            if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter organic elements
+        if smiles[i].isalpha():  # organic subset elements
+            if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter elements
                 symbol = smiles[i: i + 2]
                 symbol_type = ATOM_TYPE
                 i += 2

@@ -13,7 +13,6 @@ Standard Methods
 
 Advanced Methods
 ------------------------
-.. autofunction:: get_alphabet
-.. autofunction:: get_atom_dict
-.. autofunction:: set_alphabet
+.. autofunction:: get_semantic_constraints
+.. autofunction:: set_semantic_constraints
 

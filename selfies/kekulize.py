@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Set, Tuple, Union
 
-from selfies.grammar_rules import get_num_from_bond
+from selfies.grammar_rules import find_element, get_num_from_bond, \
+    parse_atom_symbol
 
 ATOM_TYPE = 1
 BRANCH_TYPE = 2
@@ -134,87 +135,6 @@ _aromatic_valences = {
 }
 
 
-def _find_element(atom_symbol: str) -> Tuple[int, int]:
-    """Returns the indices of the element component of a SMILES atom symbol.
-
-    That is, if atom_symbol[i:j] is the element substring of the SMILES atom,
-    then (i, j) is returned. For example:
-        *   _find_element('b') = (0, 1).
-        *   _find_element('B') = (0, 1).
-        *   _find_element('[13C]') = (3, 4).
-        *   _find_element('[nH+]') = (1, 2).
-
-    :param atom_symbol: a SMILES atom.
-    :return: a tuple of the indices of the element substring of
-        ``atom_symbol``.
-    """
-
-    if atom_symbol[0] != '[':
-        return 0, len(atom_symbol)
-
-    i = 1
-    while atom_symbol[i].isdigit():  # skip isotope number
-        i += 1
-
-    if atom_symbol[i + 1].isalpha() and atom_symbol[i + 1] != 'H':
-        return i, i + 2
-    else:
-        return i, i + 1
-
-
-def _parse_atom_symbol(atom_symbol: str) -> Tuple[str, int, int]:
-    """Parses a SMILES atom symbol and returns its element component,
-    number of associated hydrogens, and charge.
-
-    See http://opensmiles.org/opensmiles.html for the formal grammar
-    of SMILES atom symbols. Note that only @ and @@ are currently supported
-    as chiral specifications.
-
-    :param atom_symbol: a SMILES atom symbol.
-    :return: a tuple of (1) the element of ``atom_symbol``, (2) the hydrogen
-        count, and (3) the charge.
-    """
-
-    if atom_symbol[0] != '[':
-        return atom_symbol, 0, 0
-
-    atom_start, atom_end = _find_element(atom_symbol)
-    i = atom_end
-
-    # skip chirality
-    if atom_symbol[i] == '@':  # e.g. @
-        i += 1
-    if atom_symbol[i] == '@':  # e.g. @@
-        i += 1
-
-    h_count = 0  # hydrogen count
-    if atom_symbol[i] == 'H':
-        h_count = 1
-
-        i += 1
-        if atom_symbol[i].isdigit():  # e.g. [CH2]
-            h_count = int(atom_symbol[i])
-            i += 1
-
-    charge = 0  # charge count
-    if atom_symbol[i] in ('+', '-'):
-        charge = 1 if atom_symbol[i] == '+' else -1
-
-        i += 1
-        if atom_symbol[i] in ('+', '-'):  # e.g. [Cu++]
-            while atom_symbol[i] in ('+', '-'):
-                charge += (1 if atom_symbol[i] == '+' else -1)
-                i += 1
-
-        elif atom_symbol[i].isdigit():  # e.g. [Cu+2]
-            s = i
-            while atom_symbol[i].isdigit():
-                i += 1
-            charge *= int(atom_symbol[s:i])
-
-    return atom_symbol[atom_start: atom_end], h_count, charge
-
-
 def _capitalize(atom_symbol: str) -> str:
     """Capitalizes the element portion of an aromatic SMILES atom symbol,
     converting it into a standard SMILES atom symbol.
@@ -223,7 +143,7 @@ def _capitalize(atom_symbol: str) -> str:
     :return: the capitalized ``atom_symbol``.
     """
 
-    s, _ = _find_element(atom_symbol)
+    s, _ = find_element(atom_symbol)
     return atom_symbol[:s] + atom_symbol[s].upper() + atom_symbol[s + 1:]
 
 
@@ -238,7 +158,7 @@ def _is_aromatic(atom_symbol: str) -> bool:
         and False otherwise.
     """
 
-    s, e = _find_element(atom_symbol)
+    s, e = find_element(atom_symbol)
 
     if e == len(atom_symbol):  # optimization to prevent string copying
         element = atom_symbol
@@ -270,7 +190,7 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
         and False otherwise.
     """
 
-    atom, h_count, charge = _parse_atom_symbol(atom_symbol)
+    atom, h_count, charge = parse_atom_symbol(atom_symbol)
 
     used_electrons = 0
     for b in bonds:
