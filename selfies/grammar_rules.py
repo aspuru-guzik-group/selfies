@@ -14,16 +14,16 @@ _bond_constraints = default_bond_constraints
 
 
 def get_semantic_constraints() -> Dict[str, int]:
-    """Returns the semantic bond constraints that ``selfies`` is currently
+    """Returns the semantic bond constraints that :mod:`selfies` is currently
     operating on.
 
     Returned is the argument of the most recent call of
-    ``selfies.set_semantic_constraints``, or the default bond constraints if
-    the method has not been called yet. Once retrieved, it is copied and
-    then returned. See ``selfies.set_semantic_constraints`` for further
+    :func:`selfies.set_semantic_constraints`, or the default bond constraints
+    if the function has not been called yet. Once retrieved, it is copied and
+    then returned. See :func:`selfies.set_semantic_constraints` for further
     explanation.
 
-    :return: The bond constraints ``selfies`` is currently operating on.
+    :return: The bond constraints :mod:`selfies` is currently operating on.
     """
 
     global _bond_constraints
@@ -32,19 +32,19 @@ def get_semantic_constraints() -> Dict[str, int]:
 
 def set_semantic_constraints(
         bond_constraints: Optional[Dict[str, int]] = None) -> None:
-    """Configures the semantic constraints of ``selfies``.
+    """Configures the semantic constraints of :mod:`selfies`.
 
     The SELFIES grammar is enforced dynamically from a dictionary
     ``bond_constraints``. The keys of the dictionary are atoms and/or ions
     (e.g. ``I``, ``Fe+2``). To denote an ion, use the format ``E+C``
-    or ``E-C``, where ``E`` is an atom and ``C`` is a positive integer.
+    or ``E-C``, where ``E`` is an element and ``C`` is a positive integer.
     The corresponding value is the maximum number of bonds that atom or
     ion can make, between 1 and 8 inclusive. For example, one may have:
 
         * ``bond_constraints['I'] = 1``
-        * ``bond_constraints['Fe+2'] = 4``
+        * ``bond_constraints['C'] = 4``
 
-    ``selfies.decoder`` will only generate SMILES that respect the bond
+    :func:`selfies.decoder` will only generate SMILES that respect the bond
     constraints specified by the dictionary. In the example above, both
     ``'[C][=I]'`` and ``'[I][=C]'`` will be translated to ``'CI'`` and
     ``'IC'`` respectively, because ``I`` has been configured to make one bond
@@ -60,6 +60,14 @@ def set_semantic_constraints(
         ``None``; in this case, a default dictionary will be used.
     :return: ``None``.
     """
+
+    # error checking
+    if '?' not in bond_constraints:
+        raise ValueError("'?' not a key in bond_constraints")
+
+    for key, value in bond_constraints:
+        if not (1 <= value <= 8):
+            raise ValueError("Value in bond_constraints not in [1, 8]")
 
     global _bond_constraints
 
@@ -217,7 +225,7 @@ def get_symbols_from_n(n: int) -> List[str]:
     return symbols[::-1]
 
 
-# Helper Methods ==============================================================
+# Helper Functions ============================================================
 
 
 def get_num_from_bond(bond_symbol: str) -> int:

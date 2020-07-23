@@ -3,7 +3,7 @@ Code Documentation
 
 .. currentmodule:: selfies
 
-Standard Methods
+Standard Functions
 ------------------------
 .. autofunction:: encoder
 .. autofunction:: decoder
@@ -11,7 +11,7 @@ Standard Methods
 .. autofunction:: split_selfies
 .. autofunction:: get_alphabet_from_selfies
 
-Advanced Methods
+Advanced Functions
 ------------------------
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints

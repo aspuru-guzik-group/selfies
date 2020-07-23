@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, List, Optional, Tuple
 
-from selfies.grammar_rules import get_symbols_from_n, get_num_from_bond
+from selfies.grammar_rules import get_num_from_bond, get_symbols_from_n
 from selfies.kekulize import kekulize_parser
 
 
@@ -8,33 +8,35 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     """Translates a SMILES into a SELFIES.
 
     The SMILES to SELFIES translation occurs independently of the SELFIES
-    alphabet and grammar. Thus, ``selfies.encoder`` will work regardless of
-    the alphabet and grammar rules that ``selfies`` is operating on, assuming
-    the input is a valid SMILES. Additionally, ``selfies.encoder`` preserves
-    the atom and branch order of the input SMILES; thus, one could generate
-    random SELFIES corresponding to the same molecule by generating random
-    SMILES, and then translating them.
+    alphabet and grammar. Thus, :func:`selfies.encoder` will work regardless of
+    the alphabet and grammar rules that :py:mod:`selfies` is operating on,
+    assuming the input is a valid SMILES. Additionally, :func:`selfies.encoder`
+    preserves the atom and branch order of the input SMILES; thus, one
+    could generate random SELFIES corresponding to the same molecule by
+    generating random SMILES, and then translating them.
 
     However, encoding and then decoding a SMILES may not necessarily yield
     the original SMILES. Reasons include:
 
-        1.  SMILES with explicit aromatic symbols are automatically
+        1.  SMILES with aromatic symbols are automatically
             Kekulized before being translated.
-        2.  A SMILES that violates the bond constraints specified by
-            ``selfies`` will be successfully encoded by ``selfies.encoder``,
-            but then decoded into a new molecule that satisfies the
-            constraints.
-        3.  The exact ring numbering order is lost in ``selfies.encoder``,
-            and cannot be reconstructed by ``selfies.decoder``.
+        2.  SMILES that violate the bond constraints specified by
+            :mod:`selfies` will be successfully encoded by
+            :func:`selfies.encoder`, but then decoded into a new molecule
+            that satisfies the constraints.
+        3.  The exact ring numbering order is lost in :func:`selfies.encoder`,
+            and cannot be reconstructed by :func:`selfies.decoder`.
 
-    Finally, note that ``selfies.encoder`` does **not** check if the input
+    Finally, note that :func:`selfies.encoder` does **not** check if the input
     SMILES is valid, and should not be expected to reject invalid inputs.
+    It is recommended to use RDKit to first verify that the SMILES are
+    valid.
 
     :param smiles: The SMILES to be translated.
     :param print_error: If True, error messages will be printed to console.
         Defaults to False.
-    :return: the SELFIES translation of **smiles**. If an error occurs,
-        and **smiles** cannot be translated, :code:`None` is returned instead.
+    :return: the SELFIES translation of ``smiles``. If an error occurs,
+        and ``smiles`` cannot be translated, :code:`None` is returned instead.
 
     :Example:
 
@@ -42,15 +44,15 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     >>> selfies.encoder('C=CF')
     '[C][=C][F]'
 
-    .. note:: Currently, :code:`selfies.encoder` first splits a
-        SMILES by the dot-bond symbol, translates each fragment separately,
-        and then rejoins them. Thus, SMILES such as C1.C2.C12 (propane) and
-        c1cc([O-].[Na+])ccc1 (sodium phenoxide) are **not** supported because
-        their fragments (e.g. C1, c1cc([O-], C12) are not valid SMILES.
-        However, [Na+].[O-]c1ccccc1 and [K+].[Cl-] are supported.
+    .. note:: Currently, :func:`selfies.encoder` does not support the
+        following types of SMILES:
 
-        SMILES with ring numbering between atoms that are over
-        ``16 ** 3 = 4096`` atoms apart are also not supported.
+        *   SMILES using ring numbering across a dot-bond symbol
+            to specify bonds, e.g. ``C1.C2.C12`` (propane) or
+            ``c1cc([O-].[Na+])ccc1`` (sodium phenoxide).
+        *   SMILES with ring numbering between atoms that are over
+            ``16 ** 3 = 4096`` atoms apart.
+        *   SMILES using the wildcard symbol ``*``.
 
     """
 

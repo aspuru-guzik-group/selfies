@@ -7,7 +7,7 @@ import selfies as sf
 
 # 1. First we try translating SMILES --> SELFIES --> SMILES.
 
-# Test SMILES: non-fullerene acceptors for organic solar cells.
+# Test SMILES: non-fullerene acceptor for organic solar cells.
 smiles = "CN1C(=O)C2=C(c3cc4c(s3)-c3sc(-c5ncc(C#N)s5)cc3C43OCCO3)N(C)C(=O)" \
          "C2=C1c1cc2c(s1)-c1sc(-c3ncc(C#N)s3)cc1C21OCCO1"
 encoded_selfies = sf.encoder(smiles)  # SMILES --> SEFLIES
@@ -37,7 +37,7 @@ print()
 
 # 3. Let's modify the SELFIES constraints
 
-# We have two compounds here, C#S and Li=CCC in SELFIES form
+# We have two compounds here, CS=CC#S and [Li]=CC in SELFIES form
 c_s_compound = sf.encoder("CS=CC#S")
 li_compound = sf.encoder("[Li]=CC")
 
