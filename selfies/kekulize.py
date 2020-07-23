@@ -116,9 +116,7 @@ def _kekulize(mol_graph: MolecularGraph) -> None:
 
     visited = set()
     for i in mol_graph.get_nodes_by_num_edges():
-        matched = set()
-
-        success = mol_graph.dfs_assign_bonds(i, visited, matched)
+        success = mol_graph.dfs_assign_bonds(i, visited, set(), set())
         if not success:
             raise ValueError("Kekulization Failed.")
 
@@ -377,7 +375,8 @@ class MolecularGraph:
 
     def dfs_assign_bonds(self, idx: int,
                          visited: Set[int],
-                         matched: Set[int]) -> bool:
+                         matched_nodes: Set[int],
+                         matched_edges: Set[Bond]) -> bool:
         """After calling ``prune_to_pi_subgraph``, this method assigns
         double bonds between pairs of nodes such that every node is
         paired or matched.
@@ -386,8 +385,9 @@ class MolecularGraph:
 
         :param idx: the index of the current atom (or node).
         :param visited: a set of the indices of nodes that have been visited.
-        :param matched: a set of the indices of nodes that have been matched,
-            i.e., assigned a double bond.
+        :param matched_nodes: a set of the indices of nodes that have been
+            matched, i.e., assigned a double bond.
+        :param matched_edges: a set of the bonds that have been matched.
         :return: True, if a valid bond assignment was found; False otherwise.
         """
 
@@ -396,7 +396,7 @@ class MolecularGraph:
 
         edges = self.graph[idx]
 
-        if idx in matched:
+        if idx in matched_nodes:
 
             # recursively try to match adjacent nodes. If the matching
             # fails, then we must backtrack.
@@ -405,7 +405,9 @@ class MolecularGraph:
             visited.add(idx)
             for e in edges:
                 adj = e.other_end(idx)
-                if not self.dfs_assign_bonds(adj, visited, matched):
+                if not self.dfs_assign_bonds(adj, visited,
+                                             matched_nodes,
+                                             matched_edges):
                     visited &= visited_save
                     return False
             return True
@@ -413,27 +415,37 @@ class MolecularGraph:
         else:
 
             # list of candidate edges that can become a double bond
-            candidates = list(filter(lambda i: i.other_end(idx) not in matched,
-                                     edges))
+            candidates = list(
+                filter(lambda i: i.other_end(idx) not in matched_nodes, edges)
+            )
 
             if not candidates:
                 return False  # idx is unmatched, but all adj nodes are matched
 
+            matched_edges_save = matched_edges.copy()
+
             for e in candidates:
 
                 # match nodes connected by c
-                e.bond_symbol = '='
-                matched.add(e.idx_a)
-                matched.add(e.idx_b)
+                matched_nodes.add(e.idx_a)
+                matched_nodes.add(e.idx_b)
+                matched_edges.add(e)
 
-                success = self.dfs_assign_bonds(idx, visited, matched)
+                success = self.dfs_assign_bonds(idx, visited,
+                                                matched_nodes,
+                                                matched_edges)
 
                 if success:
+                    e.bond_symbol = '='
                     return True
                 else:  # the matching failed, so we must backtrack
-                    e.bond_symbol = ''
-                    matched.remove(e.idx_a)
-                    matched.remove(e.idx_b)
+
+                    for edge in matched_edges - matched_edges_save:
+                        edge.bond_symbol = ''
+                        matched_nodes.discard(edge.idx_a)
+                        matched_nodes.discard(edge.idx_b)
+
+                    matched_edges &= matched_edges_save
 
             return False
 
@@ -487,6 +499,14 @@ class Bond:
         self.idx_b = idx_b
         self.bond_symbol = bond_symbol
         self.bond_idx = bond_idx
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return (self.idx_a, self.idx_b) == (other.idx_a, other.idx_b)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((self.idx_a, self.idx_b))
 
     def other_end(self, idx):
         """Given an index representing one end of this bond, returns

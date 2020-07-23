@@ -17,12 +17,11 @@ import random
 faulthandler.enable()
 
 test_sets = [
-    ('tests/test_sets/130K_QM9.txt', 'smiles'),
-    ('tests/test_sets/51K_NonFullerene.txt', 'smiles'),
-    ('tests/test_sets/250k_ZINC.txt', 'smiles'),
-    ('tests/test_sets/8k_Tox21.txt', 'smiles'),
-    ('tests/test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
-    # ('22M_eMolecule.smi', 'isosmiles')
+    ('test_sets/130K_QM9.txt', 'smiles'),
+    ('test_sets/51K_NonFullerene.txt', 'smiles'),
+    ('test_sets/250k_ZINC.txt', 'smiles'),
+    ('test_sets/8k_Tox21.txt', 'smiles'),
+    ('test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
 ]
 
 
@@ -38,7 +37,10 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
 
     # file I/O
     test_name = os.path.splitext(os.path.basename(test_path))[0]
-    error_path = f"error_sets/errors_{test_name}.csv"
+
+    curr_dir = os.path.dirname(__file__)
+    test_path = os.path.join(curr_dir, test_path)
+    error_path = os.path.join(curr_dir, f"error_sets/errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -60,7 +62,12 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
-            out_smiles = sf.decoder(sf.encoder(in_smiles))
+            selfies = sf.encoder(in_smiles)
+            if selfies is None:
+                error_list.append((in_smiles, ''))
+                continue
+
+            out_smiles = sf.decoder(selfies)
 
             if not is_same_mol(in_smiles, out_smiles):
                 error_list.append((in_smiles, out_smiles))
@@ -82,7 +89,11 @@ def test_kekulize_parser(test_path, column_name, dataset_samples):
 
     # file I/O
     test_name = os.path.splitext(os.path.basename(test_path))[0]
-    error_path = f"error_sets/errors_{test_name}.csv"
+
+    curr_dir = os.path.dirname(__file__)
+    test_path = os.path.join(curr_dir, test_path)
+    error_path = os.path.join(curr_dir,
+                              f"error_sets/errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
