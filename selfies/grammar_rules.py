@@ -61,19 +61,21 @@ def set_semantic_constraints(
     :return: ``None``.
     """
 
-    # error checking
-    if '?' not in bond_constraints:
-        raise ValueError("'?' not a key in bond_constraints")
-
-    for key, value in bond_constraints:
-        if not (1 <= value <= 8):
-            raise ValueError("Value in bond_constraints not in [1, 8]")
-
     global _bond_constraints
 
     if bond_constraints is None:
         _bond_constraints = default_bond_constraints
+
     else:
+
+        # error checking
+        if '?' not in bond_constraints:
+            raise ValueError("'?' not a key in bond_constraints")
+
+        for key, value in bond_constraints.items():
+            if not (1 <= value <= 8):
+                raise ValueError("Value in bond_constraints not in [1, 8]")
+
         _bond_constraints = dict(bond_constraints)
 
 
