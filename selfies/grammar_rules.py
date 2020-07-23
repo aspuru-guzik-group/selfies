@@ -131,7 +131,6 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
         if next_state == 0:
             next_state = -1
 
-    print((bond + smiles_symbol), next_state)
     return (bond + smiles_symbol), next_state
 
 
