@@ -4,15 +4,20 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string representation
+SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular 
+string representation
 
-A main objective is to use SELFIES as direct input into machine  learning models, in particular in generative models, for the generation of  molecular graphs which are syntactically and semantically valid.
+A main objective is to use SELFIES as direct input into machine learning 
+models, in particular in generative models, for the generation of molecular
+graphs which are syntactically and semantically valid.
 
-See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, and Alan Aspuru-Guzik at arXiv (https://arxiv.org/abs/1905.13741).
+See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam, 
+Pascal Friederich, and Alan Aspuru-Guzik at 
+arXiv (https://arxiv.org/abs/1905.13741).
 
 
 ## Installation
-Use pip to install selfies.
+Use pip to install ``selfies``.
 
 ```bash
 pip install selfies
@@ -38,14 +43,28 @@ customize the SELFIES language.
 
 ### Examples
 
-Translation between SELFIES and SMILES: 
+Translation between SELFIES and SMILES using the SMILES of benzene as 
+an example.  
 
 ```python
 import selfies as sf
-    
-benzene = "C1=CC=CC=C1"
-encoded_selfies = sf.encoder(benzene)  # SMILES --> SEFLIES
-decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
+
+benzene = "c1ccccc1"
+
+# SMILES --> SELFIES translation
+encoded_selfies = sf.encoder(benzene)
+# encoded_selfies = '[C][=C][C][=C][C][=C][Ring1][Branch1_2]'
+
+# SELFIES --> SMILES translation
+decoded_smiles = sf.decoder(encoded_selfies)
+# decoded_smiles = 'C1=CC=CC=C1'
+
+len_benzene = sf.len_selfies(encoded_selfies)
+# len_benzene = 8
+
+symbols_benzene = list(sf.split_selfies(encoded_selfies))
+# symbols_benzene = ['[C]', '[=C]', '[C]', '[=C]',
+#                    '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
 Integer encoding a SELFIES: 
