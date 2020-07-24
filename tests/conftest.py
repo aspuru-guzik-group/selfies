@@ -7,7 +7,7 @@ def pytest_addoption(parser):
         help="number of trails for random tests"
     )
     parser.addoption(
-        "--dataset_samples", action="store", default=1,
+        "--dataset_samples", action="store", default=10000,
         help="number of samples to test from the data sets"
     )
 
