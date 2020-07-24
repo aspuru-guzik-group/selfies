@@ -5,7 +5,7 @@
 
 
 SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular 
-string representation
+string representation.
 
 A main objective is to use SELFIES as direct input into machine learning 
 models, in particular in generative models, for the generation of molecular
@@ -43,8 +43,7 @@ customize the SELFIES language.
 
 ### Examples
 
-Translation between SELFIES and SMILES using the SMILES of benzene as 
-an example.  
+Translation between SELFIES and SMILES representations: 
 
 ```python
 import selfies as sf
@@ -63,29 +62,36 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
-Integer encoding a SELFIES: 
+Integer encoding SELFIES: in this example we first build an alphabet 
+from a dataset of SELFIES, and then convert a SELFIES into a
+padded, integer-encoded representation. Note that we use the SELFIES symbol
+``'[nop]'`` to pad our SELFIES. ``'[nop]'`` is a special SELFIES symbol that
+is always ignored and skipped over by ``selfies.decoder``, making it a useful 
+padding character. 
+
 ```python
 import selfies as sf
 
-dataset = ['[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
+dataset = ['[C][O][C]', '[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
 alphabet = sf.get_alphabet_from_selfies(dataset)
-alphabet.add('[nop]')  # '[nop]' is a special padding symbol 
-print(alphabet)  # {'[C]', '[F]', '[nop]', '[O]', '[=O]'}
+alphabet.add('[nop]')  # '[nop]' is a special padding symbol
+alphabet = list(sorted(alphabet))
+print(alphabet)  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
 
-pad_to_len = 5
-symbol_to_idx = {s: i for i, s in enumerate(sorted(alphabet))}
+pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5 
+symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
 
 # SELFIES to integer encode
-dimethyl_ether = '[C][O][C]'
+dimethyl_ether = dataset[0]  # '[C][O][C]'
 
-# pad the SELFIES 
+# pad the SELFIES
 dimethyl_ether += '[nop]' * (pad_to_len - sf.len_selfies(dimethyl_ether))
 
-# integer encode the SELFIES 
+# integer encode the SELFIES
 int_encoded = []
 for symbol in sf.split_selfies(dimethyl_ether):
     int_encoded.append(symbol_to_idx[symbol])
-    
+
 print(int_encoded)  # [1, 3, 1, 4, 4]
 ```
 
