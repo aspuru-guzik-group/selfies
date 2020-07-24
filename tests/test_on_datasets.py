@@ -18,7 +18,7 @@ faulthandler.enable()
 datasets = [
     ('130K_QM9.txt', 'smiles'),
     ('51K_NonFullerene.txt', 'smiles'),
-    ('250k_ZINC.txt', 'smiles'),
+    ('ZINC.txt', 'smiles'),
     ('8k_Tox21.txt', 'smiles'),
     ('93k_PubChem_MUV_bioassay.txt', 'smiles')
 ]
