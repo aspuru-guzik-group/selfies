@@ -79,4 +79,4 @@ if __name__ == '__main__':
 
     # temporary example
     time_roundtrip('test_sets/250K_ZINC.txt')
-    time_kekulize('test_sets/250K_ZINC.txt')
+    # time_kekulize('test_sets/250K_ZINC.txt')

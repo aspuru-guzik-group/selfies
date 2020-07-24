@@ -1,114 +1,85 @@
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Tuple
 
-from selfies.state_library import build_state_dict, default_atom_dict
+default_bond_constraints = {
+    'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
+    'O': 2,
+    'N': 3,
+    'C': 4,
+    'P': 5,
+    'S': 6,
+    '?': 8,
+}
+
+_bond_constraints = default_bond_constraints
 
 
-def get_alphabet() -> Set[str]:
-    """Returns the alphabet that ``selfies`` is currently operating on.
+def get_semantic_constraints() -> Dict[str, int]:
+    """Returns the semantic bond constraints that :mod:`selfies` is currently
+    operating on.
 
-    More specifically, the alphabet is the set of SELFIES symbols that
-    ``selfies`` recognizes and can apply semantic constraints to. ``selfies``
-    initially operates upon a default alphabet, which can later be changed
-    using ``selfies.set_alphabet``. After retrieving the alphabet, it is copied
-    and returned as a set, i.e., mutating the returned set has no effect on
-    the behaviour of ``selfies``.
+    Returned is the argument of the most recent call of
+    :func:`selfies.set_semantic_constraints`, or the default bond constraints
+    if the function has not been called yet. Once retrieved, it is copied and
+    then returned. See :func:`selfies.set_semantic_constraints` for further
+    explanation.
 
-    Although the symbols ``'[epsilon]'`` and ``'.'`` are always
-    recognized by ``selfies``, they will never be members of the returned set.
-
-    :return: The alphabet that ``selfies`` is currently operating on.
-
-    .. note:: In order to one-hot or integer encode SELFIES strings,
-        ``selfies.get_alphabet`` may be a poor choice. This is because
-        ``selfies`` often includes many symbols in its alphabet that never
-        actually appear in the input set. Instead,
-        ``selfies.get_alphabet_from_selfies`` may be preferred.
+    :return: The bond constraints :mod:`selfies` is currently operating on.
     """
 
-    global _state_library
-
-    alphabet = set(_state_library[0].keys())
-    alphabet.update([
-        '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Ring1]',
-        '[Branch2_1]', '[Branch2_2]', '[Branch2_3]', '[Ring2]',
-        '[Branch3_1]', '[Branch3_2]', '[Branch3_3]', '[Ring3]',
-    ])
-    alphabet.discard('[?]')
-    alphabet.discard('[epsilon]')
-    alphabet.add('[nop]')
-
-    return alphabet
+    global _bond_constraints
+    return dict(_bond_constraints)
 
 
-def get_atom_dict() -> Dict[str, int]:
-    """Returns the ``atom_dict`` that ``selfies`` is currently operating on.
+def set_semantic_constraints(
+        bond_constraints: Optional[Dict[str, int]] = None) -> None:
+    """Configures the semantic constraints of :mod:`selfies`.
 
-    The ``atom_dict`` is the argument of the most recent call of
-    ``selfies.set_alphabet``, or a default dictionary if the method has not
-    been called yet. Once retrieved, it is copied and then returned. See
-    ``selfies.set_alphabet`` for further explanation on ``atom_dict``.
+    The SELFIES grammar is enforced dynamically from a dictionary
+    ``bond_constraints``. The keys of the dictionary are atoms and/or ions
+    (e.g. ``I``, ``Fe+2``). To denote an ion, use the format ``E+C``
+    or ``E-C``, where ``E`` is an element and ``C`` is a positive integer.
+    The corresponding value is the maximum number of bonds that atom or
+    ion can make, between 1 and 8 inclusive. For example, one may have:
 
-    :return: The ``atom_dict`` that ``selfies`` is currently operating on.
-    """
+        * ``bond_constraints['I'] = 1``
+        * ``bond_constraints['C'] = 4``
 
-    global _atom_dict
-    return dict(_atom_dict)
-
-
-def set_alphabet(atom_dict: Optional[Dict[str, int]] = None) -> None:
-    """Sets the alphabet the ``selfies`` is operating on based on
-    ``atom_dict``.
-
-    The SELFIES alphabet and grammar is built dynamically from a dictionary
-    ``atom_dict`` of atom(s) and/or ion(s) and their corresponding bond
-    capacities. The key of the dictionary is a SMILES string representing
-    either a single atom, or some atom(s) and/or ion(s) enclosed by square
-    brackets. The corresponding value is the number of bonds that
-    the key can make, between 1 and 8 inclusive. For example, one may have:
-
-        * ``atom_dict['I'] = 1``
-        * ``atom_dict['[C@@H]'] = 3``
-
-    ``selfies.decoder`` will only generate SMILES that respect the bond
+    :func:`selfies.decoder` will only generate SMILES that respect the bond
     constraints specified by the dictionary. In the example above, both
     ``'[C][=I]'`` and ``'[I][=C]'`` will be translated to ``'CI'`` and
     ``'IC'`` respectively, because ``I`` has been configured to make one bond
     maximally.
 
-    If a SMILES key is not specified in ``atom_dict``, it will by default be
-    constrained to 8 bonds. To change the default setting for unrecognized
-    symbols, set ``atom_dict['?']`` to the desired integer (between 1 and 8
-    inclusive). Note that ``selfies.decoder`` only recognizes the exact
-    symbol string specified in ``atom_dict``. For example, ``'[Fe+2]'`` will
-    not be constrained if it is not in ``atom_dict``, even if ``'[Fe++]'`` is
-    a key in the dictionary.
+    If an atom or ion is not specified in ``bond_constraints``, it will
+    by default be constrained to 8 bonds. To change the default setting
+    for unrecognized atoms or ions, set ``bond_constraints['?']`` to the
+    desired integer (between 1 and 8 inclusive).
 
-    :param atom_dict: a dictionary of the atom(s) or ions that the new SELFIES
-        alphabet will be built upon, with the value being the
-        maximum bond capacity of the atom or ion. Defaults to ``None``. In that
-        case, a default dictionary will be used for ``atom_dict``.
+    :param bond_constraints: a dictionary representing the semantic
+        constraints the updated SELFIES will operate upon. Defaults to
+        ``None``; in this case, a default dictionary will be used.
     :return: ``None``.
     """
 
-    global _state_library, _atom_dict
+    global _bond_constraints
 
-    if atom_dict is None:
-        _atom_dict = default_atom_dict
+    if bond_constraints is None:
+        _bond_constraints = default_bond_constraints
+
     else:
-        _atom_dict = dict(atom_dict)
 
-    _state_library = build_state_dict(atom_dict)
+        # error checking
+        if '?' not in bond_constraints:
+            raise ValueError("'?' not a key in bond_constraints")
+
+        for key, value in bond_constraints.items():
+            if not (1 <= value <= 8):
+                raise ValueError("Value in bond_constraints not in [1, 8]")
+
+        _bond_constraints = dict(bond_constraints)
 
 
 # Symbol State Dict Functions ==============================================
-
-# _state_library is accessed through two keys, which are (1) the current
-# derivation state and (2) the current SELFIES symbol to be derived, or
-# '[?]' if the symbol is unknown. The corresponding value is a tuple of
-# (1) the derived SMILES symbol, and (2) the next derivation state.
-
-_atom_dict = default_atom_dict
-_state_library = build_state_dict()
 
 
 def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
@@ -124,71 +95,56 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
         (2) the next derivation state.
     """
 
-    state_dict = _state_library[state]
+    if 9991 <= state <= 9993:
+        state -= 9990  # X9991 --> X1, X9992 --> X2, X9993 --> X3
 
-    if symbol in state_dict:
-        return state_dict[symbol]
+    if symbol == '[epsilon]':
+        return ('', 0) if state == 0 else ('', -1)
 
-    else:  # unknown SELFIES symbol
-        derived_symbol = _process_unknown_symbol(symbol, state)
-        new_state = state_dict['[?]'][1] - get_num_from_bond(symbol[1])
-        return derived_symbol, new_state
+    # convert to smiles symbol
+    bond = ''
+    if symbol[1] in {'/', '\\', '=', '#'}:
+        bond = symbol[1]
+    bond_num = get_num_from_bond(bond)
 
+    if symbol[-5:] == 'expl]':  # e.g. [C@@Hexpl]
+        smiles_symbol = f"[{symbol[1 + len(bond):-5]}]"
+    else:
+        smiles_symbol = symbol[1 + len(bond):-1]
 
-# _bracket_less_smiles is a set of SELFIES symbols, whose
-# SMILES counterparts cannot have brackets by convention.
+    # get bond capacity
+    element, h_count, charge = parse_atom_symbol(smiles_symbol)
 
-_bracket_less_smiles = {'[B]', '[C]', '[N]', '[P]', '[O]', '[S]',
-                        '[F]', '[Cl]', '[Br]', '[I]'}
+    if charge == 0:
+        atom_or_ion = element
+    else:
+        atom_or_ion = f"{element}{charge:+}"
 
+    max_bonds = _bond_constraints.get(atom_or_ion,
+                                      _bond_constraints['?'])
 
-def _process_unknown_symbol(symbol: str, state: int) -> str:
-    """Attempts to convert an unknown SELFIES symbol ``symbol`` into a
-    proper SMILES symbol.
+    if h_count >= max_bonds:
+        raise ValueError(f"Too many Hs in SELFIES Symbol '{symbol}'. "
+                         f"Consider adjusting bond constraints.")
+    max_bonds -= h_count  # hydrogens consume 1 bond
 
-    :param symbol: an unrecognized SELFIES symbol.
-    :param state: the current derivation state.
-    :return: the processed SMILES symbol.
-    """
+    # calculate next state
+    if state == 0:
+        bond = ''
+        next_state = max_bonds
+    else:
+        if bond_num > min(state, max_bonds):
+            bond_num = min(state, max_bonds)
+            bond = get_bond_from_num(bond_num)
 
-    processed = ""
+        next_state = max_bonds - bond_num
+        if next_state == 0:
+            next_state = -1
 
-    if symbol[1: 2] in {'=', '#', '\\', '/', '-'}:
-        if state != 0:
-            processed += symbol[1]
-        symbol = "[" + symbol[2:]
-
-    if symbol in _bracket_less_smiles:
-        symbol = symbol[1: -1]  # remove [ and ] brackets
-
-    symbol = symbol.replace('expl]', ']')
-    processed += symbol
-
-    return processed
+    return (bond + smiles_symbol), next_state
 
 
 # Branch State Dict Functions =================================================
-
-# _branch_state_library takes as a key the current derivation state.
-# Its value is a tuple; for [BranchL_X], the (X - 1)th element of the tuple
-# gives a tuple of (1) the initial branch derivation state and (2) the
-# next derivation state (after the branch is derived). States 0-1, 9991-9993
-# are not included because Branches at those states are simply skipped.
-
-_branch_state_library = {
-    0: ((-1, 0), (-1, 0), (-1, 0)),
-    1: ((-1, 1), (-1, 1), (-1, 1)),
-    2: ((9991, 1), (9991, 1), (9991, 1)),
-    3: ((9991, 2), (9992, 1), (9992, 1)),
-    4: ((9991, 3), (9992, 2), (9993, 1)),
-    5: ((9991, 4), (9992, 3), (9993, 2)),
-    6: ((9991, 5), (9992, 4), (9993, 3)),
-    7: ((9991, 6), (9992, 5), (9993, 4)),
-    8: ((9991, 7), (9992, 6), (9993, 5)),
-    9991: ((-1, 9991), (-1, 9991), (-1, 9991)),
-    9992: ((-1, 9992), (-1, 9992), (-1, 9992)),
-    9993: ((-1, 9993), (-1, 9993), (-1, 9993))
-}
 
 
 def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
@@ -210,7 +166,12 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
     if not (1 <= branch_type <= 3):
         raise ValueError(f"Unknown branch symbol: {branch_symbol}")
 
-    return _branch_state_library[state][branch_type - 1]
+    if 2 <= state <= 8:
+        next_state = max(1, state - branch_type)
+        branch_init_state = 9990 + (state - next_state)
+        return branch_init_state, next_state
+    else:
+        return -1, state
 
 
 # SELFIES Symbol to N Functions ============================================
@@ -266,7 +227,7 @@ def get_symbols_from_n(n: int) -> List[str]:
     return symbols[::-1]
 
 
-# Helper Methods ==============================================================
+# Helper Functions ============================================================
 
 
 def get_num_from_bond(bond_symbol: str) -> int:
@@ -295,3 +256,84 @@ def get_bond_from_num(n: int) -> str:
     """
 
     return ('', '=', '#')[n - 1]
+
+
+def find_element(atom_symbol: str) -> Tuple[int, int]:
+    """Returns the indices of the element component of a SMILES atom symbol.
+
+    That is, if atom_symbol[i:j] is the element substring of the SMILES atom,
+    then (i, j) is returned. For example:
+        *   _find_element('b') = (0, 1).
+        *   _find_element('B') = (0, 1).
+        *   _find_element('[13C]') = (3, 4).
+        *   _find_element('[nH+]') = (1, 2).
+
+    :param atom_symbol: a SMILES atom.
+    :return: a tuple of the indices of the element substring of
+        ``atom_symbol``.
+    """
+
+    if atom_symbol[0] != '[':
+        return 0, len(atom_symbol)
+
+    i = 1
+    while atom_symbol[i].isdigit():  # skip isotope number
+        i += 1
+
+    if atom_symbol[i + 1].isalpha() and atom_symbol[i + 1] != 'H':
+        return i, i + 2
+    else:
+        return i, i + 1
+
+
+def parse_atom_symbol(atom_symbol: str) -> Tuple[str, int, int]:
+    """Parses a SMILES atom symbol and returns its element component,
+    number of associated hydrogens, and charge.
+
+    See http://opensmiles.org/opensmiles.html for the formal grammar
+    of SMILES atom symbols. Note that only @ and @@ are currently supported
+    as chiral specifications.
+
+    :param atom_symbol: a SMILES atom symbol.
+    :return: a tuple of (1) the element of ``atom_symbol``, (2) the hydrogen
+        count, and (3) the charge.
+    """
+
+    if atom_symbol[0] != '[':
+        return atom_symbol, 0, 0
+
+    atom_start, atom_end = find_element(atom_symbol)
+    i = atom_end
+
+    # skip chirality
+    if atom_symbol[i] == '@':  # e.g. @
+        i += 1
+    if atom_symbol[i] == '@':  # e.g. @@
+        i += 1
+
+    h_count = 0  # hydrogen count
+    if atom_symbol[i] == 'H':
+        h_count = 1
+
+        i += 1
+        if atom_symbol[i].isdigit():  # e.g. [CH2]
+            h_count = int(atom_symbol[i])
+            i += 1
+
+    charge = 0  # charge count
+    if atom_symbol[i] in ('+', '-'):
+        charge = 1 if atom_symbol[i] == '+' else -1
+
+        i += 1
+        if atom_symbol[i] in ('+', '-'):  # e.g. [Cu++]
+            while atom_symbol[i] in ('+', '-'):
+                charge += (1 if atom_symbol[i] == '+' else -1)
+                i += 1
+
+        elif atom_symbol[i].isdigit():  # e.g. [Cu+2]
+            s = i
+            while atom_symbol[i].isdigit():
+                i += 1
+            charge *= int(atom_symbol[s:i])
+
+    return atom_symbol[atom_start: atom_end], h_count, charge

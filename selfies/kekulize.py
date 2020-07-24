@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Dict, Iterable, List, Set, Tuple, Union
 
-from selfies.grammar_rules import get_num_from_bond
+from selfies.grammar_rules import find_element, get_num_from_bond, \
+    parse_atom_symbol
 
 ATOM_TYPE = 1
 BRANCH_TYPE = 2
@@ -115,9 +116,7 @@ def _kekulize(mol_graph: MolecularGraph) -> None:
 
     visited = set()
     for i in mol_graph.get_nodes_by_num_edges():
-        matched = set()
-
-        success = mol_graph.dfs_assign_bonds(i, visited, matched)
+        success = mol_graph.dfs_assign_bonds(i, visited, set(), set())
         if not success:
             raise ValueError("Kekulization Failed.")
 
@@ -134,87 +133,6 @@ _aromatic_valences = {
 }
 
 
-def _find_element(atom_symbol: str) -> Tuple[int, int]:
-    """Returns the indices of the element component of a SMILES atom symbol.
-
-    That is, if atom_symbol[i:j] is the element substring of the SMILES atom,
-    then (i, j) is returned. For example:
-        *   _find_element('b') = (0, 1).
-        *   _find_element('B') = (0, 1).
-        *   _find_element('[13C]') = (3, 4).
-        *   _find_element('[nH+]') = (1, 2).
-
-    :param atom_symbol: a SMILES atom.
-    :return: a tuple of the indices of the element substring of
-        ``atom_symbol``.
-    """
-
-    if atom_symbol[0] != '[':
-        return 0, len(atom_symbol)
-
-    i = 1
-    while atom_symbol[i].isdigit():  # skip isotope number
-        i += 1
-
-    if atom_symbol[i + 1].isalpha() and atom_symbol[i + 1] != 'H':
-        return i, i + 2
-    else:
-        return i, i + 1
-
-
-def _parse_atom_symbol(atom_symbol: str) -> Tuple[str, int, int]:
-    """Parses a SMILES atom symbol and returns its element component,
-    number of associated hydrogens, and charge.
-
-    See http://opensmiles.org/opensmiles.html for the formal grammar
-    of SMILES atom symbols. Note that only @ and @@ are currently supported
-    as chiral specifications.
-
-    :param atom_symbol: a SMILES atom symbol.
-    :return: a tuple of (1) the element of ``atom_symbol``, (2) the hydrogen
-        count, and (3) the charge.
-    """
-
-    if atom_symbol[0] != '[':
-        return atom_symbol, 0, 0
-
-    atom_start, atom_end = _find_element(atom_symbol)
-    i = atom_end
-
-    # skip chirality
-    if atom_symbol[i] == '@':  # e.g. @
-        i += 1
-    if atom_symbol[i] == '@':  # e.g. @@
-        i += 1
-
-    h_count = 0  # hydrogen count
-    if atom_symbol[i] == 'H':
-        h_count = 1
-
-        i += 1
-        if atom_symbol[i].isdigit():  # e.g. [CH2]
-            h_count = int(atom_symbol[i])
-            i += 1
-
-    charge = 0  # charge count
-    if atom_symbol[i] in ('+', '-'):
-        charge = 1 if atom_symbol[i] == '+' else -1
-
-        i += 1
-        if atom_symbol[i] in ('+', '-'):  # e.g. [Cu++]
-            while atom_symbol[i] in ('+', '-'):
-                charge += (1 if atom_symbol[i] == '+' else -1)
-                i += 1
-
-        elif atom_symbol[i].isdigit():  # e.g. [Cu+2]
-            s = i
-            while atom_symbol[i].isdigit():
-                i += 1
-            charge *= int(atom_symbol[s:i])
-
-    return atom_symbol[atom_start: atom_end], h_count, charge
-
-
 def _capitalize(atom_symbol: str) -> str:
     """Capitalizes the element portion of an aromatic SMILES atom symbol,
     converting it into a standard SMILES atom symbol.
@@ -223,7 +141,7 @@ def _capitalize(atom_symbol: str) -> str:
     :return: the capitalized ``atom_symbol``.
     """
 
-    s, _ = _find_element(atom_symbol)
+    s, _ = find_element(atom_symbol)
     return atom_symbol[:s] + atom_symbol[s].upper() + atom_symbol[s + 1:]
 
 
@@ -238,7 +156,7 @@ def _is_aromatic(atom_symbol: str) -> bool:
         and False otherwise.
     """
 
-    s, e = _find_element(atom_symbol)
+    s, e = find_element(atom_symbol)
 
     if e == len(atom_symbol):  # optimization to prevent string copying
         element = atom_symbol
@@ -270,7 +188,7 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
         and False otherwise.
     """
 
-    atom, h_count, charge = _parse_atom_symbol(atom_symbol)
+    atom, h_count, charge = parse_atom_symbol(atom_symbol)
 
     used_electrons = 0
     for b in bonds:
@@ -457,7 +375,8 @@ class MolecularGraph:
 
     def dfs_assign_bonds(self, idx: int,
                          visited: Set[int],
-                         matched: Set[int]) -> bool:
+                         matched_nodes: Set[int],
+                         matched_edges: Set[Bond]) -> bool:
         """After calling ``prune_to_pi_subgraph``, this method assigns
         double bonds between pairs of nodes such that every node is
         paired or matched.
@@ -466,8 +385,9 @@ class MolecularGraph:
 
         :param idx: the index of the current atom (or node).
         :param visited: a set of the indices of nodes that have been visited.
-        :param matched: a set of the indices of nodes that have been matched,
-            i.e., assigned a double bond.
+        :param matched_nodes: a set of the indices of nodes that have been
+            matched, i.e., assigned a double bond.
+        :param matched_edges: a set of the bonds that have been matched.
         :return: True, if a valid bond assignment was found; False otherwise.
         """
 
@@ -476,7 +396,7 @@ class MolecularGraph:
 
         edges = self.graph[idx]
 
-        if idx in matched:
+        if idx in matched_nodes:
 
             # recursively try to match adjacent nodes. If the matching
             # fails, then we must backtrack.
@@ -485,7 +405,9 @@ class MolecularGraph:
             visited.add(idx)
             for e in edges:
                 adj = e.other_end(idx)
-                if not self.dfs_assign_bonds(adj, visited, matched):
+                if not self.dfs_assign_bonds(adj, visited,
+                                             matched_nodes,
+                                             matched_edges):
                     visited &= visited_save
                     return False
             return True
@@ -493,27 +415,37 @@ class MolecularGraph:
         else:
 
             # list of candidate edges that can become a double bond
-            candidates = list(filter(lambda i: i.other_end(idx) not in matched,
-                                     edges))
+            candidates = list(
+                filter(lambda i: i.other_end(idx) not in matched_nodes, edges)
+            )
 
             if not candidates:
                 return False  # idx is unmatched, but all adj nodes are matched
 
+            matched_edges_save = matched_edges.copy()
+
             for e in candidates:
 
                 # match nodes connected by c
-                e.bond_symbol = '='
-                matched.add(e.idx_a)
-                matched.add(e.idx_b)
+                matched_nodes.add(e.idx_a)
+                matched_nodes.add(e.idx_b)
+                matched_edges.add(e)
 
-                success = self.dfs_assign_bonds(idx, visited, matched)
+                success = self.dfs_assign_bonds(idx, visited,
+                                                matched_nodes,
+                                                matched_edges)
 
                 if success:
+                    e.bond_symbol = '='
                     return True
                 else:  # the matching failed, so we must backtrack
-                    e.bond_symbol = ''
-                    matched.remove(e.idx_a)
-                    matched.remove(e.idx_b)
+
+                    for edge in matched_edges - matched_edges_save:
+                        edge.bond_symbol = ''
+                        matched_nodes.discard(edge.idx_a)
+                        matched_nodes.discard(edge.idx_b)
+
+                    matched_edges &= matched_edges_save
 
             return False
 
@@ -567,6 +499,14 @@ class Bond:
         self.idx_b = idx_b
         self.bond_symbol = bond_symbol
         self.bond_idx = bond_idx
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return (self.idx_a, self.idx_b) == (other.idx_a, other.idx_b)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash((self.idx_a, self.idx_b))
 
     def other_end(self, idx):
         """Given an index representing one end of this bond, returns
