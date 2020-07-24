@@ -52,19 +52,15 @@ import selfies as sf
 benzene = "c1ccccc1"
 
 # SMILES --> SELFIES translation
-encoded_selfies = sf.encoder(benzene)
-# encoded_selfies = '[C][=C][C][=C][C][=C][Ring1][Branch1_2]'
+encoded_selfies = sf.encoder(benzene)  # '[C][=C][C][=C][C][=C][Ring1][Branch1_2]'
 
 # SELFIES --> SMILES translation
-decoded_smiles = sf.decoder(encoded_selfies)
-# decoded_smiles = 'C1=CC=CC=C1'
+decoded_smiles = sf.decoder(encoded_selfies)  # 'C1=CC=CC=C1'
 
-len_benzene = sf.len_selfies(encoded_selfies)
-# len_benzene = 8
+len_benzene = sf.len_selfies(encoded_selfies)  # 8
 
 symbols_benzene = list(sf.split_selfies(encoded_selfies))
-# symbols_benzene = ['[C]', '[=C]', '[C]', '[=C]',
-#                    '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
+# ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
 Integer encoding a SELFIES: 
