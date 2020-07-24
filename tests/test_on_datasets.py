@@ -18,7 +18,7 @@ faulthandler.enable()
 datasets = [
     ('130K_QM9.txt', 'smiles'),
     ('51K_NonFullerene.txt', 'smiles'),
-    ('ZINC.txt', 'smiles'),
+    ('250K_ZINC.txt', 'smiles'),
     ('8k_Tox21.txt', 'smiles'),
     ('93k_PubChem_MUV_bioassay.txt', 'smiles')
 ]
@@ -37,6 +37,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     # file I/O
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', test_name)
+    
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
