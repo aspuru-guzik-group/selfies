@@ -3,6 +3,7 @@
 
 import faulthandler
 import os
+import random
 
 import pandas as pd
 import pytest
@@ -11,8 +12,6 @@ from rdkit.Chem import MolFromSmiles, MolToSmiles
 import selfies as sf
 from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
-
-import random
 
 faulthandler.enable()
 
@@ -38,14 +37,6 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     # file I/O
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', test_name)
-    error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_{test_name}.csv")
-
-    os.makedirs(os.path.dirname(error_path), exist_ok=True)
-    error_list = []
-    with open(error_path, "w+") as error_log:
-        error_log.write("In, Out\n")
-    error_found_flag = False
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
@@ -62,22 +53,10 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
         for in_smiles in chunk[column_name]:
 
             selfies = sf.encoder(in_smiles)
-            if selfies is None:
-                error_list.append((in_smiles, ''))
-                continue
-
+            assert selfies is not None
             out_smiles = sf.decoder(selfies)
 
-            if not is_same_mol(in_smiles, out_smiles):
-                error_list.append((in_smiles, out_smiles))
-
-        with open(error_path, "a") as error_log:
-            for error in error_list:
-                error_log.write(','.join(error) + "\n")
-        error_found_flag = error_found_flag or error_list
-        error_list = []
-
-    assert not error_found_flag
+            assert is_same_mol(in_smiles, out_smiles)
 
 
 @pytest.mark.parametrize("test_name, column_name", datasets)
@@ -89,14 +68,6 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     # file I/O
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', test_name)
-    error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_kekulize_{test_name}.csv")
-
-    os.makedirs(os.path.dirname(error_path), exist_ok=True)
-    error_list = []
-    with open(error_path, "w+") as error_log:
-        error_log.write("In\n")
-    error_found_flag = False
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
@@ -133,15 +104,7 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
 
             kekule_smiles = '.'.join(kekule_fragments)
 
-            if not is_same_mol(smiles, kekule_smiles):
-                error_list.append(smiles)
-
-        with open(error_path, "a") as error_log:
-            error_log.write("\n".join(error_list))
-        error_found_flag = error_found_flag or error_list
-        error_list = []
-
-    assert not error_found_flag
+            assert is_same_mol(smiles, kekule_smiles)
 
 
 # Helper Methods
