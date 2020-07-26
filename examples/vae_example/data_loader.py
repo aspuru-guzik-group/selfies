@@ -47,7 +47,7 @@ def selfies_to_hot(selfie, largest_selfie_len, alphabet):
 
     symbol_to_int = dict((c, i) for i, c in enumerate(alphabet))
 
-    # pad with [epsilon]
+    # pad with [nop]
     selfie += '[nop]' * (largest_selfie_len - sf.len_selfies(selfie))
 
     # integer encode
