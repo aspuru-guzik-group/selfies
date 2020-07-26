@@ -203,7 +203,6 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
                                           derived, prev_idx, branches, rings)
                 branch_end = len(derived) - 1
 
-                new_state = derived[prev_idx][1]
                 if branch_start <= branch_end:
                     branches.append((branch_start, branch_end))
 
