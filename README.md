@@ -4,15 +4,20 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string representation
+SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular 
+string representation.
 
-A main objective is to use SELFIES as direct input into machine  learning models, in particular in generative models, for the generation of  molecular graphs which are syntactically and semantically valid.
+A main objective is to use SELFIES as direct input into machine learning 
+models, in particular in generative models, for the generation of molecular
+graphs which are syntactically and semantically valid.
 
-See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, and Alan Aspuru-Guzik at arXiv (https://arxiv.org/abs/1905.13741).
+See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam, 
+Pascal Friederich, and Alan Aspuru-Guzik at 
+arXiv (https://arxiv.org/abs/1905.13741).
 
 
 ## Installation
-Use pip to install selfies.
+Use pip to install ``selfies``.
 
 ```bash
 pip install selfies
@@ -38,39 +43,56 @@ customize the SELFIES language.
 
 ### Examples
 
-Translation between SELFIES and SMILES: 
+#### Translation between SELFIES and SMILES representations
 
 ```python
 import selfies as sf
-    
-benzene = "C1=CC=CC=C1"
-encoded_selfies = sf.encoder(benzene)  # SMILES --> SEFLIES
-decoded_smiles = sf.decoder(encoded_selfies)  # SELFIES --> SMILES
+
+benzene = "c1ccccc1"
+
+# SMILES --> SELFIES translation
+encoded_selfies = sf.encoder(benzene)  # '[C][=C][C][=C][C][=C][Ring1][Branch1_2]'
+
+# SELFIES --> SMILES translation
+decoded_smiles = sf.decoder(encoded_selfies)  # 'C1=CC=CC=C1'
+
+len_benzene = sf.len_selfies(encoded_selfies)  # 8
+
+symbols_benzene = list(sf.split_selfies(encoded_selfies))
+# ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
-Integer encoding a SELFIES: 
+#### Integer encoding SELFIES:
+In this example we first build an alphabet 
+from a dataset of SELFIES, and then convert a SELFIES into a
+padded, integer-encoded representation. Note that we use the symbol
+``'[nop]'`` to pad our SELFIES, which is a special SELFIES symbol that
+is always ignored and skipped over by ``selfies.decoder``, making it a useful 
+padding character. 
+
 ```python
 import selfies as sf
 
-dataset = ['[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
+dataset = ['[C][O][C]', '[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
 alphabet = sf.get_alphabet_from_selfies(dataset)
-alphabet.add('[nop]')  # '[nop]' is a special padding symbol 
-print(alphabet)  # {'[C]', '[F]', '[nop]', '[O]', '[=O]'}
+alphabet.add('[nop]')  # '[nop]' is a special padding symbol
+alphabet = list(sorted(alphabet))
+print(alphabet)  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
 
-pad_to_len = 5
-symbol_to_idx = {s: i for i, s in enumerate(sorted(alphabet))}
+pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5 
+symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
 
 # SELFIES to integer encode
-dimethyl_ether = '[C][O][C]'
+dimethyl_ether = dataset[0]  # '[C][O][C]'
 
-# pad the SELFIES 
+# pad the SELFIES
 dimethyl_ether += '[nop]' * (pad_to_len - sf.len_selfies(dimethyl_ether))
 
-# integer encode the SELFIES 
+# integer encode the SELFIES
 int_encoded = []
 for symbol in sf.split_selfies(dimethyl_ether):
     int_encoded.append(symbol_to_idx[symbol])
-    
+
 print(int_encoded)  # [1, 3, 1, 4, 4]
 ```
 

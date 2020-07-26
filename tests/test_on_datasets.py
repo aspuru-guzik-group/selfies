@@ -3,6 +3,7 @@
 
 import faulthandler
 import os
+import random
 
 import pandas as pd
 import pytest
@@ -12,21 +13,19 @@ import selfies as sf
 from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
-import random
-
 faulthandler.enable()
 
-test_sets = [
-    ('test_sets/130K_QM9.txt', 'smiles'),
-    ('test_sets/51K_NonFullerene.txt', 'smiles'),
-    ('test_sets/250k_ZINC.txt', 'smiles'),
-    ('test_sets/8k_Tox21.txt', 'smiles'),
-    ('test_sets/93k_PubChem_MUV_bioassay.txt', 'smiles')
+datasets = [
+    ('130K_QM9', 'smiles'),
+    ('51K_NonFullerene', 'smiles'),
+    ('250K_ZINC', 'smiles'),
+    ('8k_Tox21', 'smiles'),
+    ('93k_PubChem_MUV_bioassay', 'smiles')
 ]
 
 
-@pytest.mark.parametrize("test_path, column_name", test_sets)
-def test_roundtrip_translation(test_path, column_name, dataset_samples):
+@pytest.mark.parametrize("test_name, column_name", datasets)
+def test_roundtrip_translation(test_name, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
@@ -36,11 +35,10 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     sf.set_semantic_constraints(constraints)
 
     # file I/O
-    test_name = os.path.splitext(os.path.basename(test_path))[0]
-
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, test_path)
-    error_path = os.path.join(curr_dir, f"error_sets/errors_{test_name}.csv")
+    test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
+    error_path = os.path.join(curr_dir,
+                              'error_sets', f"errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -81,19 +79,17 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     assert not error_found_flag
 
 
-@pytest.mark.parametrize("test_path, column_name", test_sets)
-def test_kekulize_parser(test_path, column_name, dataset_samples):
+@pytest.mark.parametrize("test_name, column_name", datasets)
+def test_kekulize_parser(test_name, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
     """
 
     # file I/O
-    test_name = os.path.splitext(os.path.basename(test_path))[0]
-
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, test_path)
+    test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              f"error_sets/errors_kekulize_{test_name}.csv")
+                              'error_sets', f"errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
