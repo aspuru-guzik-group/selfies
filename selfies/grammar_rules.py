@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional, Tuple
+from itertools import product
+from typing import Dict, List, Optional, Set, Tuple
 
 default_bond_constraints = {
     'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
@@ -11,6 +12,45 @@ default_bond_constraints = {
 }
 
 _bond_constraints = default_bond_constraints
+
+
+def get_semantic_alphabet_subset() -> Set[str]:
+    """Returns a subset of all symbols that are semantically constrained
+    by :mod:`selfies`.
+
+    These semantic constraints can be configured with
+    :func:`selfies.set_semantic_constraints`.
+
+    :return: a subset of all symbols that are semantically constrained.
+    """
+
+    alphabet_subset = set()
+
+    organic_subset = {'B', 'C', 'N', 'O', 'S', 'P', 'F', 'Cl', 'Br', 'I'}
+    bonds = {'': 1, '=': 2, '#': 3}
+
+    # add atomic symbols
+    for (a, c), (b, m) in product(_bond_constraints.items(), bonds.items()):
+
+        if (m > c) or (a == '?'):
+            continue
+
+        if a in organic_subset:
+            symbol = f"[{b}{a}]"
+        else:
+            symbol = f"[{b}{a}expl]"
+
+        alphabet_subset.add(symbol)
+
+    # add branch and ring symbols
+    for i in range(1, 4):
+        alphabet_subset.add(f"[Ring{i}]")
+        alphabet_subset.add(f"[Expl=Ring{i}]")
+
+        for j in range(1, 4):
+            alphabet_subset.add(f"[Branch{i}_{j}]")
+
+    return alphabet_subset
 
 
 def get_semantic_constraints() -> Dict[str, int]:

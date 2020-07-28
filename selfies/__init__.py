@@ -27,11 +27,13 @@ mario.krenn@utoronto.ca and alan@aspuru.com.
 
 __version__ = "1.0.0"
 
-__all__ = ['decoder', 'encoder',
-           'get_semantic_constraints', 'set_semantic_constraints',
+__all__ = ['encoder', 'decoder',
+           'get_semantic_alphabet_subset', 'get_semantic_constraints',
+           'set_semantic_constraints',
            'len_selfies', 'split_selfies', 'get_alphabet_from_selfies']
 
 from .decoder import decoder
 from .encoder import encoder
-from .grammar_rules import get_semantic_constraints, set_semantic_constraints
-from .utils import len_selfies, split_selfies, get_alphabet_from_selfies
+from .grammar_rules import get_semantic_alphabet_subset, \
+    get_semantic_constraints, set_semantic_constraints
+from .utils import get_alphabet_from_selfies, len_selfies, split_selfies
