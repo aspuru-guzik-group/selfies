@@ -13,6 +13,7 @@ Standard Functions
 
 Advanced Functions
 ------------------------
+.. autofunction:: get_semantic_alphabet_subset
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
 

@@ -194,7 +194,8 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
     for b in bonds:
         used_electrons += get_num_from_bond(b)
 
-    if (atom == 'c') and (h_count == 0) and (len(bonds) == 2):  # e.g. c1ccccc1
+    # e.g. c1ccccc1
+    if (atom == 'c') and (h_count == charge == 0) and (len(bonds) == 2):
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:

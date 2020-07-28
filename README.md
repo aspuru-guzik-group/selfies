@@ -43,7 +43,7 @@ customize the SELFIES language.
 
 ### Examples
 
-Translation between SELFIES and SMILES representations: 
+#### Translation between SELFIES and SMILES representations
 
 ```python
 import selfies as sf
@@ -62,7 +62,8 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
-Integer encoding SELFIES: in this example we first build an alphabet 
+#### Integer encoding SELFIES:
+In this example we first build an alphabet 
 from a dataset of SELFIES, and then convert a SELFIES into a
 padded, integer-encoded representation. Note that we use the symbol
 ``'[nop]'`` to pad our SELFIES, which is a special SELFIES symbol that
