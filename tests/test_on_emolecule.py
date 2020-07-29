@@ -1,5 +1,7 @@
 """ This script is a clone of the 'test_on_datasets.py' script,
-    specifically for testing the large 1.2 GB version.txt file.
+    specifically for testing the large 1.2 GB eKolecules set. See
+    tests/README.md for instructions on how to download, process, and
+    test the set for developers interested in making a PR to the repository!
 
     This file is split into 23 text files of 1 million SMILES strings,
     such that the developer can end the test and run from the last
