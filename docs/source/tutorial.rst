@@ -38,11 +38,11 @@ An atomic symbol ``[<B><A>]`` connects atom ``<A>`` to the previously
 derived atom through bond type ``<B>``. If creating this bond would violate the
 bond constraints of the previous or current atom, the bond multiplicity is
 reduced (minimally) such that no constraints are violated. If the previous
-atom cannot make at least one bond, then SELFIES interpretation terminates, and
-the current and all subsequent symbols are ignored.
+atom cannot make at least one bond, then SELFIES interpretation
+completes and terminates.
 
-In the following examples, we restrict ``C`` to 4 bonds, ``S`` to 2 bonds,
-and ``I`` to 1 bond:
+In the following examples, we restrict ``C`` to 4 bonds, ``O`` to 2 bonds,
+and ``F`` to 1 bond:
 
 .. table::
     :align: center
@@ -52,15 +52,16 @@ and ``I`` to 1 bond:
     +=========+=============================+=================+
     | 1       | ``[C][=C][C][#C][13Cexpl]`` | ``C=CC#C[13C]`` |
     +---------+-----------------------------+-----------------+
-    | 2       | ``[C][I][C][C][C][C]``      | ``CI``          |
+    | 2       | ``[C][F][C][C][C][C]``      | ``CF``          |
     +---------+-----------------------------+-----------------+
-    | 3       | ``[C][S][=C][#S][C][I]``    | ``CSC=S``       |
+    | 3       | ``[C][O][=C][#O][C][F]``    | ``COC=O``       |
     +---------+-----------------------------+-----------------+
 
-**Discussion:** In example 2, since ``I`` was constrained to 1 bond,
-the subsequent ``[C][C][C][C]`` was ignored. In example 3, since ``S``
-was constrained to 2 bonds, the triple bond of ``[#S]`` is first reduced
-to a double bond. Then, the subsequent ``[C][I]`` is ignored because ``=S``
+**Discussion:** In example 2, since ``F`` was constrained to 1 bond, SELFIES
+interpretation terminates after the ``[F]``, and the subsequent
+``[C][C][C][C]`` is not derived. In example 3, since ``O``
+was constrained to 2 bonds, the triple bond in ``[#O]`` is first reduced
+to a double bond. Then, the subsequent ``[C][F]`` is not derived because ``=O``
 cannot make any more bonds.
 
 
@@ -103,26 +104,26 @@ Then, the indices are read as a hexadecimal (base 16) integer ``N``.
 .. table::
     :align: center
 
-    +----------------------+---------------------------------------------+
-    | SELFIES              | ``...[Branch3_1][Ring1][C][O][C][C]...``    |
-    +----------------------+---------------------------------------------+
-    | Next ``<L>`` symbols | ``[Ring1][C][O]``                           |
-    +----------------------+---------------------------------------------+
-    | Indices              | 1, 0, 9                                     |
-    +----------------------+---------------------------------------------+
-    | ``N``                | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
-    +----------------------+---------------------------------------------+
+    +--------------------------+---------------------------------------------+
+    | SELFIES                  | ``...[Branch3_1][Ring1][C][O][C][C]...``    |
+    +--------------------------+---------------------------------------------+
+    | Next ``<L> = 3`` symbols | ``[Ring1][C][O]``                           |
+    +--------------------------+---------------------------------------------+
+    | Indices                  | 1, 0, 9                                     |
+    +--------------------------+---------------------------------------------+
+    | ``Q``                    | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
+    +--------------------------+---------------------------------------------+
 
-The next ``N + 1`` symbols (after the ``<L>`` symbols used to compute ``N``)
+The next ``Q + 1`` symbols (after the ``<L>`` symbols used to compute ``Q``)
 are treated as a separate SELFIES and recursively interpreted. Finally, the
-branch fragment is connected to the previously derived atom. SELFIES
-interpretation proceeds with the next symbol (after the ``<L> + N + 1``
-symbols used to create the branch). Although we have recursively derived
-new atoms that are in the branch, in practice, we still define the
-"previously derived atom" as the previously derived atom
-before the branch interpretation.
+first atom of the derived branch is connected to the previously derived atom.
+SELFIES interpretation proceeds with the next symbol (after the ``<L> + Q + 1``
+symbols used to create the branch). Although we have derived new atoms that
+are in the branch, in practice, we still define the "previously derived atom"
+as the previously derived atom before the branch derivation.
 
-Work in progress... : )
+``<X>`` specifies the type of bond that connects the branch to the main
+chain.
 
 Ring Symbols
 ############
