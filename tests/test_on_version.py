@@ -48,7 +48,8 @@ test_sets = [
     ('test_sets/split22.txt', 'isosmiles')
 ]
 
-@pytest.mark.parametrize("test_path, column_name", test_sets)
+#@pytest.mark.parametrize("test_path, column_name", test_sets)
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_roundtrip_translation(test_path, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
@@ -104,7 +105,8 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     assert not error_found_flag
 
 
-@pytest.mark.parametrize("test_path, column_name", test_sets)
+#@pytest.mark.parametrize("test_path, column_name", test_sets)
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_kekulize_parser(test_path, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
