@@ -53,6 +53,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
         *   SMILES with ring numbering between atoms that are over
             ``16 ** 3 = 4096`` atoms apart.
         *   SMILES using the wildcard symbol ``*``.
+        *   SMILES using chiral specifications other than ``@`` and ``@@``.
 
     """
 
