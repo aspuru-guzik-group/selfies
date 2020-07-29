@@ -1,7 +1,7 @@
 This directory contains the testing suite for ``selfies``. 
  * ``test_sets/`` contains the testing datasets.
  * ``test_on_datasets.py`` contains tests that use the testing datasets.
- * ``test_on_version.py`` contains tests on the eMolecules dataset of over 22 million SMILES strings. The dataset must be downloaded and processed, for which instructions are included below.
+ * ``test_on_emolecule.py`` contains tests on the eMolecules dataset of over 22 million SMILES strings. The dataset must be downloaded and processed, for which instructions are included below.
  * ``test_selfies.py`` contains tests for the overall ``selfies`` library. 
  * ``test_selfies_utils`` contains tests for the utility methods 
     of ``selfies``, for example ``selfies.len_selfies``.
@@ -19,5 +19,5 @@ brew install coreutils
 gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
 ```
 
-Once the dataset is downloaded and split in the `test_sets/` directory, `test_on_version.py` can be run to test the eMolecules set. 
+Once the dataset is downloaded and split in the `test_sets/` directory, `test_on_emolecule.py` can be run to test the eMolecules set. 
 
