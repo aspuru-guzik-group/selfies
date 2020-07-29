@@ -27,7 +27,6 @@ Pygments==2.6.1
 pyparsing==2.4.7
 pyrsistent==0.16.0
 pytz==2020.1
-pywin32==228
 requests==2.24.0
 six==1.15.0
 snowballstemmer==2.0.0
