@@ -98,7 +98,7 @@ and converted into indices according to this assignment:
     | All other symbols assigned index 0.               |
     +-------+-----------------+-------+-----------------+
 
-Then, the indices are read as a hexadecimal (base 16) integer ``N``.
+Then, the indices are read as a hexadecimal (base 16) integer ``Q`.
 
 .. table::
     :align: center
@@ -110,13 +110,13 @@ Then, the indices are read as a hexadecimal (base 16) integer ``N``.
     +----------------------+---------------------------------------------+
     | Indices              | 1, 0, 9                                     |
     +----------------------+---------------------------------------------+
-    | ``N``                | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
+    | ``Q``                | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
     +----------------------+---------------------------------------------+
 
-The next ``N + 1`` symbols (after the ``<L>`` symbols used to compute ``N``)
+The next ``Q + 1`` symbols (after the ``<L>`` symbols used to compute ``Q`)
 are treated as a separate SELFIES and recursively interpreted. Finally, the
 branch fragment is connected to the previously derived atom. SELFIES
-interpretation proceeds with the next symbol (after the ``<L> + N + 1``
+interpretation proceeds with the next symbol (after the ``<L> + Q + 1``
 symbols used to create the branch). Although we have recursively derived
 new atoms that are in the branch, in practice, we still define the
 "previously derived atom" as the previously derived atom
