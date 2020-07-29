@@ -44,7 +44,7 @@ customize the SELFIES language.
 
 ### Examples
 
-#### Translation between SELFIES and SMILES representations
+#### Translation between SELFIES and SMILES representations:
 
 ```python
 import selfies as sf
@@ -107,8 +107,9 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 
 ## Documentation 
 
-The documentation can be found on ReadTheDocs. Alternatively, it can be built 
-from the ``docs/`` directory.
+The documentation can be found on 
+[ReadTheDocs](https://selfies-mirror.readthedocs.io/en/latest/?). 
+Alternatively, it can be built from the ``docs/`` directory.
 
 
 ## Tests
@@ -126,8 +127,9 @@ By default, SELFIES is tested against a random subset
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
- * 8K molecules from Tox21
- * 93K molecules from PubChem MUV
+ * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
+ * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet 
+ * 23M molecules from the [eMolecules set](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0) 
  
 Other tests are random and repeated ``trials`` number of times. 
 These can be specified as arguments 

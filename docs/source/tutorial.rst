@@ -99,7 +99,7 @@ and converted into indices according to this assignment:
     | All other symbols assigned index 0.               |
     +-------+-----------------+-------+-----------------+
 
-Then, the indices are read as a hexadecimal (base 16) integer ``N``.
+Then, the indices are read as a hexadecimal (base 16) integer ``Q``.
 
 .. table::
     :align: center

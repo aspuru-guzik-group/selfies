@@ -1,4 +1,11 @@
-"""Lengthy tests that are run on testing data sets.
+""" This script is a clone of the 'test_on_datasets.py' script,
+specifically for testing the large 1.2 GB eKolecules set. See
+tests/README.md for instructions on how to download, process, and
+test the set for developers interested in making a PR to the repository!
+
+This file is split into 23 text files of 1 million SMILES strings,
+such that the developer can end the test and run from the last
+file tested, by passing the specific paths into 'test_sets = {}'.
 """
 
 import faulthandler
@@ -15,17 +22,36 @@ from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
 faulthandler.enable()
 
-datasets = [
-    ('130K_QM9', 'smiles'),
-    ('51K_NonFullerene', 'smiles'),
-    ('250K_ZINC', 'smiles'),
-    ('8k_Tox21', 'smiles'),
-    ('93k_PubChem_MUV_bioassay', 'smiles')
+test_sets = [
+    ('test_sets/split00.txt', 'isosmiles'),
+    ('test_sets/split01.txt', 'isosmiles'),
+    ('test_sets/split02.txt', 'isosmiles'),
+    ('test_sets/split03.txt', 'isosmiles'),
+    ('test_sets/split04.txt', 'isosmiles'),
+    ('test_sets/split05.txt', 'isosmiles'),
+    ('test_sets/split06.txt', 'isosmiles'),
+    ('test_sets/split07.txt', 'isosmiles'),
+    ('test_sets/split08.txt', 'isosmiles'),
+    ('test_sets/split09.txt', 'isosmiles'),
+    ('test_sets/split10.txt', 'isosmiles'),
+    ('test_sets/split11.txt', 'isosmiles'),
+    ('test_sets/split12.txt', 'isosmiles'),
+    ('test_sets/split13.txt', 'isosmiles'),
+    ('test_sets/split14.txt', 'isosmiles'),
+    ('test_sets/split15.txt', 'isosmiles'),
+    ('test_sets/split16.txt', 'isosmiles'),
+    ('test_sets/split17.txt', 'isosmiles'),
+    ('test_sets/split18.txt', 'isosmiles'),
+    ('test_sets/split19.txt', 'isosmiles'),
+    ('test_sets/split20.txt', 'isosmiles'),
+    ('test_sets/split21.txt', 'isosmiles'),
+    ('test_sets/split22.txt', 'isosmiles')
 ]
 
 
-@pytest.mark.parametrize("test_name, column_name", datasets)
-def test_roundtrip_translation(test_name, column_name, dataset_samples):
+# @pytest.mark.parametrize("test_path, column_name", test_sets)
+@pytest.mark.skip(reason="no way of currently testing this")
+def test_roundtrip_translation(test_path, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
@@ -35,10 +61,11 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     sf.set_semantic_constraints(constraints)
 
     # file I/O
+    test_name = os.path.splitext(os.path.basename(test_path))[0]
+
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
-    error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_{test_name}.csv")
+    test_path = os.path.join(curr_dir, test_path)
+    error_path = os.path.join(curr_dir, f"error_sets/errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -60,9 +87,6 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
-            if MolFromSmiles(in_smiles) is None:
-                continue
-
             selfies = sf.encoder(in_smiles)
             if selfies is None:
                 error_list.append((in_smiles, ''))
@@ -82,17 +106,20 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     assert not error_found_flag
 
 
-@pytest.mark.parametrize("test_name, column_name", datasets)
-def test_kekulize_parser(test_name, column_name, dataset_samples):
+# @pytest.mark.parametrize("test_path, column_name", test_sets)
+@pytest.mark.skip(reason="no way of currently testing this")
+def test_kekulize_parser(test_path, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
     """
 
     # file I/O
+    test_name = os.path.splitext(os.path.basename(test_path))[0]
+
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
+    test_path = os.path.join(curr_dir, test_path)
     error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_kekulize_{test_name}.csv")
+                              f"error_sets/errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -113,9 +140,6 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     # kekulize testing
     for chunk in reader:
         for smiles in chunk[column_name]:
-
-            if MolFromSmiles(smiles) is None:
-                continue
 
             # build kekulized SMILES
             kekule_fragments = []
