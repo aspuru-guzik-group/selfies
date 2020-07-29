@@ -1,15 +1,16 @@
 """ This script is a clone of the 'test_on_datasets.py' script,
-    specifically for testing the large 1.2 GB eKolecules set. See
-    tests/README.md for instructions on how to download, process, and
-    test the set for developers interested in making a PR to the repository!
+specifically for testing the large 1.2 GB eKolecules set. See
+tests/README.md for instructions on how to download, process, and
+test the set for developers interested in making a PR to the repository!
 
-    This file is split into 23 text files of 1 million SMILES strings,
-    such that the developer can end the test and run from the last
-    file tested, by passing the specific paths into 'test_sets = {}'.
+This file is split into 23 text files of 1 million SMILES strings,
+such that the developer can end the test and run from the last
+file tested, by passing the specific paths into 'test_sets = {}'.
 """
 
 import faulthandler
 import os
+import random
 
 import pandas as pd
 import pytest
@@ -19,10 +20,7 @@ import selfies as sf
 from selfies.encoder import _parse_smiles
 from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
-import random
-
 faulthandler.enable()
-
 
 test_sets = [
     ('test_sets/split00.txt', 'isosmiles'),
@@ -50,7 +48,8 @@ test_sets = [
     ('test_sets/split22.txt', 'isosmiles')
 ]
 
-#@pytest.mark.parametrize("test_path, column_name", test_sets)
+
+# @pytest.mark.parametrize("test_path, column_name", test_sets)
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_roundtrip_translation(test_path, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
@@ -107,7 +106,7 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     assert not error_found_flag
 
 
-#@pytest.mark.parametrize("test_path, column_name", test_sets)
+# @pytest.mark.parametrize("test_path, column_name", test_sets)
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_kekulize_parser(test_path, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
@@ -194,6 +193,3 @@ def is_same_mol(smiles1, smiles2):
     can2 = MolToSmiles(m2)
 
     return can1 == can2
-
-
-
