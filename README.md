@@ -44,7 +44,7 @@ customize the SELFIES language.
 
 ### Examples
 
-#### Translation between SELFIES and SMILES representations
+#### Translation between SELFIES and SMILES representations:
 
 ```python
 import selfies as sf
