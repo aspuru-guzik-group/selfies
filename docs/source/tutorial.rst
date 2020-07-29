@@ -98,7 +98,7 @@ and converted into indices according to this assignment:
     | All other symbols assigned index 0.               |
     +-------+-----------------+-------+-----------------+
 
-Then, the indices are read as a hexadecimal (base 16) integer ``Q`.
+Then, the indices are read as a hexadecimal (base 16) integer ``Q``.
 
 .. table::
     :align: center
@@ -113,7 +113,7 @@ Then, the indices are read as a hexadecimal (base 16) integer ``Q`.
     | ``Q``                | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
     +----------------------+---------------------------------------------+
 
-The next ``Q + 1`` symbols (after the ``<L>`` symbols used to compute ``Q`)
+The next ``Q + 1`` symbols (after the ``<L>`` symbols used to compute ``Q``)
 are treated as a separate SELFIES and recursively interpreted. Finally, the
 branch fragment is connected to the previously derived atom. SELFIES
 interpretation proceeds with the next symbol (after the ``<L> + Q + 1``
