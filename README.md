@@ -107,8 +107,9 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 
 ## Documentation 
 
-The documentation can be found on ReadTheDocs. Alternatively, it can be built 
-from the ``docs/`` directory.
+The documentation can be found on 
+[ReadTheDocs](https://selfies-mirror.readthedocs.io/en/latest/?). 
+Alternatively, it can be built from the ``docs/`` directory.
 
 
 ## Tests
