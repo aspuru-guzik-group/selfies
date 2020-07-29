@@ -8,10 +8,12 @@ This directory contains the testing suite for ``selfies``.
  * ``time_selfies.py`` contains a script that times the efficiency of 
     ``selfies``.
 
-
+---
 
 The eMolecules set is not included in the github repository, due to its size (1.29 GB). For developers interested on testing using this set, one can download the dataset [here](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0). Once the dataset is downloaded, one can split the file into chunks of 1 million SMILES for easier processing using the following command in Windows:
-```split -l 1000000 -d --additional-suffix=.txt version.txt split```
+```
+split -l 1000000 -d --additional-suffix=.txt version.txt split
+```
 
 On Mac, the following commands can be used:
 ```
