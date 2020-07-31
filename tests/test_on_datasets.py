@@ -64,6 +64,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
                 continue
 
             selfies = sf.encoder(in_smiles)
+
             if selfies is None:
                 error_list.append((in_smiles, ''))
                 continue
