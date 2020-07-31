@@ -87,6 +87,9 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
+            if MolFromSmiles(in_smiles) is None:
+                continue
+
             selfies = sf.encoder(in_smiles)
             if selfies is None:
                 error_list.append((in_smiles, ''))
