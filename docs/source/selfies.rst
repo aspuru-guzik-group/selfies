@@ -10,7 +10,7 @@ Standard Functions
 .. autofunction:: len_selfies
 .. autofunction:: split_selfies
 .. autofunction:: get_alphabet_from_selfies
-.. autofunction:: get_semantic_alphabet_subset
+.. autofunction:: get_semantic_robust_alphabet
 
 Advanced Functions
 ------------------------

@@ -36,7 +36,7 @@ The ``selfies`` library has six standard functions:
 | ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  | 
 | ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
 | ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. | 
-| ``selfies.get_semantic_alphabet_subset`` | Returns a subset of all SELFIES symbols that are semantically constrained. | 
+| ``selfies.get_semantic_robust_alphabet`` | Returns a subset of all SELFIES symbols that are semantically constrained. | 
 
 Please read the documentation for more detailed descriptions of these 
 functions, and to view the advanced functions, which allow users to
