@@ -1,25 +1,32 @@
-Interpreting SELFIES
-=====================
+Reading SELFIES
+===============
 
-This section is an informal tutorial on interpreting SELFIES; we aim to
-provide an intuition on translating SELFIES into molecules. We use the verb
-*interpret* to describe the action of interpreting a SELFIES
-as a molecule. SELFIES are interpreted symbol-by-symbol (from left to right),
-so atoms and bonds of the molecule are derived sequentially, one-by-one.
+This section is an informal tutorial on *reading* SELFIES. Reading a
+SELFIES is the action of deriving a molecule from a SELFIES. SELFIES are
+read symbol-by-symbol (from left to right), so atoms and bonds of the molecule
+are derived sequentially, one-by-one. We begin by describing the various
+types of SELFIES symbols, and the form they come in. Then, we delve into the
+SELFIES derivation process, which involves discussion about the
+SELFIES grammar rules.
+
+----------
+
+SELFIES Symbols
+###############
 
 There are three main types of SELFIES symbols: atomic symbols, branch symbols,
-and ring symbols. We describe each type of symbol in each section.
-
+and ring symbols. Additionally, there are a few symbols that :mod:`selfies`
+ascribes special meaning to.
 
 Atomic Symbols
-##############
+**************
 
 Atomic symbols are of the general form ``[<B><A>]``, where
-``<B> in {'', '/', '\\', '=', '#'}`` is a bond symbol and ``<A>`` is
-a SMILES symbol representing an atom or ion. If the SMILES symbol is
-enclosed by square brackets (e.g. ``[13C]``), then the square brackets are
-dropped and ``expl`` (for "explicit brackets") is appended to obtain ``<A>``.
-For example:
+``<B> in {'', '/', '\\', '=', '#'}`` is a prefix representing a bond,
+and ``<A>`` is a SMILES symbol representing an atom or ion.
+If the SMILES symbol is enclosed by square brackets (e.g. ``[13C]``),
+then the square brackets are dropped and ``expl`` (for "explicit brackets")
+is appended to obtain ``<A>``. For example:
 
 .. table::
     :align: center
@@ -34,109 +41,24 @@ For example:
     | ``'/'`` | ``[O+]``      | ``O+expl``   | ``[/O+expl]``  |
     +---------+---------------+--------------+----------------+
 
-An atomic symbol ``[<B><A>]`` connects atom ``<A>`` to the previously
-derived atom through bond type ``<B>``. If creating this bond would violate the
-bond constraints of the previous or current atom, the bond multiplicity is
-reduced (minimally) such that no constraints are violated. If the previous
-atom cannot make at least one bond, then SELFIES interpretation
-completes and terminates.
-
-In the following examples, we restrict ``C`` to 4 bonds, ``O`` to 2 bonds,
-and ``F`` to 1 bond:
-
-.. table::
-    :align: center
-
-    +---------+-----------------------------+-----------------+
-    | Example | SELFIES                     | SMILES          |
-    +=========+=============================+=================+
-    | 1       | ``[C][=C][C][#C][13Cexpl]`` | ``C=CC#C[13C]`` |
-    +---------+-----------------------------+-----------------+
-    | 2       | ``[C][F][C][C][C][C]``      | ``CF``          |
-    +---------+-----------------------------+-----------------+
-    | 3       | ``[C][O][=C][#O][C][F]``    | ``COC=O``       |
-    +---------+-----------------------------+-----------------+
-
-**Discussion:** In example 2, since ``F`` was constrained to 1 bond, SELFIES
-interpretation terminates after the ``[F]``, and the subsequent
-``[C][C][C][C]`` is not derived. In example 3, since ``O``
-was constrained to 2 bonds, the triple bond in ``[#O]`` is first reduced
-to a double bond. Then, the subsequent ``[C][F]`` is not derived because ``=O``
-cannot make any more bonds.
-
 
 Branch Symbols
-##############
+**************
 
-Branch symbols are of the general form ``[Branch<L>_<X>]``, where
-``<L>, <X> in {1, 2, 3}``. A branch symbol specifies a branch from the
+Branch symbols are of the general form ``[Branch<L>_<M>]``, where
+``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
 main chain, analogous to the open and closed curved brackets in SMILES.
-After a branch symbol, the next ``<L>`` symbols are first read
-and converted into indices according to this assignment:
-
-.. table::
-    :align: center
-
-    +-------+-----------------+-------+-----------------+
-    | Index | Symbol          | Index | Symbol          |
-    +=======+=================+=======+=================+
-    | 0     | ``[C]``         | 8     | ``[Branch2_3]`` |
-    +-------+-----------------+-------+-----------------+
-    | 1     | ``[Ring1]``     | 9     | ``[O]``         |
-    +-------+-----------------+-------+-----------------+
-    | 2     | ``[Ring2]``     | 10    | ``[N]``         |
-    +-------+-----------------+-------+-----------------+
-    | 3     | ``[Branch1_1]`` | 11    | ``[=N]``        |
-    +-------+-----------------+-------+-----------------+
-    | 4     | ``[Branch1_2]`` | 12    | ``[=C]``        |
-    +-------+-----------------+-------+-----------------+
-    | 5     | ``[Branch1_3]`` | 13    | ``[#C]``        |
-    +-------+-----------------+-------+-----------------+
-    | 6     | ``[Branch2_1]`` | 14    | ``[S]``         |
-    +-------+-----------------+-------+-----------------+
-    | 7     | ``[Branch2_2]`` | 15    | ``[P]``         |
-    +-------+-----------------+-------+-----------------+
-    | All other symbols assigned index 0.               |
-    +-------+-----------------+-------+-----------------+
-
-Then, the indices are read as a hexadecimal (base 16) integer ``Q``.
-
-.. table::
-    :align: center
-
-    +--------------------------+---------------------------------------------+
-    | SELFIES                  | ``...[Branch3_1][Ring1][C][O][C][C]...``    |
-    +--------------------------+---------------------------------------------+
-    | Next ``<L> = 3`` symbols | ``[Ring1][C][O]``                           |
-    +--------------------------+---------------------------------------------+
-    | Indices                  | 1, 0, 9                                     |
-    +--------------------------+---------------------------------------------+
-    | ``Q``                    | ``1 * (16 ** 2) + 0 * (16 ** 1) + 9 = 265`` |
-    +--------------------------+---------------------------------------------+
-
-The next ``Q + 1`` symbols (after the ``<L>`` symbols used to compute ``Q``)
-are treated as a separate SELFIES and recursively interpreted. Finally, the
-first atom of the derived branch is connected to the previously derived atom.
-SELFIES interpretation proceeds with the next symbol (after the ``<L> + Q + 1``
-symbols used to create the branch). Although we have derived new atoms that
-are in the branch, in practice, we still define the "previously derived atom"
-as the previously derived atom before the branch derivation.
-
-``<X>`` specifies the type of bond that connects the branch to the main
-chain.
 
 Ring Symbols
-############
+************
 
 Ring symbols are of the general form ``[Ring<L>]``, where ``<L> in {1, 2, 3}``.
+A ring symbol specifies a ring bond between two atoms, analogous to the
+ring numbering digits in SMILES.
 
-Work in progress... : )
 
 Special Symbols
-###############
-
-This subsection describes various special symbols that :mod:`selfies`
-ascribes special meaning to.
+***************
 
 +---------------+----------------------------------------------------------------------------------------------+
 | Character     | Description                                                                                  |
@@ -149,3 +71,71 @@ ascribes special meaning to.
 |               |                                                                                              |
 |               | used in SMILES.                                                                              |
 +---------------+----------------------------------------------------------------------------------------------+
+
+----------
+
+SELFIES Derivation
+##################
+
+The derivation of a molecule from a SELFIES occurs in two steps. First,
+the main chain and projecting branches - the main scaffold - is derived.
+Then, ring bonds are added between atoms of the main scaffold.
+
+Step 1: Main Scaffold
+*********************
+
+The SELFIES grammar has non-terminal symbols or states
+
+.. math::
+
+    X_0, \ldots, X_7, X_{9991}, X_{9992}, X_{9993}, Q_1, Q_2, Q_3
+
+Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
+with each symbol specifying a grammar rule. SELFIES derivation terminates
+when no non-terminal symbols remain. We now describe the grammar rules
+associated with each type of SELFIES symbol.
+
+**Atomic Symbol:** Let atomic symbol ``[<B><A>]`` be given, where ``<B>`` is a prefix
+representing a bond with multiplicity :math:`\beta` and ``<A>`` is an atom
+that can make :math:`\alpha` bonds maximally. For :math:`i \in \{1, \ldots, 7\}`, the
+atomic symbol will map:
+
+.. math::
+
+    \begin{align}
+        X_0 &\to \texttt{<A>} X_{\alpha} \\
+        X_i &\to \texttt{<B'><A><X>}
+    \end{align}
+
+where ``<B'>`` is a prefix representing a bond with multiplicity
+:math:`\mu = \min(\beta, \alpha, i)`,
+and ``<X>`` is the empty string if :math:`\alpha - \mu = 0` or the
+non-termial symbol :math:`X_{\alpha - \mu}` otherwise. Intuitively,
+non-terminal states :math:`X_i` restricts subsequent bonds to a multiplicity
+of at most :math:`i`. We provide an example of the derivation of the
+SELFIES ``[F][=C][=13Cexpl][#N]``:
+
+.. math::
+
+    X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=[13C]}X_2 \to \texttt{FC=C=N}
+
+
+**Branch Symbol:** Let Branch symbol ``[Branch<L>_<M>]`` be given. For
+:math:`i \in \{0, 1, 9991, 9992, 9993\}`, the Branch symbol maps:
+
+.. math::
+
+    X_i \to X_i
+
+in other words, the Branch symbol is ignored.
+
+in progress : )
+
+**Ring Symbol:**
+
+in progress : )
+
+Step 2: Ring Formation
+**********************
+
+in progress : )
