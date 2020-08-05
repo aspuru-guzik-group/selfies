@@ -14,7 +14,7 @@ default_bond_constraints = {
 _bond_constraints = default_bond_constraints
 
 
-def get_semantic_alphabet_subset() -> Set[str]:
+def get_semantic_robust_alphabet() -> Set[str]:
     """Returns a subset of all symbols that are semantically constrained
     by :mod:`selfies`.
 
