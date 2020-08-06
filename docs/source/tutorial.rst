@@ -1,25 +1,20 @@
-Reading SELFIES
-===============
+SELFIES Derivation
+==================
 
-This section is an informal tutorial on *reading* SELFIES. Reading a
-SELFIES is the action of deriving a molecule from a SELFIES. SELFIES are
-read symbol-by-symbol (from left to right), so atoms and bonds of the molecule
-are derived sequentially, one-by-one. We begin by describing the various
-types of SELFIES symbols, and the form they come in. Then, we delve into the
-SELFIES derivation process, which involves discussion about the
-SELFIES grammar rules.
+This section is an informal tutorial on how molecules are derived
+from a SELFIES. The SELFIES grammar has non-terminal symbols or states
 
-----------
+.. math::
 
-SELFIES Symbols
-###############
+    X_0, \ldots, X_7, X_{9991}, X_{9992}, X_{9993}, Q_1, Q_2, Q_3
 
-There are three main types of SELFIES symbols: atomic symbols, branch symbols,
-and ring symbols. Additionally, there are a few symbols that :mod:`selfies`
-ascribes special meaning to.
+Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
+with each symbol specifying a grammar rule. SELFIES derivation terminates
+when no non-terminal symbols remain. In each subsection, we describe a type of
+SELFIES symbol and the grammar rules associated with it.
 
 Atomic Symbols
-**************
+##############
 
 Atomic symbols are of the general form ``[<B><A>]``, where
 ``<B> in {'', '/', '\\', '=', '#'}`` is a prefix representing a bond,
@@ -41,28 +36,203 @@ is appended to obtain ``<A>``. For example:
     | ``'/'`` | ``[O+]``      | ``O+expl``   | ``[/O+expl]``  |
     +---------+---------------+--------------+----------------+
 
+Let atomic symbol ``[<B><A>]`` be given, where ``<B>`` is a prefix
+representing a bond with multiplicity :math:`\beta` and ``<A>`` is an atom
+that can make :math:`\alpha` bonds maximally. For any state :math:`X_i`,
+let
+
+.. math::
+
+    \mu = \begin{cases}
+        \min(\beta, \alpha, i) & 0 \leq i \leq 7 \\
+        \min(\beta, \alpha, i - 9990) & i > 9990
+    \end{cases}
+
+The atomic symbol maps:
+
+.. math::
+
+    X_i \to \begin{cases}
+        \texttt{<A>} X_{\alpha} & i = 0 \\
+        \texttt{<B'><A>} X_{\alpha - \mu} & i \neq 0
+    \end{cases}
+
+where ``<B'>`` is a prefix representing a bond with multiplicity :math:`\mu`,
+and where we replace :math:`X_{\alpha - \mu}` above with the empty string
+if :math:`\alpha - \mu = 0`. Non-terminal states :math:`X_{1-7}`
+restrict subsequent bonds to a multiplicity of at most :math:`i`.
+Additionally, note that non-terminal states :math:`X_{9991-9993}`
+behave identically to states :math:`X_{1-3}` with respect to
+atomic symbols. Finally, we provide an example of the derivation of the
+SELFIES ``[F][=C][=13Cexpl][#N]``:
+
+.. math::
+
+    X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=[13C]}X_2 \to \texttt{FC=C=N}
+
+
+**Discussion:** Intuitively, an atomic symbol ``[<B><A>]`` connects
+atom ``<A>`` to the previously derived atom through bond type ``<B>``.
+If creating this bond would violate the bond constraints of the previous
+or current atom, the bond multiplicity is reduced (minimally) such that no
+constraints are violated. We present more examples below:
+
+.. table::
+    :align: center
+
+    +---------+-----------------------------+-----------------+
+    | Example | SELFIES                     | SMILES          |
+    +=========+=============================+=================+
+    | 1       | ``[C][=C][C][#C][13Cexpl]`` | ``C=CC#C[13C]`` |
+    +---------+-----------------------------+-----------------+
+    | 2       | ``[C][F][C][C][C][C]``      | ``CF``          |
+    +---------+-----------------------------+-----------------+
+    | 3       | ``[C][O][=C][#O][C][F]``    | ``COC=O``       |
+    +---------+-----------------------------+-----------------+
+
+Index Symbols
+#############
+
+All SELFIES symbols map states :math:`Q_{1-3}` to
+an integer or index. The mapping is summarized by the table below.
+
+.. table::
+    :align: center
+
+    +-------+-----------------+-------+-----------------+
+    | Index | Symbol          | Index | Symbol          |
+    +=======+=================+=======+=================+
+    | 0     | ``[C]``         | 8     | ``[Branch2_3]`` |
+    +-------+-----------------+-------+-----------------+
+    | 1     | ``[Ring1]``     | 9     | ``[O]``         |
+    +-------+-----------------+-------+-----------------+
+    | 2     | ``[Ring2]``     | 10    | ``[N]``         |
+    +-------+-----------------+-------+-----------------+
+    | 3     | ``[Branch1_1]`` | 11    | ``[=N]``        |
+    +-------+-----------------+-------+-----------------+
+    | 4     | ``[Branch1_2]`` | 12    | ``[=C]``        |
+    +-------+-----------------+-------+-----------------+
+    | 5     | ``[Branch1_3]`` | 13    | ``[#C]``        |
+    +-------+-----------------+-------+-----------------+
+    | 6     | ``[Branch2_1]`` | 14    | ``[S]``         |
+    +-------+-----------------+-------+-----------------+
+    | 7     | ``[Branch2_2]`` | 15    | ``[P]``         |
+    +-------+-----------------+-------+-----------------+
+    | All other symbols assigned index 0.               |
+    +-------+-----------------+-------+-----------------+
+
+The states :math:`Q_{1-3}` are used to specify the size of branches,
+and the location of ring bonds.
 
 Branch Symbols
-**************
-
+##############
 Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
 main chain, analogous to the open and closed curved brackets in SMILES.
 
+
+A Branch symbol ``[Branch<L>_<M>]`` maps:
+
+.. math::
+
+    X_i \to \begin{cases}
+        X_i & i \leq 1 \text{ or } i \geq 9991 \\
+        B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})X_j & 2 \leq i \leq 7
+    \end{cases}
+
+:math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
+derivation state and :math:`j = i - n` is the next derivation state. In the
+bottom case, the ``<L>`` symbols after the Branch symbol are read,
+and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
+:math:`B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})` reads the
+indices as a hexadecimal (base 16) integer :math:`Q`, takes the
+next :math:`Q + 1` symbols, and recursively derives them with initial
+derivation state :math:`X_{9990 + n}`. The resulting fragment is taken to be
+the derived branch, and derivation proceeds with the next
+derivation state :math:`X_j`.
+
+**Discussion:**  Intuitively, branch symbols are skipped for states
+:math:`X_{0-1}` because the previous atom can make at most one bond
+(branches require two bonds
+to be free). Branch symbols are also skipped for states :math:`X_{9991-9993}`
+in order to prevent branches being created at the start of branches.
+We present some examples below:
+
++---------+-----------------------------------------+---------------+-------------------------+
+| Example | SELFIES                                 | :math:`Q + 1` | SMILES                  |
++=========+=========================================+===============+=========================+
+| 1       | ``[C][Branch1_1][C][F][Cl]``            | 1             | ``C(F)Cl``              |
++---------+-----------------------------------------+---------------+-------------------------+
+| 2       | ``[C][Branch1_2][Ring2][=C][C][C][Cl]`` | 3             | ``C(=CCC)Cl``           |
++---------+-----------------------------------------+---------------+-------------------------+
+| 3       | ``[S][Branch1_2][C][=O][Branch1_2][C]`` | 1, 1, 1       | ``S(=O)(=O)([O-])[O-]`` |
+|         |                                         |               |                         |
+|         | ``[=O][Branch1_1][C][O-expl][O-expl]``  |               |                         |
++---------+-----------------------------------------+---------------+-------------------------+
+
 Ring Symbols
-************
+############
 
-Ring symbols are of the general form ``[Ring<L>]``, where ``<L> in {1, 2, 3}``.
-A ring symbol specifies a ring bond between two atoms, analogous to the
-ring numbering digits in SMILES.
+Ring symbols are of the general form ``[Ring<L>]`` or ``[Expl<B>Ring<L>]``,
+where ``<L> in {1, 2, 3}`` and ``<B> in {'/', '\\', '=', '#'}`` is a
+prefix representing a bond. A ring symbol specifies a ring bond between two
+atoms, analogous to the ring numbering digits in SMILES.
 
+A Ring symbol ``[Ring<L>]`` maps:
+
+.. math::
+
+    X_i \to \begin{cases}
+        X_i & i = 0 \text{ or } i \geq 9991 \\
+        R(Q_1, \ldots Q_{\texttt{<L>}})X_i & 1 \leq i \leq 7
+    \end{cases}
+
+Identical to the branch case, the ``<L>`` symbols after the Branch symbol are read,
+and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
+:math:`R(Q_1, \ldots Q_{\texttt{<L>}})` reads the
+indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
+atom to the :math:`(Q + 1)`-th previously derived atom through a single bond.
+If the :math:`(Q + 1)`-th previously derived atom does not exist,
+then the connection is made to the 1st derived atom instead.
+The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function, except
+that it connects the current and :math:`(Q + 1)`-th previous atom through
+a bond of type ``<B>``.
+
+
+**Discussion**: In practice, ring bonds are created in a second pass,
+after all atoms and branches - have been derived. The candidate ring
+bonds are temporarily stored in a separate queue, and then made in
+the order they appear in the SELFIES. A ring bond will be made if
+both atoms of the bond can make the ring bond without violating any bond
+constraints. It is possible that the current atom is already bonded to the
+:math:`(Q + 1)`-th previous atom, e.g. if :math:`Q = 0`. In this case,
+the multiplicity of the existing bond is increased by the multiplicity
+of the ring bond. Similarly, if doing so would violate any bond constraints,
+then the ring bond is not made.
+
+We present some examples below
+
++---------+-------------------------------------------------+---------------+------------------+
+| Example | SELFIES                                         | :math:`Q + 1` | SMILES           |
++---------+-------------------------------------------------+---------------+------------------+
+| 1       | ``[C][=C][C][=C][C][=C][Ring1][Branch1_2]``     | 5             | ``C1=CC=CC=C1``  |
++---------+-------------------------------------------------+---------------+------------------+
+| 2       | ``[C][C][=C][C][=C][C][Expl=Ring1][Branch1_2]`` | 5             | ``C=1C=CC=CC=1`` |
++---------+-------------------------------------------------+---------------+------------------+
+| 3       | ``[C][C][Expl=Ring1][C]``                       | 1             | ``C#C``          |
++---------+-------------------------------------------------+---------------+------------------+
 
 Special Symbols
-***************
+###############
+
+The following are symbols that have a special meaning for SELFIES:
 
 +---------------+----------------------------------------------------------------------------------------------+
 | Character     | Description                                                                                  |
 +===============+==============================================================================================+
+| ``[epsilon]`` | The ``[epsilon]`` symbol maps :math:`X_0 \to X_0` and :math:`X_i \to \epsilon` (the empty    |
+|               | string) for all :math:`i \geq 1`.                                                            |
++---------------+----------------------------------------------------------------------------------------------+
 | ``[nop]``     | The nop (no operation) symbol is always ignored and skipped over by :func:`selfies.decoder`. |
 |               |                                                                                              |
 |               | Thus, it can be used as a padding symbol for SELFIES.                                        |
@@ -71,71 +241,3 @@ Special Symbols
 |               |                                                                                              |
 |               | used in SMILES.                                                                              |
 +---------------+----------------------------------------------------------------------------------------------+
-
-----------
-
-SELFIES Derivation
-##################
-
-The derivation of a molecule from a SELFIES occurs in two steps. First,
-the main chain and projecting branches - the main scaffold - is derived.
-Then, ring bonds are added between atoms of the main scaffold.
-
-Step 1: Main Scaffold
-*********************
-
-The SELFIES grammar has non-terminal symbols or states
-
-.. math::
-
-    X_0, \ldots, X_7, X_{9991}, X_{9992}, X_{9993}, Q_1, Q_2, Q_3
-
-Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
-with each symbol specifying a grammar rule. SELFIES derivation terminates
-when no non-terminal symbols remain. We now describe the grammar rules
-associated with each type of SELFIES symbol.
-
-**Atomic Symbol:** Let atomic symbol ``[<B><A>]`` be given, where ``<B>`` is a prefix
-representing a bond with multiplicity :math:`\beta` and ``<A>`` is an atom
-that can make :math:`\alpha` bonds maximally. For :math:`i \in \{1, \ldots, 7\}`, the
-atomic symbol will map:
-
-.. math::
-
-    \begin{align}
-        X_0 &\to \texttt{<A>} X_{\alpha} \\
-        X_i &\to \texttt{<B'><A><X>}
-    \end{align}
-
-where ``<B'>`` is a prefix representing a bond with multiplicity
-:math:`\mu = \min(\beta, \alpha, i)`,
-and ``<X>`` is the empty string if :math:`\alpha - \mu = 0` or the
-non-termial symbol :math:`X_{\alpha - \mu}` otherwise. Intuitively,
-non-terminal states :math:`X_i` restricts subsequent bonds to a multiplicity
-of at most :math:`i`. We provide an example of the derivation of the
-SELFIES ``[F][=C][=13Cexpl][#N]``:
-
-.. math::
-
-    X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=[13C]}X_2 \to \texttt{FC=C=N}
-
-
-**Branch Symbol:** Let Branch symbol ``[Branch<L>_<M>]`` be given. For
-:math:`i \in \{0, 1, 9991, 9992, 9993\}`, the Branch symbol maps:
-
-.. math::
-
-    X_i \to X_i
-
-in other words, the Branch symbol is ignored.
-
-in progress : )
-
-**Ring Symbol:**
-
-in progress : )
-
-Step 2: Ring Formation
-**********************
-
-in progress : )
