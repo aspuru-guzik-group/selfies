@@ -6,7 +6,7 @@ from a SELFIES. The SELFIES grammar has non-terminal symbols or states
 
 .. math::
 
-    X_0, \ldots, X_7, X_{9991}, X_{9992}, X_{9993}, Q_1, Q_2, Q_3
+    X_0, \ldots, X_7, Q_1, Q_2, Q_3
 
 Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
 with each symbol specifying a grammar rule. SELFIES derivation terminates
@@ -38,17 +38,7 @@ is appended to obtain ``<A>``. For example:
 
 Let atomic symbol ``[<B><A>]`` be given, where ``<B>`` is a prefix
 representing a bond with multiplicity :math:`\beta` and ``<A>`` is an atom
-that can make :math:`\alpha` bonds maximally. For any state :math:`X_i`,
-let
-
-.. math::
-
-    \mu = \begin{cases}
-        \min(\beta, \alpha, i) & 0 \leq i \leq 7 \\
-        \min(\beta, \alpha, i - 9990) & i > 9990
-    \end{cases}
-
-The atomic symbol maps:
+that can make :math:`\alpha` bonds maximally. The atomic symbol maps:
 
 .. math::
 
@@ -57,18 +47,17 @@ The atomic symbol maps:
         \texttt{<B'><A>} X_{\alpha - \mu} & i \neq 0
     \end{cases}
 
-where ``<B'>`` is a prefix representing a bond with multiplicity :math:`\mu`,
-and where we replace :math:`X_{\alpha - \mu}` above with the empty string
-if :math:`\alpha - \mu = 0`. Non-terminal states :math:`X_{1-7}`
-restrict subsequent bonds to a multiplicity of at most :math:`i`.
-Additionally, note that non-terminal states :math:`X_{9991-9993}`
-behave identically to states :math:`X_{1-3}` with respect to
-atomic symbols. Finally, we provide an example of the derivation of the
-SELFIES ``[F][=C][=13Cexpl][#N]``:
+where ``<B'>`` is a prefix representing a bond with multiplicity
+:math:`\mu = \min(\beta, \alpha, i)`, and where we replace
+:math:`X_{\alpha - \mu}` above with the empty string
+if :math:`\alpha - \mu = 0`. Note that non-terminal states :math:`X_{1-7}`
+effectively restrict the subsequent bond to a multiplicity of at most :math:`i`.
+We provide an example of the derivation of the
+SELFIES ``[F][=C][=C][#N]``:
 
 .. math::
 
-    X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=[13C]}X_2 \to \texttt{FC=C=N}
+    X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=C}X_2 \to \texttt{FC=C=N}
 
 
 **Discussion:** Intuitively, an atomic symbol ``[<B><A>]`` connects
@@ -126,9 +115,18 @@ and the location of ring bonds.
 
 Branch Symbols
 ##############
+
 Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
 main chain, analogous to the open and closed curved brackets in SMILES.
+
+.. note::
+
+    In order to prevent branches and rings from forming at the beginning
+    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
+    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
+    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
+    under these states.
 
 
 A Branch symbol ``[Branch<L>_<M>]`` maps:
@@ -169,6 +167,14 @@ We present some examples below:
 |         |                                         |               |                         |
 |         | ``[=O][Branch1_1][C][O-expl][O-expl]``  |               |                         |
 +---------+-----------------------------------------+---------------+-------------------------+
+| 4       | ``[C][Branch2_1][Ring1][Branch1_2][C]`` | 21            | ``C(CC...CC)F``         |
+|         |                                         |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C][C]``|               |                         |
+|         |                                         |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][F]``         |               |                         |
+|         +-----------------------------------------+---------------+-------------------------+
+|         | Example 4 has a single branch of 21 carbon atoms.                                 |
++---------+-----------------------------------------------------------------------------------+
 
 Ring Symbols
 ############
@@ -177,6 +183,14 @@ Ring symbols are of the general form ``[Ring<L>]`` or ``[Expl<B>Ring<L>]``,
 where ``<L> in {1, 2, 3}`` and ``<B> in {'/', '\\', '=', '#'}`` is a
 prefix representing a bond. A ring symbol specifies a ring bond between two
 atoms, analogous to the ring numbering digits in SMILES.
+
+.. note::
+
+    In order to prevent branches and rings from forming at the beginning
+    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
+    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
+    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
+    under these states.
 
 A Ring symbol ``[Ring<L>]`` maps:
 
@@ -194,9 +208,9 @@ indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
 atom to the :math:`(Q + 1)`-th previously derived atom through a single bond.
 If the :math:`(Q + 1)`-th previously derived atom does not exist,
 then the connection is made to the 1st derived atom instead.
-The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function, except
-that it connects the current and :math:`(Q + 1)`-th previous atom through
-a bond of type ``<B>``.
+The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
+``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
+previous atom through a bond of type ``<B>``.
 
 
 **Discussion**: In practice, ring bonds are created in a second pass,
@@ -210,7 +224,7 @@ the multiplicity of the existing bond is increased by the multiplicity
 of the ring bond. Similarly, if doing so would violate any bond constraints,
 then the ring bond is not made.
 
-We present some examples below
+We present some examples below:
 
 +---------+-------------------------------------------------+---------------+------------------+
 | Example | SELFIES                                         | :math:`Q + 1` | SMILES           |
@@ -221,6 +235,14 @@ We present some examples below
 +---------+-------------------------------------------------+---------------+------------------+
 | 3       | ``[C][C][Expl=Ring1][C]``                       | 1             | ``C#C``          |
 +---------+-------------------------------------------------+---------------+------------------+
+| 4       | ``[C][C][C][C][C][C][C][C][C][C][C]``           | 21            | ``C1CC...CC1``   |
+|         |                                                 |               |                  |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C]``           |               |                  |
+|         |                                                 |               |                  |
+|         | ``[Ring2][Ring1][Branch1_2]``                   |               |                  |
++         +-------------------------------------------------+---------------+------------------+
+|         | Example 4 is a single carbon ring of 22 carbon atoms.                              |
++---------+------------------------------------------------------------------------------------+
 
 Special Symbols
 ###############
