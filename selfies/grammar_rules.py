@@ -135,9 +135,6 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
         (2) the next derivation state.
     """
 
-    if 9991 <= state <= 9993:
-        state -= 9990  # X9991 --> X1, X9992 --> X2, X9993 --> X3
-
     if symbol == '[epsilon]':
         return ('', 0) if state == 0 else ('', -1)
 
@@ -207,8 +204,8 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
         raise ValueError(f"Unknown branch symbol: {branch_symbol}")
 
     if 2 <= state <= 8:
-        next_state = max(1, state - branch_type)
-        branch_init_state = 9990 + (state - next_state)
+        branch_init_state = min(state - 1, branch_type)
+        next_state = state - branch_init_state
         return branch_init_state, next_state
     else:
         return -1, state

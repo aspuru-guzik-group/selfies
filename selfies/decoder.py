@@ -1,7 +1,7 @@
+from typing import Dict, Iterable, List, Optional, Tuple, Union
+
 from selfies.grammar_rules import get_bond_from_num, get_n_from_symbols, \
     get_next_branch_state, get_next_state, get_num_from_bond
-
-from typing import Optional, Iterable, List, Union, Tuple
 
 
 def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
@@ -109,11 +109,11 @@ def _translate_selfies(selfies: str) -> str:
     # derived[6] = ['=C', 2, 5]
     derived = []
 
-    # each element of <branches> is a tuple of size two that represents the
-    # branches to be made, in the same order they appear in the SELFIES (left
-    # to right). If the i-th branch starts at the j-th derived atom and ends
-    # at the k-th derived atom, then branches[i] = (j, k).
-    branches = []
+    # each item of <branches> is a key-value pair of indices that represents
+    # the branches to be made. If a branch starts at the i-th derived atom
+    # and ends at the j-th derived atom, then branches[i] = j. No two
+    # branches should start at the same atom, e.g. C((C)Cl)C
+    branches = {}
 
     # each element of <rings> is a tuple of size three that represents the
     # rings to be made, in the same order they appear in the SELFIES (left
@@ -125,23 +125,14 @@ def _translate_selfies(selfies: str) -> str:
     _translate_selfies_derive(selfies_gen, 0, derived, -1, branches, rings)
     _form_rings_bilocally(derived, rings)
 
-    lb_locs = {}  # key = index of left bracket, value = how many brackets
-    rb_locs = {}  # key = index of right bracket, value = how many brackets
-    for lb, rb in branches:
-        lb_locs[lb] = lb_locs.get(lb, 0) + 1
-        rb_locs[rb] = rb_locs.get(rb, 0) + 1
+    # create branches
+    for lb, rb in branches.items():
+        derived[lb][0] = '(' + derived[lb][0]
+        derived[rb][0] += ')'
 
     smiles = ""
-    for i, d in enumerate(derived):  # construct SMILES from <derived>
-
-        if i in lb_locs:
-            smiles += '(' * lb_locs[i]
-
-        smiles += d[0]
-
-        if i in rb_locs:
-            smiles += ')' * rb_locs[i]
-
+    for s, _, _ in derived:  # construct SMILES from <derived>
+        smiles += s
     return smiles
 
 
@@ -151,7 +142,7 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
                               init_state: int,
                               derived: List[List[Union[str, int]]],
                               prev_idx: int,
-                              branches: List[Tuple[int, int]],
+                              branches: Dict[int, int],
                               rings: List[Tuple[int, int, str]]) -> None:
     """Recursive helper for _translate_selfies.
 
@@ -182,7 +173,7 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
             branch_init_state, new_state = \
                 get_next_branch_state(curr_symbol, state)
 
-            if state <= 1 or state >= 9991:  # state = 0, 1, 9991, 9992, 9993
+            if state <= 1:  # state = 0, 1
                 pass  # ignore no symbols
 
             else:
@@ -203,15 +194,20 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
                                           derived, prev_idx, branches, rings)
                 branch_end = len(derived) - 1
 
+                # resolve C((C)Cl)C --> C(C)(Cl)C
+                while branch_start in branches:
+                    branch_start = branches[branch_start] + 1
+
+                # finally, register the branch in branches
                 if branch_start <= branch_end:
-                    branches.append((branch_start, branch_end))
+                    branches[branch_start] = branch_end
 
         # Case 2: Ring symbol (e.g. [Ring2])
         elif 'Ring' in curr_symbol:
 
             new_state = state
 
-            if state == 0 or state >= 9991:  # state = 0, 9991, 9992, 9993
+            if state == 0:
                 pass  # ignore no symbols
 
             else:
