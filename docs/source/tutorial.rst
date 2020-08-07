@@ -120,41 +120,30 @@ Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
 main chain, analogous to the open and closed curved brackets in SMILES.
 
-.. note::
-
-    In order to prevent branches and rings from forming at the beginning
-    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
-    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
-    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
-    under these states.
-
-
 A Branch symbol ``[Branch<L>_<M>]`` maps:
 
 .. math::
 
     X_i \to \begin{cases}
-        X_i & i \leq 1 \text{ or } i \geq 9991 \\
-        B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})X_j & 2 \leq i \leq 7
+        X_i & i \leq 1 \\
+        B(Q_1, \ldots Q_{\texttt{<L>}}, X_{n})X_j & i > 1
     \end{cases}
 
 :math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
 derivation state and :math:`j = i - n` is the next derivation state. In the
 bottom case, the ``<L>`` symbols after the Branch symbol are read,
 and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
-:math:`B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})` reads the
+:math:`B(Q_1, \ldots Q_{\texttt{<L>}}, X_{n})` reads the
 indices as a hexadecimal (base 16) integer :math:`Q`, takes the
 next :math:`Q + 1` symbols, and recursively derives them with initial
-derivation state :math:`X_{9990 + n}`. The resulting fragment is taken to be
+derivation state :math:`X_{n}`. The resulting fragment is taken to be
 the derived branch, and derivation proceeds with the next
 derivation state :math:`X_j`.
 
 **Discussion:**  Intuitively, branch symbols are skipped for states
 :math:`X_{0-1}` because the previous atom can make at most one bond
 (branches require two bonds
-to be free). Branch symbols are also skipped for states :math:`X_{9991-9993}`
-in order to prevent branches being created at the start of branches.
-We present some examples below:
+to be free). We present some examples below:
 
 +---------+-----------------------------------------+---------------+-------------------------+
 | Example | SELFIES                                 | :math:`Q + 1` | SMILES                  |
@@ -184,21 +173,13 @@ where ``<L> in {1, 2, 3}`` and ``<B> in {'/', '\\', '=', '#'}`` is a
 prefix representing a bond. A ring symbol specifies a ring bond between two
 atoms, analogous to the ring numbering digits in SMILES.
 
-.. note::
-
-    In order to prevent branches and rings from forming at the beginning
-    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
-    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
-    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
-    under these states.
-
 A Ring symbol ``[Ring<L>]`` maps:
 
 .. math::
 
     X_i \to \begin{cases}
-        X_i & i = 0 \text{ or } i \geq 9991 \\
-        R(Q_1, \ldots Q_{\texttt{<L>}})X_i & 1 \leq i \leq 7
+        X_i & i = 0 \\
+        R(Q_1, \ldots Q_{\texttt{<L>}})X_i & i \neq 0
     \end{cases}
 
 Identical to the branch case, the ``<L>`` symbols after the Branch symbol are read,
