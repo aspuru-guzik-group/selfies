@@ -210,12 +210,15 @@ previous atom through a bond of type ``<B>``.
 after all atoms and branches have been derived. The candidate ring
 bonds are temporarily stored in a queue, and then made in
 the order that they appear in the SELFIES. A ring bond will be made if
-both atoms of the bond can make the ring bond without violating any bond
-constraints. It is possible that the current atom is already bonded to the
+its connected atoms can make the ring bond without violating any
+bond constraints.
+
+It is also possible that the current atom is already bonded to the
 :math:`(Q + 1)`-th previous atom, e.g. if :math:`Q = 0`. In this case,
-the multiplicity of the existing bond is increased by the multiplicity
-of the ring bond. Again, if doing so would violate any bond constraints,
-then the ring bond is not made.
+the multiplicity of the existing bond is increased by the minimum
+of (1) the multiplicity of the ring bond candidate and (2) the number
+of free bonds of both connected atoms (see Example 6). Note that
+the resulting bond will be constrained to a multiplicity of at most 3.
 
 **Examples:**
 
@@ -240,6 +243,10 @@ then the ring bond is not made.
 |         +------------------------------------------------------------+---------------+------------------+
 |         | Note that the SMILES ``CC1CC(C1)CC`` is not outputted.                                        |
 +---------+------------------------------------------------------------+---------------+------------------+
+| 6       | ``[C][C][C][C][Expl=Ring1][Ring2][Expl#Ring1][Ring2]``     | 3, 3          | ``C#1CCC#1``     |
++---------+------------------------------------------------------------+---------------+------------------+
+
+
 
 Special Symbols
 ###############
