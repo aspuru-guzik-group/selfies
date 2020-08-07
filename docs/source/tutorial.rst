@@ -64,7 +64,9 @@ SELFIES ``[F][=C][=C][#N]``:
 atom ``<A>`` to the previously derived atom through bond type ``<B>``.
 If creating this bond would violate the bond constraints of the previous
 or current atom, the bond multiplicity is reduced (minimally) such that no
-constraints are violated. We present more examples below:
+constraints are violated.
+
+**Examples:**
 
 .. table::
     :align: center
@@ -142,28 +144,34 @@ derivation state :math:`X_j`.
 
 **Discussion:**  Intuitively, branch symbols are skipped for states
 :math:`X_{0-1}` because the previous atom can make at most one bond
-(branches require two bonds
-to be free). We present some examples below:
+(branches require at least two bonds to be free). It is possible
+that a branch is nested at the start of another branch; in SELFIES, both
+branches will be connected to the same main chain atom (see Example 5).
 
-+---------+-----------------------------------------+---------------+-------------------------+
-| Example | SELFIES                                 | :math:`Q + 1` | SMILES                  |
-+=========+=========================================+===============+=========================+
-| 1       | ``[C][Branch1_1][C][F][Cl]``            | 1             | ``C(F)Cl``              |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 2       | ``[C][Branch1_2][Ring2][=C][C][C][Cl]`` | 3             | ``C(=CCC)Cl``           |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 3       | ``[S][Branch1_2][C][=O][Branch1_2][C]`` | 1, 1, 1       | ``S(=O)(=O)([O-])[O-]`` |
-|         |                                         |               |                         |
-|         | ``[=O][Branch1_1][C][O-expl][O-expl]``  |               |                         |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 4       | ``[C][Branch2_1][Ring1][Branch1_2][C]`` | 21            | ``C(CC...CC)F``         |
-|         |                                         |               |                         |
-|         | ``[C][C][C][C][C][C][C][C][C][C][C][C]``|               |                         |
-|         |                                         |               |                         |
-|         | ``[C][C][C][C][C][C][C][C][F]``         |               |                         |
-|         +-----------------------------------------+---------------+-------------------------+
-|         | Example 4 has a single branch of 21 carbon atoms.                                 |
-+---------+-----------------------------------------------------------------------------------+
+**Examples:**
+
++---------+-------------------------------------------------------+---------------+-------------------------+
+| Example | SELFIES                                               | :math:`Q + 1` | SMILES                  |
++=========+=======================================================+===============+=========================+
+| 1       | ``[C][Branch1_1][C][F][Cl]``                          | 1             | ``C(F)Cl``              |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 2       | ``[C][Branch1_2][Ring2][=C][C][C][Cl]``               | 3             | ``C(=CCC)Cl``           |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 3       | ``[S][Branch1_2][C][=O][Branch1_2][C]``               | 1, 1, 1       | ``S(=O)(=O)([O-])[O-]`` |
+|         |                                                       |               |                         |
+|         | ``[=O][Branch1_1][C][O-expl][O-expl]``                |               |                         |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 4       | ``[C][Branch2_1][Ring1][Branch1_2][C]``               | 21            | ``C(CC...CC)F``         |
+|         |                                                       |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C][C]``              |               |                         |
+|         |                                                       |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][F]``                       |               |                         |
+|         +-------------------------------------------------------+---------------+-------------------------+
+|         | Example 4 has a single branch of 21 carbon atoms.                                               |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 5       | ``[C][Branch1_2][Branch1_1][Branch1_1][C][C][Cl][F]`` | 4, 1          | ``C(C)(Cl)F``           |
++---------+-------------------------------------------------------+---------------+-------------------------+
+
 
 Ring Symbols
 ############
@@ -182,48 +190,56 @@ A Ring symbol ``[Ring<L>]`` maps:
         R(Q_1, \ldots Q_{\texttt{<L>}})X_i & i \neq 0
     \end{cases}
 
-Identical to the branch case, the ``<L>`` symbols after the Branch symbol are read,
+Identical to branch derivation, the ``<L>`` symbols after the Ring symbol are read,
 and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
 :math:`R(Q_1, \ldots Q_{\texttt{<L>}})` reads the
 indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
 atom to the :math:`(Q + 1)`-th previously derived atom through a single bond.
-If the :math:`(Q + 1)`-th previously derived atom does not exist,
-then the connection is made to the 1st derived atom instead.
+More specifically, the current atom is connected to the
+:math:`(Q + 1)`-th previously derived atom in the *current* derivation instance,
+given that branches are derived in a separate recursive copy (see
+Example 5 below). If the :math:`(Q + 1)`-th previously derived atom does
+not exist, then the connection is made to the 1st derived atom instead.
+
 The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
 ``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
 previous atom through a bond of type ``<B>``.
 
 
-**Discussion**: In practice, ring bonds are created in a second pass,
-after all atoms and branches - have been derived. The candidate ring
-bonds are temporarily stored in a separate queue, and then made in
-the order they appear in the SELFIES. A ring bond will be made if
+**Discussion**: In practice, ring bonds are created during a second pass,
+after all atoms and branches have been derived. The candidate ring
+bonds are temporarily stored in a queue, and then made in
+the order that they appear in the SELFIES. A ring bond will be made if
 both atoms of the bond can make the ring bond without violating any bond
 constraints. It is possible that the current atom is already bonded to the
 :math:`(Q + 1)`-th previous atom, e.g. if :math:`Q = 0`. In this case,
 the multiplicity of the existing bond is increased by the multiplicity
-of the ring bond. Similarly, if doing so would violate any bond constraints,
+of the ring bond. Again, if doing so would violate any bond constraints,
 then the ring bond is not made.
 
-We present some examples below:
+**Examples:**
 
-+---------+-------------------------------------------------+---------------+------------------+
-| Example | SELFIES                                         | :math:`Q + 1` | SMILES           |
-+---------+-------------------------------------------------+---------------+------------------+
-| 1       | ``[C][=C][C][=C][C][=C][Ring1][Branch1_2]``     | 5             | ``C1=CC=CC=C1``  |
-+---------+-------------------------------------------------+---------------+------------------+
-| 2       | ``[C][C][=C][C][=C][C][Expl=Ring1][Branch1_2]`` | 5             | ``C=1C=CC=CC=1`` |
-+---------+-------------------------------------------------+---------------+------------------+
-| 3       | ``[C][C][Expl=Ring1][C]``                       | 1             | ``C#C``          |
-+---------+-------------------------------------------------+---------------+------------------+
-| 4       | ``[C][C][C][C][C][C][C][C][C][C][C]``           | 21            | ``C1CC...CC1``   |
-|         |                                                 |               |                  |
-|         | ``[C][C][C][C][C][C][C][C][C][C][C]``           |               |                  |
-|         |                                                 |               |                  |
-|         | ``[Ring2][Ring1][Branch1_2]``                   |               |                  |
-+         +-------------------------------------------------+---------------+------------------+
-|         | Example 4 is a single carbon ring of 22 carbon atoms.                              |
-+---------+------------------------------------------------------------------------------------+
++---------+------------------------------------------------------------+---------------+------------------+
+| Example | SELFIES                                                    | :math:`Q + 1` | SMILES           |
++=========+============================================================+===============+==================+
+| 1       | ``[C][=C][C][=C][C][=C][Ring1][Branch1_2]``                | 5             | ``C1=CC=CC=C1``  |
++---------+------------------------------------------------------------+---------------+------------------+
+| 2       | ``[C][C][=C][C][=C][C][Expl=Ring1][Branch1_2]``            | 5             | ``C=1C=CC=CC=1`` |
++---------+------------------------------------------------------------+---------------+------------------+
+| 3       | ``[C][C][Expl=Ring1][C]``                                  | 1             | ``C#C``          |
++---------+------------------------------------------------------------+---------------+------------------+
+| 4       | ``[C][C][C][C][C][C][C][C][C][C][C]``                      | 21            | ``C1CC...CC1``   |
+|         |                                                            |               |                  |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C]``                      |               |                  |
+|         |                                                            |               |                  |
+|         | ``[Ring2][Ring1][Branch1_2]``                              |               |                  |
+|         +------------------------------------------------------------+---------------+------------------+
+|         | Example 4 is a single carbon ring of 22 carbon atoms.                                         |
++---------+------------------------------------------------------------+---------------+------------------+
+| 5       | ``[C][C][C][C][Branch1_1][C][C][Ring1][Ring2][C][C]``      | 3             | ``C1CCC1(C)CC``  |
+|         +------------------------------------------------------------+---------------+------------------+
+|         | Note that the SMILES ``CC1CC(C1)CC`` is not outputted.                                        |
++---------+------------------------------------------------------------+---------------+------------------+
 
 Special Symbols
 ###############
