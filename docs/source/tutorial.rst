@@ -131,7 +131,7 @@ A Branch symbol ``[Branch<L>_<M>]`` maps:
         B(Q_1, \ldots Q_{\texttt{<L>}}, X_{n})X_j & i > 1
     \end{cases}
 
-:math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
+where :math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
 derivation state and :math:`j = i - n` is the next derivation state. In the
 bottom case, the ``<L>`` symbols after the Branch symbol are read,
 and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
