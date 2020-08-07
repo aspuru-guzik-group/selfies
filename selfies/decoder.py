@@ -218,8 +218,8 @@ def _translate_selfies_derive(selfies_gen: Iterable[str],
 
                 N = get_n_from_symbols(*L_symbols)
 
-                left_idx = max(0, len(derived) - 1 - (N + 1))
-                right_idx = len(derived) - 1
+                left_idx = max(0, prev_idx - (N + 1))
+                right_idx = prev_idx
 
                 bond_symbol = ''
                 if curr_symbol[1:5] == 'Expl':
