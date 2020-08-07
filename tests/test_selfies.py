@@ -11,7 +11,7 @@ faulthandler.enable()
 
 @pytest.fixture()
 def max_len():
-    return 200
+    return 1000
 
 
 @pytest.fixture()

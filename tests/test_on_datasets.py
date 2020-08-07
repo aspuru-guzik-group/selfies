@@ -16,6 +16,7 @@ from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 faulthandler.enable()
 
 datasets = [
+    ('Custom_Cases', 'smiles'),
     ('130K_QM9', 'smiles'),
     ('51K_NonFullerene', 'smiles'),
     ('250K_ZINC', 'smiles'),
@@ -82,6 +83,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     assert not error_found_flag
 
 
+@pytest.mark.skip(reason="covered by round-trip test")
 @pytest.mark.parametrize("test_name, column_name", datasets)
 def test_kekulize_parser(test_name, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
