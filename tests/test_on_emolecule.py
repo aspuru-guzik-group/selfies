@@ -50,7 +50,6 @@ test_sets = [
 
 
 # @pytest.mark.parametrize("test_path, column_name", test_sets)
-@pytest.mark.skip(reason="no way of currently testing this")
 def test_roundtrip_translation(test_path, column_name, dataset_samples):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
@@ -110,7 +109,7 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
 
 
 # @pytest.mark.parametrize("test_path, column_name", test_sets)
-@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="CI will fail for invalid molecules, we can run this test manually for new releases.")
 def test_kekulize_parser(test_path, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
