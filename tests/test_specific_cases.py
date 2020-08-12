@@ -29,9 +29,17 @@ def test_branch_at_end_of_selfies():
     assert is_eq(sf.decoder("[C][C][C][C][Branch3_3]"), "CCCC")
 
 
+def test_ring_at_end_of_selfies():
+    """Test SELFIES that have a ring symbol as its very last symbol.
+    """
+
+    assert is_eq(sf.decoder("[C][C][C][C][C][Ring1]"), "CCCC=C")
+    assert is_eq(sf.decoder("[C][C][C][C][C][Ring3]"), "CCCC=C")
+
+
 def test_branch_with_no_atoms():
     """Test SELFIES that have a branch, but the branch has no atoms in it.
-    Such branches should not be made.
+    Such branches should not be made in the outputted SMILES.
     """
 
     assert is_eq(sf.decoder("[C][Branch1_1][Ring2][Branch1_1]"
@@ -40,10 +48,22 @@ def test_branch_with_no_atoms():
     assert is_eq(sf.decoder("[C][Branch1_1][Ring2][Ring1]"
                             "[Ring1][Branch1_1][F]"),
                  "CF")
+    assert is_eq(sf.decoder("[C][Branch1_2][Ring2][Branch1_1]"
+                            "[C][Cl][F]"),
+                 "C(Cl)F")
 
     # special case: Branch3_3 takes Q_1, Q_2 = [O] and Q_3 = ''. However,
     # there are no more symbols in the branch.
     assert is_eq(sf.decoder("[C][C][C][C][Branch3_3][O][O]"), "CCCC")
+
+
+def test_oversized_branch():
+    """Test SELFIES that have a branch, with Q larger than the length
+    of the SELFIES
+    """
+
+    assert is_eq(sf.decoder("[C][Branch2_1][O][O][C][C][S][F][C]"), "C(CCSF)")
+    assert is_eq(sf.decoder("[C][Branch2_3][O][O][#C][C][S][F]"), "C(#CCSF)")
 
 
 def test_oversized_ring():
@@ -97,14 +117,6 @@ def test_ring_after_branch():
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[Branch1_1][C][F][C][C][Ring1][Branch2_2]"),
                  "CCCCC1CC(OCO)(F)CC1")
-
-
-def test_ring_at_end_of_selfies():
-    """Test SELFIES that have a ring symbol as its very last symbol.
-    """
-
-    assert is_eq(sf.decoder("[C][C][C][C][C][Ring1]"), "CCCC=C")
-    assert is_eq(sf.decoder("[C][C][C][C][C][Ring3]"), "CCCC=C")
 
 
 def test_ring_on_top_of_existing_bond():
