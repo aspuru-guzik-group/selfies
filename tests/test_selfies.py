@@ -18,24 +18,23 @@ def max_len():
 def hard_alphabet():
     """A challenging alphabet of SELFIES symbols.
     """
-    alphabet = {'[I]', '[N]', '[\\O]', '[#NHexpl]', '[#O]', '[\\P]',
-                '[#C@@Hexpl]', '[=Br]', '[#C]', '[=C@expl]', '[Branch2_2]',
-                '[Branch2_3]', '[C@@Hexpl]', '[#P]', '[Hexpl]', '[/N]',
-                '[=N]', '[Ring3]', '[Branch1_2]', '[#C@Hexpl]', '[\\C@@Hexpl]',
-                '[S]', '[/C@@expl]', '[Branch1_3]', '[#N]', '[/F]', '[\\I]',
-                '[=Hexpl]', '[C]', '[/C@expl]', '[/P]', '[\\C@@expl]',
-                '[Ring2]', '[Ring1]', '[/S]', '[\\N]', '[Branch3_3]', '[P]',
-                '[=Cl]', '[\\C]', '[O]', '[#C@@expl]', '[Branch1_1]',
-                '[C@expl]', '[#Hexpl]', '[#Br]', '[=C@@expl]', '[=S]', '[=F]',
-                '[#F]', '[Branch2_1]', '[/Br]', '[/O]', '[\\Cl]', '[#C@expl]',
-                '[=P]', '[=C]', '[F]', '[/C@Hexpl]', '[=NHexpl]', '[/NHexpl]',
-                '[\\S]', '[/I]', '[Br]', '[/Cl]', '[\\F]', '[\\C@expl]',
-                '[NHexpl]', '[#S]', '[#I]', '[=O]', '[\\C@Hexpl]', '[/C]',
-                '[=C@Hexpl]', '[=C@@Hexpl]', '[Branch3_1]', '[nop]',
-                '[/C@@Hexpl]', '[Branch3_2]', '[\\Br]', '[\\Hexpl]',
-                '[/Hexpl]', '[=I]', '[C@@expl]', '[\\NHexpl]', '[#Cl]',
-                '[Cl]', '[C@Hexpl]', '[epsilon]', '.', '[/C]', '[\\C]', '[/N]',
-                '[\\N]', '[Expl=Ring1]', '[Expl#Ring1]', '[=Br]'}
+    alphabet = ['[#Br]', '[#C@@Hexpl]', '[#C@@expl]', '[#C@Hexpl]',
+                '[#C@expl]', '[#C]', '[#Cl]', '[#F]', '[#Hexpl]', '[#I]',
+                '[#NHexpl]', '[#N]', '[#O]', '[#P]', '[#S]', '[/Br]',
+                '[/C@@Hexpl]', '[/C@@expl]', '[/C@Hexpl]', '[/C@expl]', '[/C]',
+                '[/Cl]', '[/F]', '[/Hexpl]', '[/I]', '[/NHexpl]', '[/N]',
+                '[/O]', '[/P]', '[/S]', '[=Br]', '[=C@@Hexpl]', '[=C@@expl]',
+                '[=C@Hexpl]', '[=C@expl]', '[=C]', '[=Cl]', '[=F]', '[=Hexpl]',
+                '[=I]', '[=NHexpl]', '[=N]', '[=O]', '[=P]', '[=S]', '[Br]',
+                '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Branch2_1]',
+                '[Branch2_2]', '[Branch2_3]', '[Branch3_1]', '[Branch3_2]',
+                '[Branch3_3]', '[C@@Hexpl]', '[C@@expl]', '[C@Hexpl]',
+                '[C@expl]', '[C]', '[Cl]', '[Expl#Ring1]', '[Expl=Ring1]',
+                '[F]', '[Hexpl]', '[I]', '[NHexpl]', '[N]', '[O]', '[P]',
+                '[Ring1]', '[Ring2]', '[Ring3]', '[S]', '[\\Br]',
+                '[\\C@@Hexpl]', '[\\C@@expl]', '[\\C@Hexpl]', '[\\C@expl]',
+                '[\\C]', '[\\Cl]', '[\\F]', '[\\Hexpl]', '[\\I]', '[\\NHexpl]',
+                '[\\N]', '[\\O]', '[\\P]', '[\\S]', '[epsilon]', '[nop]']
 
     return alphabet
 
