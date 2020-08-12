@@ -268,9 +268,12 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
         right_end = derived[right_idx]
         bond_num = get_num_from_bond(bond_symbol)
 
-        bond_num = min(bond_num, left_end[1], right_end[1])
-        if bond_num == 0:
-            continue
+        if left_end[1] <= 0 or right_end[1] <= 0:
+            continue  # no room for bond
+
+        if bond_num > min(left_end[1], right_end[1]):
+            bond_num = min(left_end[1], right_end[1])
+            bond_symbol = get_bond_from_num(bond_num)
 
         # ring is formed between two atoms that are already bonded
         # e.g. CC1C1C --> CC=CC
