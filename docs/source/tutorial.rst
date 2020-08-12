@@ -194,16 +194,16 @@ Identical to branch derivation, the ``<L>`` symbols after the Ring symbol are re
 and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
 :math:`R(Q_1, \ldots Q_{\texttt{<L>}})` reads the
 indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
-atom to the :math:`(Q + 1)`-th previously derived atom through a single bond.
-More specifically, the current atom is connected to the
-:math:`(Q + 1)`-th previously derived atom in the *current* derivation instance,
-given that branches are derived in a separate recursive copy (see
-Example 5 below). If the :math:`(Q + 1)`-th previously derived atom does
+atom to the :math:`(Q + 1)`-th preceding atom through a single bond.
+More specifically, the "current" atom is the most recently derived atom,
+excluding atoms derived in branches (see Example 5 below); and the ":math:`(Q + 1)`-th
+preceding atom" is the atom derived :math:`Q + 1` atoms before the
+current atom, counting atoms derived in branches. If the preceding atom does
 not exist, then the connection is made to the 1st derived atom instead.
 
 The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
 ``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
-previous atom through a bond of type ``<B>``.
+preceding atom through a bond of type ``<B>``.
 
 
 **Discussion**: In practice, ring bonds are created during a second pass,
@@ -214,7 +214,7 @@ its connected atoms can make the ring bond without violating any
 bond constraints.
 
 It is also possible that the current atom is already bonded to the
-:math:`(Q + 1)`-th previous atom, e.g. if :math:`Q = 0`. In this case,
+:math:`(Q + 1)`-th preceding atom, e.g. if :math:`Q = 0`. In this case,
 the multiplicity of the existing bond is increased by the minimum
 of (1) the multiplicity of the ring bond candidate and (2) the number
 of free bonds of both connected atoms (see Example 6). Note that
