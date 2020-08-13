@@ -146,8 +146,8 @@ the whole dataset is used.
 ---
 
 (∗) The eMolecules dataset is not included in the GitHub repository, due to its size.
-For developers interested on testing using this set, one can download the 
-dataset, and then split the file into chunks of 1 million SMILES
+For developers interested in testing on this dataset, one can download it
+and then split the file into chunks of 1 million SMILES
 using the following command in Windows:
 
 ```
