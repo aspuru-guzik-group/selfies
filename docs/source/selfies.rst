@@ -46,7 +46,11 @@ Additionally, users may want to specify their own custom constraints. Thus, we
 provide the following methods for configuring the semantic constraints
 of :mod:`selfies`.
 
-.. note::
+.. warning::
+
+    If custom semantic constraints are used, it is recommended to report
+    them for reproducibility reasons. SELFIES may be translated differently
+    under different semantic constraints.
 
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
