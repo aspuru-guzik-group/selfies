@@ -10,7 +10,7 @@ This directory contains the testing suite for ``selfies``.
 
 ---
 
-The eMolecules dataset is not included in the github repository, due to its size
+The eMolecules dataset is not included in the github repository, due to its size.
 For developers interested on testing using this set, one can download the 
 dataset [here](https://www.emolecules.com/info/plus/download-database). 
 Once the dataset is downloaded, one can split the file into chunks of 1 

@@ -130,7 +130,7 @@ By default, SELFIES is tested against a random subset
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
  * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet
- * 23M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database) 
+ * 6M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database)[^1] 
 
 Other tests are random and repeated ``trials`` number of times.
 These can be specified as arguments
@@ -143,18 +143,26 @@ where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
 if ``dataset_samples`` is negative or exceeds the length of the dataset,
 the whole dataset is used.
 
-*The eMolecules set is not included in the github repository, due to its size (1.29 GB). For developers interested on testing using this set, one can download the dataset [here](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0). Once the dataset is downloaded, you must split the file into chunks of 1 million SMILES for efficient string processing using the following command in Windows:
-```
-split -l 1000000 -d --additional-suffix=.txt version.txt split
-```
+---
 
-On Mac, the following commands can be used:
-```
-brew install coreutils
-gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
-```
-
-Once the dataset is downloaded and split in the `test_sets/` directory, `test_on_emolecule.py` can be executed to test the eMolecules set.
+[^1]: The eMolecules dataset is not included in the github repository, due to its size.
+     For developers interested on testing using this set, one can download the 
+     dataset [here](https://www.emolecules.com/info/plus/download-database). 
+     Once the dataset is downloaded, one can split the file into chunks of 1 
+     million SMILES for easier processing using the following command in Windows:
+     
+     ```
+     split -l 1000000 -d --additional-suffix=.txt version.txt split
+     ```
+     
+     On Mac, the following commands can be used:
+     ```
+     brew install coreutils
+     gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
+     ```
+     
+     Once the dataset is downloaded and split in the `test_sets/` directory,
+      `test_on_emolecule.py` can be run to test the eMolecules set. 
 
 
 ## Credits
