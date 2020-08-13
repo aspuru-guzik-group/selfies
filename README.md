@@ -67,7 +67,7 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 In this example we first build an alphabet 
 from a dataset of SELFIES, and then convert a SELFIES into a
 padded, integer-encoded representation. Note that we use the 
-``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code))
+``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
 ignored and skipped over by ``selfies.decoder``, making it a useful 
 padding character. 
