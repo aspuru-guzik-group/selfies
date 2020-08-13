@@ -38,13 +38,15 @@ By default, :mod:`selfies` operates under the following semantic constraints
     | 8         | All other atoms              |
     +-----------+------------------------------+
 
-However, the default constraints may be inadequate for certain SMILES - for
+However, the default constraints are inadequate for SMILES that violate them. For
 example, nitrobenzene ``O=N(=O)C1=CC=CC=C1`` has a nitrogen with 6 bonds and
-the chlorate anion ``O=Cl(=O)[O-]`` has a chlorine with 5 bonds. Additionally,
-users may want to specify their own custom constraints. Thus, we
+the chlorate anion ``O=Cl(=O)[O-]`` has a chlorine with 5 bonds - these
+SMILES *cannot* be represented as SELFIES under the default constraints.
+Additionally, users may want to specify their own custom constraints. Thus, we
 provide the following methods for configuring the semantic constraints
 of :mod:`selfies`.
 
+.. note::
 
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
