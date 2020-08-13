@@ -130,7 +130,7 @@ By default, SELFIES is tested against a random subset
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
  * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet 
- * 23M molecules from the [eMolecules set](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0) 
+ * 23M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database) 
  
 Other tests are random and repeated ``trials`` number of times. 
 These can be specified as arguments 

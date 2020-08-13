@@ -10,7 +10,12 @@ This directory contains the testing suite for ``selfies``.
 
 ---
 
-The eMolecules set is not included in the github repository, due to its size (1.29 GB). For developers interested on testing using this set, one can download the dataset [here](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0). Once the dataset is downloaded, one can split the file into chunks of 1 million SMILES for easier processing using the following command in Windows:
+The eMolecules dataset is not included in the github repository, due to its size
+For developers interested on testing using this set, one can download the 
+dataset [here](https://www.emolecules.com/info/plus/download-database). 
+Once the dataset is downloaded, one can split the file into chunks of 1 
+million SMILES for easier processing using the following command in Windows:
+
 ```
 split -l 1000000 -d --additional-suffix=.txt version.txt split
 ```
@@ -21,5 +26,6 @@ brew install coreutils
 gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
 ```
 
-Once the dataset is downloaded and split in the `test_sets/` directory, `test_on_emolecule.py` can be run to test the eMolecules set. 
+Once the dataset is downloaded and split in the `test_sets/` directory,
+ `test_on_emolecule.py` can be run to test the eMolecules set. 
 
