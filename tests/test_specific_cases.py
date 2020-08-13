@@ -82,25 +82,81 @@ def test_oversized_ring():
     assert is_eq(sf.decoder("[C][Ring1][O]"), "C")
 
 
+def test_branch_at_beginning_of_branch():
+    """Test SELFIES that have a branch immediately at the start of a branch.
+    """
+
+    # [C@]((Br)Cl)F
+    assert is_eq(sf.decoder("[C@expl][Branch1_2][Branch1_1]"
+                            "[Branch1_1][C][Br]"
+                            "[Cl][F]"),
+                 "[C@](Br)(Cl)F")
+
+    # [C@](((Br)Cl)I)F
+    assert is_eq(sf.decoder("[C@expl][Branch1_3][Branch2_1]"
+                            "[Branch1_2][Branch1_1]"
+                            "[Branch1_1][C][Br]"
+                            "[Cl][I][F]"),
+                 "[C@](Br)(Cl)(I)F")
+
+    # [C@]((Br)(Cl)I)F
+    assert is_eq(sf.decoder("[C@expl][Branch1_3][Branch2_1]"
+                            "[Branch1_1][C][Br]"
+                            "[Branch1_1][C][Cl]"
+                            "[I][F]"),
+                 "[C@](Br)(Cl)(I)F")
+
+
 def test_ring_at_beginning_of_branch():
     """Test SELFIES that have a ring immediately at the start of a branch.
     """
 
-    assert is_eq(sf.decoder("[C][C][C][C][Branch1_1][Branch1_1]"
+    # CC1CCC(1CCl)F
+    assert is_eq(sf.decoder("[C][C][C][C][C][Branch1_1][Branch1_1]"
                             "[Ring1][Ring2][C][Cl][F]"),
-                 "C1CCC1(CCl)F")
-    assert is_eq(sf.decoder("[C][C][C][S][Branch1_1][C][Br]"
+                 "CC1CCC1(CCl)F")
+
+    # CC1CCS(Br)(1CCl)F
+    assert is_eq(sf.decoder("[C][C][C][C][S][Branch1_1][C][Br]"
                             "[Branch1_1][Branch1_1][Ring1][Ring2][C][Cl][F]"),
-                 "C1CCS1(Br)(CCl)F")
+                 "CC1CCS1(Br)(CCl)F")
+
+
+def test_branch_and_ring_at_beginning_of_branch():
+    """Test SELFIES that have a branch and ring immediately at the start
+    of a branch.
+    """
+
+    # CC1CCCS((Br)1Cl)F
+    assert is_eq(sf.decoder("[C][C][C][C][C][S][Branch1_2][Branch1_3]"
+                            "[Branch1_1][C][Br]"
+                            "[Ring1][Branch1_1][Cl][F]"),
+                 "CC1CCCS1(Br)(Cl)F")
+
+    # CC1CCCS(1(Br)Cl)F
+    assert is_eq(sf.decoder("[C][C][C][C][C][S][Branch1_2][Branch1_3]"
+                            "[Ring1][Branch1_1]"
+                            "[Branch1_1][C][Br][Cl][F]"),
+                 "CC1CCCS1(Br)(Cl)F")
+
+    # CC1CCCS(((1Br)Cl)I)F
+    assert is_eq(sf.decoder("[C][C][C][C][C][S][Branch1_3][Branch2_3]"
+                            "[Branch1_2][Branch1_3]"
+                            "[Branch1_1][Ring2][Ring1][Branch1_1][Br]"
+                            "[Cl][I][F]"),
+                 "CC1CCCS1(Br)(Cl)(I)F")
 
 
 def test_ring_immediately_following_branch():
     """Test SELFIES that have a ring immediately following after a branch.
     """
 
+    # CCC1CCCC(OCO)1
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[Ring1][Branch1_1]"),
                  "CCC1CCCC1(OCO)")
+
+    # CCC1CCCC(OCO)(F)1
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[Branch1_1][C][F][Ring1][Branch1_1]"),
                  "CCC1CCCC1(OCO)(F)")
@@ -111,9 +167,11 @@ def test_ring_after_branch():
     immediately after a branch.
     """
 
+    # CCCCCCC1(OCO)1
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[C][Ring1][Branch1_1]"),
                  "CCCCCCC(OCO)=C")
+
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[Branch1_1][C][F][C][C][Ring1][Branch2_2]"),
                  "CCCCC1CC(OCO)(F)CC1")
@@ -124,6 +182,7 @@ def test_ring_on_top_of_existing_bond():
     in the main scaffold.
     """
 
+    # C1C1, C1C=1, C1C#1, ...
     assert is_eq(sf.decoder("[C][C][Ring1][C]"), "C=C")
     assert is_eq(sf.decoder("[C][/C][Ring1][C]"), "C=C")
     assert is_eq(sf.decoder("[C][C][Expl=Ring1][C]"), "C#C")
