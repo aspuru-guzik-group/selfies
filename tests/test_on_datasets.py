@@ -62,7 +62,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
-            if MolFromSmiles(in_smiles) is None:
+            if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
             selfies = sf.encoder(in_smiles)
@@ -121,7 +121,7 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     for chunk in reader:
         for smiles in chunk[column_name]:
 
-            if MolFromSmiles(smiles) is None:
+            if (MolFromSmiles(smiles) is None) or ('*' in smiles):
                 continue
 
             # build kekulized SMILES

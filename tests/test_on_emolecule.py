@@ -1,11 +1,10 @@
-""" This script is a clone of the 'test_on_datasets.py' script,
-specifically for testing the large 1.2 GB eKolecules set. See
-tests/README.md for instructions on how to download, process, and
+"""This script is specifically for testing the large eMolecules dataset.
+See tests/README.md for instructions on how to download, process, and
 test the set for developers interested in making a PR to the repository!
 
-This file is split into 23 text files of 1 million SMILES strings,
+This file is split into text files of 1 million SMILES strings,
 such that the developer can end the test and run from the last
-file tested, by passing the specific paths into 'test_sets = {}'.
+file tested, by passing the specific paths into 'datasets = []'.
 """
 
 import faulthandler
@@ -22,50 +21,54 @@ from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
 faulthandler.enable()
 
-test_sets = [
-    ('test_sets/split00.txt', 'isosmiles'),
-    ('test_sets/split01.txt', 'isosmiles'),
-    ('test_sets/split02.txt', 'isosmiles'),
-    ('test_sets/split03.txt', 'isosmiles'),
-    ('test_sets/split04.txt', 'isosmiles'),
-    ('test_sets/split05.txt', 'isosmiles'),
-    ('test_sets/split06.txt', 'isosmiles'),
-    ('test_sets/split07.txt', 'isosmiles'),
-    ('test_sets/split08.txt', 'isosmiles'),
-    ('test_sets/split09.txt', 'isosmiles'),
-    ('test_sets/split10.txt', 'isosmiles'),
-    ('test_sets/split11.txt', 'isosmiles'),
-    ('test_sets/split12.txt', 'isosmiles'),
-    ('test_sets/split13.txt', 'isosmiles'),
-    ('test_sets/split14.txt', 'isosmiles'),
-    ('test_sets/split15.txt', 'isosmiles'),
-    ('test_sets/split16.txt', 'isosmiles'),
-    ('test_sets/split17.txt', 'isosmiles'),
-    ('test_sets/split18.txt', 'isosmiles'),
-    ('test_sets/split19.txt', 'isosmiles'),
-    ('test_sets/split20.txt', 'isosmiles'),
-    ('test_sets/split21.txt', 'isosmiles'),
-    ('test_sets/split22.txt', 'isosmiles')
-]
+# Test Configuration ==========================================================
+# TODO: Edit the configurations of the eMolecule script below.
+
+datasets = []
+
+# SMILES in eMolecules are under this column name
+COL_NAME = 'isosmiles'
+
+# How many samples from each data file to test. -1 to test the whole file.
+NUM_SAMPLES = -1
+
+# Dynamically search for all text files in the eMolecules folder
+curr_dir = os.path.dirname(__file__)
+emol_dir = os.path.join(curr_dir, 'test_sets', 'eMolecules')
+
+for file in os.listdir(emol_dir):
+    if file.endswith(".txt"):
+        datasets.append(file[:-4])  # remove the .txt extension
 
 
-# @pytest.mark.parametrize("test_path, column_name", test_sets)
-@pytest.mark.skip(reason="CI will fail for invalid molecules, we can run this test manually for new releases.")
-def test_roundtrip_translation(test_path, column_name, dataset_samples):
+# Alternatively, specify the files you want to test:
+# e.g. datasets = ['split05', 'split06']
+
+
+# Tests =======================================================================
+
+# TODO: Comment out the pytest skip to use this script.
+@pytest.mark.skip(reason="eMolecules dataset not on GitHub")
+@pytest.mark.parametrize("test_name", datasets)
+def test_roundtrip_translation(test_name):
     """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
 
     constraints = sf.get_semantic_constraints()
     constraints['N'] = 6
+    constraints['Br'] = 7
+    constraints['Cl'] = 7
+    constraints['I'] = 7
     sf.set_semantic_constraints(constraints)
 
     # file I/O
-    test_name = os.path.splitext(os.path.basename(test_path))[0]
-
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, test_path)
-    error_path = os.path.join(curr_dir, f"error_sets/errors_{test_name}.csv")
+    test_path = os.path.join(curr_dir, 'test_sets', 'eMolecules',
+                             f"{test_name}.txt")
+    error_path = os.path.join(curr_dir,
+                              'error_sets',
+                              f"errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -75,7 +78,7 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if (0 < dataset_samples <= N) else N
+    S = NUM_SAMPLES if (0 < NUM_SAMPLES <= N) else N
     skip = sorted(random.sample(range(1, N + 1), N - S))
     reader = pd.read_csv(test_path,
                          chunksize=10000,
@@ -85,12 +88,13 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
 
     # roundtrip testing
     for chunk in reader:
-        for in_smiles in chunk[column_name]:
+        for in_smiles in chunk[COL_NAME]:
 
-            if MolFromSmiles(in_smiles) is None:
+            if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
             selfies = sf.encoder(in_smiles)
+
             if selfies is None:
                 error_list.append((in_smiles, ''))
                 continue
@@ -106,23 +110,27 @@ def test_roundtrip_translation(test_path, column_name, dataset_samples):
         error_found_flag = error_found_flag or error_list
         error_list = []
 
+    sf.set_semantic_constraints()  # restore defaults
+
     assert not error_found_flag
 
 
-# @pytest.mark.parametrize("test_path, column_name", test_sets)
-@pytest.mark.skip(reason="CI will fail for invalid molecules, we can run this test manually for new releases.")
-def test_kekulize_parser(test_path, column_name, dataset_samples):
+# TODO: Comment out the pytest skip to use this script.
+#  This test is somewhat covered by the first test though.
+@pytest.mark.skip(reason="eMolecules dataset not on GitHub")
+@pytest.mark.parametrize("test_name", datasets)
+def test_kekulize_parser(test_name):
     """Tests the kekulization of SMILES, which is the first step of
     selfies.encoder().
     """
 
     # file I/O
-    test_name = os.path.splitext(os.path.basename(test_path))[0]
-
     curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, test_path)
+    test_path = os.path.join(curr_dir, 'test_sets', 'eMolecules',
+                             f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              f"error_sets/errors_kekulize_{test_name}.csv")
+                              'error_sets',
+                              f"errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -132,7 +140,7 @@ def test_kekulize_parser(test_path, column_name, dataset_samples):
 
     # make pandas reader
     N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if (0 < dataset_samples <= N) else N
+    S = NUM_SAMPLES if (0 < NUM_SAMPLES <= N) else N
     skip = sorted(random.sample(range(1, N + 1), N - S))
     reader = pd.read_csv(test_path,
                          chunksize=10000,
@@ -142,7 +150,10 @@ def test_kekulize_parser(test_path, column_name, dataset_samples):
 
     # kekulize testing
     for chunk in reader:
-        for smiles in chunk[column_name]:
+        for smiles in chunk[COL_NAME]:
+
+            if (MolFromSmiles(smiles) is None) or ('*' in smiles):
+                continue
 
             # build kekulized SMILES
             kekule_fragments = []
