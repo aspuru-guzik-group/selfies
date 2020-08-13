@@ -39,7 +39,8 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_{test_name}.csv")
+                              'error_sets',
+                              f"errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -95,7 +96,8 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_kekulize_{test_name}.csv")
+                              'error_sets',
+                              f"errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
