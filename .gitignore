@@ -147,3 +147,4 @@ error_sets/
 sandbox
 
 tests/test_sets/version.smi.gz
+tests/test_sets/eMolecules/*.txt
