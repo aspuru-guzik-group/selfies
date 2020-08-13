@@ -146,3 +146,4 @@ error_sets/
 *.dat
 sandbox
 
+tests/test_sets/version.smi.gz
