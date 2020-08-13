@@ -4,15 +4,15 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
-SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular 
+SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular
 string representation.
 
-A main objective is to use SELFIES as direct input into machine learning 
+A main objective is to use SELFIES as direct input into machine learning
 models, in particular in generative models, for the generation of molecular
 graphs which are syntactically and semantically valid.
 
-See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam, 
-Pascal Friederich, and Alan Aspuru-Guzik at 
+See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam,
+Pascal Friederich, and Alan Aspuru-Guzik at
 arXiv (https://arxiv.org/abs/1905.13741).
 
 
@@ -25,20 +25,20 @@ pip install selfies
 
 ## Usage
 
-### Standard Functions 
+### Standard Functions
 
-The ``selfies`` library has six standard functions: 
+The ``selfies`` library has six standard functions:
 
 | Function | Description |
 | -------- | ----------- |
-| ``selfies.encoder`` | Translates a SMILES into an equivalent SELFIES. | 
+| ``selfies.encoder`` | Translates a SMILES into an equivalent SELFIES. |
 | ``selfies.decoder`` | Translates a SELFIES into an equivalent SMILES. |
-| ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  | 
+| ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  |
 | ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
-| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. | 
-| ``selfies.get_semantic_robust_alphabet`` | Returns a subset of all SELFIES symbols that are semantically constrained. | 
+| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. |
+| ``selfies.get_semantic_robust_alphabet`` | Returns a subset of all SELFIES symbols that are semantically constrained. |
 
-Please read the documentation for more detailed descriptions of these 
+Please read the documentation for more detailed descriptions of these
 functions, and to view the advanced functions, which allow users to
 customize the SELFIES language.
 
@@ -64,13 +64,13 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 ```
 
 #### Integer encoding SELFIES:
-In this example we first build an alphabet 
+In this example we first build an alphabet
 from a dataset of SELFIES, and then convert a SELFIES into a
-padded, integer-encoded representation. Note that we use the 
+padded, integer-encoded representation. Note that we use the
 ``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
-ignored and skipped over by ``selfies.decoder``, making it a useful 
-padding character. 
+ignored and skipped over by ``selfies.decoder``, making it a useful
+padding character.
 
 ```python
 import selfies as sf
@@ -81,7 +81,7 @@ alphabet.add('[nop]')  # '[nop]' is a special padding symbol
 alphabet = list(sorted(alphabet))
 print(alphabet)  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
 
-pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5 
+pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5
 symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
 
 # SELFIES to integer encode
@@ -100,22 +100,22 @@ print(int_encoded)  # [1, 3, 1, 4, 4]
 
 ### More Examples
 
-* More examples can be found in the ``examples/`` directory, including a 
+* More examples can be found in the ``examples/`` directory, including a
 variational autoencoder that runs on the SELFIES language.
 * This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
-genetic algorithm to achieve state-of-the-art performance for inverse design, 
+genetic algorithm to achieve state-of-the-art performance for inverse design,
 with the [code here](https://github.com/aspuru-guzik-group/GA).
 
-## Documentation 
+## Documentation
 
-The documentation can be found on 
-[ReadTheDocs](https://selfies-mirror.readthedocs.io/en/latest/?). 
+The documentation can be found on
+[ReadTheDocs](https://selfies-mirror.readthedocs.io/en/latest/?).
 Alternatively, it can be built from the ``docs/`` directory.
 
 
 ## Tests
 SELFIES uses `pytest` with `tox` as its testing framework.
-All tests can be found in  the `tests/` directory. To run the test suite for 
+All tests can be found in  the `tests/` directory. To run the test suite for
 SELFIES, install ``tox`` and run:  
 
 ```bash
@@ -126,30 +126,43 @@ By default, SELFIES is tested against a random subset
 (of size ``dataset_samples=100000``) on various datasets:
 
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
- * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
+ * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database),
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
- * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet 
+ * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet
  * 23M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database) 
- 
-Other tests are random and repeated ``trials`` number of times. 
-These can be specified as arguments 
+
+Other tests are random and repeated ``trials`` number of times.
+These can be specified as arguments
 
 ```bash
 tox -- --trials 100 --dataset_samples 100
 ```
 
-where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that 
-if ``dataset_samples`` is negative or exceeds the length of the dataset, 
-the whole dataset is used. 
+where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
+if ``dataset_samples`` is negative or exceeds the length of the dataset,
+the whole dataset is used.
+
+*The eMolecules set is not included in the github repository, due to its size (1.29 GB). For developers interested on testing using this set, one can download the dataset [here](https://www.dropbox.com/s/v6i8qlgys599s45/version.smi?dl=0). Once the dataset is downloaded, you must split the file into chunks of 1 million SMILES for efficient string processing using the following command in Windows:
+```
+split -l 1000000 -d --additional-suffix=.txt version.txt split
+```
+
+On Mac, the following commands can be used:
+```
+brew install coreutils
+gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
+```
+
+Once the dataset is downloaded and split in the `test_sets/` directory, `test_on_emolecule.py` can be executed to test the eMolecules set.
 
 
 ## Credits
 
 We thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin, Andrew Brereton,
-Benjamin Sanchez-Lengeling, and Zhenpeng Yao for their suggestions and 
-bug reports. 
+Benjamin Sanchez-Lengeling, and Zhenpeng Yao for their suggestions and
+bug reports.
 
-## License 
+## License
 
 [Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
