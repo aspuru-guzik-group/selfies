@@ -82,6 +82,8 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
         error_found_flag = error_found_flag or error_list
         error_list = []
 
+    sf.set_semantic_constraints()  # restore defaults
+
     assert not error_found_flag
 
 
