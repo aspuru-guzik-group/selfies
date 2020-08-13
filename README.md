@@ -66,9 +66,10 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 #### Integer encoding SELFIES:
 In this example we first build an alphabet 
 from a dataset of SELFIES, and then convert a SELFIES into a
-padded, integer-encoded representation. Note that we use the symbol
-``'[nop]'`` to pad our SELFIES, which is a special SELFIES symbol that
-is always ignored and skipped over by ``selfies.decoder``, making it a useful 
+padded, integer-encoded representation. Note that we use the 
+``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code))
+symbol to pad our SELFIES, which is a special SELFIES symbol that is always
+ignored and skipped over by ``selfies.decoder``, making it a useful 
 padding character. 
 
 ```python
@@ -122,7 +123,7 @@ tox
 ```
 
 By default, SELFIES is tested against a random subset
-(of size ``dataset_samples``) on various datasets:
+(of size ``dataset_samples=100000``) on various datasets:
 
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database), 
@@ -138,7 +139,7 @@ These can be specified as arguments
 tox -- --trials 100 --dataset_samples 100
 ```
 
-where ``--trials=10000`` and ``--dataset_samples=10000`` by default. Note that 
+where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that 
 if ``dataset_samples`` is negative or exceeds the length of the dataset, 
 the whole dataset is used. 
 
