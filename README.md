@@ -160,8 +160,8 @@ brew install coreutils
 gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
 ```
 
-Once the dataset is downloaded and split in the `test_sets/` directory,
-`test_on_emolecule.py` can be run to test the eMolecules set. 
+Once the dataset is downloaded and split in the `tests/test_sets/` directory,
+`tests/test_on_emolecule.py` can be run to test the eMolecules dataset. 
 
 
 ## Credits
