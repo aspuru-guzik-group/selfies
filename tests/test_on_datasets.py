@@ -55,7 +55,6 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     reader = pd.read_csv(test_path,
                          chunksize=10000,
                          header=0,
-                         delimiter=' ',
                          skiprows=skip)
 
     # roundtrip testing
@@ -114,7 +113,6 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     reader = pd.read_csv(test_path,
                          chunksize=10000,
                          header=0,
-                         delimiter=' ',
                          skiprows=skip)
 
     # kekulize testing
