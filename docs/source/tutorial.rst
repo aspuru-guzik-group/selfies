@@ -6,7 +6,7 @@ from a SELFIES. The SELFIES grammar has non-terminal symbols or states
 
 .. math::
 
-    X_0, \ldots, X_7, Q_1, Q_2, Q_3
+    X_0, \ldots, X_7, Q
 
 Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
 with each symbol specifying a grammar rule. SELFIES derivation terminates
@@ -84,8 +84,11 @@ constraints are violated.
 Index Symbols
 #############
 
-All SELFIES symbols map states :math:`Q_{1-3}` to
-an integer or index. The mapping is summarized by the table below.
+The state :math:`Q` is used to specify the size of branches,
+and the location of ring bonds. A sequence of any SELFIES symbol(s)
+:math:`s_1, \ldots, s_{\texttt{<L>}}` maps state :math:`Q` to an integer.
+First, each symbol :math:`s_i` is converted to an index :math:`\text{idx}(s_i)`
+according to following assignment.
 
 .. table::
     :align: center
@@ -112,8 +115,14 @@ an integer or index. The mapping is summarized by the table below.
     | All other symbols assigned index 0.               |
     +-------+-----------------+-------+-----------------+
 
-The states :math:`Q_{1-3}` are used to specify the size of branches,
-and the location of ring bonds.
+Then :math:`Q` is mapped to the hexadecimal (base 16) integer specified
+by the indices. For example, in a sequence of three SELFIES symbols,
+:math:`Q` is mapped to:
+
+.. math::
+
+    Q \to (\text{idx}(s_1) \times 16^2) + (\text{idx}(s_2) \times 16) + \text{idx}(s_3)
+
 
 Branch Symbols
 ##############
@@ -128,19 +137,17 @@ A Branch symbol ``[Branch<L>_<M>]`` maps:
 
     X_i \to \begin{cases}
         X_i & i \leq 1 \\
-        B(Q_1, \ldots Q_{\texttt{<L>}}, X_{n})X_j & i > 1
+        B(Q, X_{n})X_j & i > 1
     \end{cases}
 
 where :math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
 derivation state and :math:`j = i - n` is the next derivation state. In the
 bottom case, the ``<L>`` symbols after the Branch symbol are read,
-and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
-:math:`B(Q_1, \ldots Q_{\texttt{<L>}}, X_{n})` reads the
-indices as a hexadecimal (base 16) integer :math:`Q`, takes the
-next :math:`Q + 1` symbols, and recursively derives them with initial
-derivation state :math:`X_{n}`. The resulting fragment is taken to be
-the derived branch, and derivation proceeds with the next
-derivation state :math:`X_j`.
+and used to map :math:`Q` to an index. Then
+:math:`B(Q, X_{n})` takes the next :math:`Q + 1` symbols, and recursively
+derives them with initial derivation state :math:`X_{n}`. The resulting
+fragment is taken to be the derived branch, and derivation proceeds
+with the next derivation state :math:`X_j`.
 
 **Discussion:**  Intuitively, branch symbols are skipped for states
 :math:`X_{0-1}` because the previous atom can make at most one bond
@@ -187,13 +194,11 @@ A Ring symbol ``[Ring<L>]`` maps:
 
     X_i \to \begin{cases}
         X_i & i = 0 \\
-        R(Q_1, \ldots Q_{\texttt{<L>}})X_i & i \neq 0
+        R(Q)X_i & i \neq 0
     \end{cases}
 
 Identical to branch derivation, the ``<L>`` symbols after the Ring symbol are read,
-and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
-:math:`R(Q_1, \ldots Q_{\texttt{<L>}})` reads the
-indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
+and used to map :math:`Q` to an index. Then :math:`R(Q)` connects the current
 atom to the :math:`(Q + 1)`-th preceding atom through a single bond.
 More specifically, the "current" atom is the most recently derived atom,
 excluding atoms derived in branches (see Example 5 below); and the ":math:`(Q + 1)`-th
@@ -253,17 +258,19 @@ Special Symbols
 
 The following are symbols that have a special meaning for SELFIES:
 
-+---------------+----------------------------------------------------------------------------------------------+
-| Character     | Description                                                                                  |
-+===============+==============================================================================================+
-| ``[epsilon]`` | The ``[epsilon]`` symbol maps :math:`X_0 \to X_0` and :math:`X_i \to \epsilon` (the empty    |
-|               | string) for all :math:`i \geq 1`.                                                            |
-+---------------+----------------------------------------------------------------------------------------------+
-| ``[nop]``     | The nop (no operation) symbol is always ignored and skipped over by :func:`selfies.decoder`. |
-|               |                                                                                              |
-|               | Thus, it can be used as a padding symbol for SELFIES.                                        |
-+---------------+----------------------------------------------------------------------------------------------+
-| ``.``         | The dot symbol is used to indicate disconnected or ionic compounds, similar to how it is     |
-|               |                                                                                              |
-|               | used in SMILES.                                                                              |
-+---------------+----------------------------------------------------------------------------------------------+
+.. _no operation: https://en.wikipedia.org/wiki/NOP_(code)
+
++---------------+-------------------------------------------------------------------------------------------------+
+| Character     | Description                                                                                     |
++===============+=================================================================================================+
+| ``[epsilon]`` | The ``[epsilon]`` symbol maps :math:`X_0 \to X_0` and :math:`X_i \to \epsilon` (the empty       |
+|               | string) for all :math:`i \geq 1`.                                                               |
++---------------+-------------------------------------------------------------------------------------------------+
+| ``[nop]``     | The nop (`no operation`_) symbol is always ignored and skipped over by :func:`selfies.decoder`. |
+|               |                                                                                                 |
+|               | Thus, it can be used as a padding symbol for SELFIES.                                           |
++---------------+-------------------------------------------------------------------------------------------------+
+| ``.``         | The dot symbol is used to indicate disconnected or ionic compounds, similar to how it is        |
+|               |                                                                                                 |
+|               | used in SMILES.                                                                                 |
++---------------+-------------------------------------------------------------------------------------------------+
