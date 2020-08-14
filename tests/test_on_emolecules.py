@@ -47,8 +47,8 @@ def test_roundtrip_translation():
     sf.set_semantic_constraints(constraints)
 
     # file I/O
-    ckpt_path = os.path.join(curr_dir, 'checkpoints', f"emolecule_ckpt.txt")
-    error_path = os.path.join(curr_dir, 'error_sets', f"errors_emolecules.csv")
+    ckpt_path = os.path.join(curr_dir, 'checkpoints', 'emolecule_ckpt.txt')
+    error_path = os.path.join(curr_dir, 'error_sets', 'errors_emolecules.csv')
 
     if os.path.exists(ckpt_path):
         with open(ckpt_path, 'r') as ckpt_file:
