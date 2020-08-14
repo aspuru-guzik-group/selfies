@@ -99,7 +99,8 @@ def test_roundtrip_translation():
             # take encoeded SELFIES and decode
             out_smiles = sf.decoder(selfies)
 
-            # compare original SMILES to decoded SELFIE string, if wrong, write to list of errors.
+            # compare original SMILES to decoded SELFIE string.
+            # if not the same string, write to list of errors.
             if not is_same_mol(in_smiles, out_smiles):
                 error_list.append((in_smiles, out_smiles))
 

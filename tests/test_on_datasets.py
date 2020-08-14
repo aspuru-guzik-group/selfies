@@ -31,6 +31,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
 
+    # modify semantic bond constraints
     constraints = sf.get_semantic_constraints()
     constraints['N'] = 6
     sf.set_semantic_constraints(constraints)
@@ -42,8 +43,11 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
                               'error_sets',
                               f"errors_{test_name}.csv")
 
+    # create error directory
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
+
+    # add header in error log text file
     with open(error_path, "w+") as error_log:
         error_log.write("In, Out\n")
     error_found_flag = False
@@ -61,20 +65,29 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
+            # check if SMILES in chunk is a valid RDKit molecule. if not, skip testing
+            # All inputted SMILES must be valid RDKit Mol objects to be encoded.
             if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
+
+            # encode selfies
             selfies = sf.encoder(in_smiles)
 
+            # if unable to encode SMILES, write to list of errors
             if selfies is None:
                 error_list.append((in_smiles, ''))
                 continue
 
+            # take encoeded SELFIES and decode
             out_smiles = sf.decoder(selfies)
 
+            # compare original SMILES to decoded SELFIE string.
+            # if not the same string, write to list of errors.
             if not is_same_mol(in_smiles, out_smiles):
                 error_list.append((in_smiles, out_smiles))
 
+        # open and write all errors to errors_emolecule.csv
         with open(error_path, "a") as error_log:
             for error in error_list:
                 error_log.write(','.join(error) + "\n")
