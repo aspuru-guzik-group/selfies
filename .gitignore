@@ -148,3 +148,4 @@ sandbox
 
 version.smi.gz
 tests/test_sets/eMolecules/*.txt
+checkpoints
