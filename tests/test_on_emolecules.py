@@ -39,6 +39,7 @@ def test_roundtrip_translation():
     SMILES examples in QM9, NonFullerene, Zinc, etc.
     """
 
+    # modify constraints
     constraints = sf.get_semantic_constraints()
     constraints['N'] = 6
     constraints['Br'] = 7
@@ -50,10 +51,12 @@ def test_roundtrip_translation():
     ckpt_path = os.path.join(curr_dir, 'checkpoints', 'emolecule_ckpt.txt')
     error_path = os.path.join(curr_dir, 'error_sets', 'errors_emolecules.csv')
 
+    # check if a previous checkpoint exists to continue tests
     if os.path.exists(ckpt_path):
         with open(ckpt_path, 'r') as ckpt_file:
             checkpoint = int(ckpt_file.readlines()[0])
 
+    # if no path to a checkpoint exists, create a new directory for error logging and checkpoints
     else:
         os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
         os.makedirs(os.path.dirname(error_path), exist_ok=True)
@@ -80,26 +83,34 @@ def test_roundtrip_translation():
 
         for in_smiles in chunk[COL_NAME]:
 
+            # check if SMILES in chunk is a valid RDKit molecule. if not, skip testing
+            # All inputted SMILES must be valid RDKit Mol objects to be encoded.
             if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
+            # encode selfies
             selfies = sf.encoder(in_smiles)
 
+            # if unable to encode SMILES, write to list of errors
             if selfies is None:
                 error_list.append((in_smiles, ''))
                 continue
 
+            # take encoeded SELFIES and decode
             out_smiles = sf.decoder(selfies)
 
+            # compare original SMILES to decoded SELFIE string, if wrong, write to list of errors.
             if not is_same_mol(in_smiles, out_smiles):
                 error_list.append((in_smiles, out_smiles))
 
+        # open and write all errors to errors_emolecule.csv
         with open(error_path, "a") as error_log:
             for error in error_list:
                 error_log.write(','.join(error) + "\n")
         error_found_flag = error_found_flag or error_list
         error_list = []
 
+        # create checkpoint from the current pandas reader chunk, to load from and continue testing.
         with open(ckpt_path, 'w+') as ckpt_file:
             ckpt_file.write(str(chunk_idx))
 
