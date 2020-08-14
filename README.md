@@ -130,7 +130,10 @@ By default, SELFIES is tested against a random subset
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
  * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet
- * 6M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database) (∗) 
+ * 27M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database).
+   Due to its large size, this dataset is not included on the repository. To run tests 
+   on it, please download the dataset in the ``tests/test_sets`` directory 
+   and enable its pytest at ``tests/test_on_emolecules.py``. 
 
 Other tests are random and repeated ``trials`` number of times.
 These can be specified as arguments
@@ -142,27 +145,6 @@ tox -- --trials 100 --dataset_samples 100
 where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
 if ``dataset_samples`` is negative or exceeds the length of the dataset,
 the whole dataset is used.
-
----
-
-(∗) The eMolecules dataset is not included in the GitHub repository, due to its size.
-For developers interested in testing on this dataset, one can download it
-and then split the file into chunks of 1 million SMILES
-using the following command in Windows:
-
-```
-split -l 1000000 -d --additional-suffix=.txt version.txt split
-```
-
-On Mac, the following commands can be used:
-```
-brew install coreutils
-gsplit -l 1000000 -d --additional-suffix=.txt version.txt split
-```
-
-Once the dataset is downloaded and split in the `tests/test_sets/` directory,
-`tests/test_on_emolecule.py` can be run to test the eMolecules dataset. 
-
 
 ## Credits
 
