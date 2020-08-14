@@ -1,6 +1,22 @@
 # Changelog
 
 
+## v1.0.0 - TBD:
+### Added:
+ *  Added script to automatically Kekulize SMILES with aromatic symbols before
+    they are translated into SELFIES by `selfies.encoder`
+ *  New functions to the library, such as `selfies.len_selfies` and 
+    `selfies.split_selfies`. Includes functions that allow users to  
+    customize the SELFIES semantic constraints, e.g. 
+    `selfies.set_semantic_constraints`.
+ *  Introduced new padding `[nop]` (no operation) symbol.
+
+### Changed: 
+ *  Major structural changes to the `selfies` language; including changes
+    to the indexing alphabet, changes to the behaviours of rings and branches,
+    and removal of states `X9991-X9993`. 
+ *  Encoding and decoding algorithms were made more efficient.
+
 ---
 
 ## v0.2.4 - 01-10-2019:
