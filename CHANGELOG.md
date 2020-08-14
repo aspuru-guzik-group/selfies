@@ -14,7 +14,7 @@
 ### Changed: 
  *  Major structural changes to the `selfies` language; including changes
     to the indexing alphabet, changes to the behaviours of rings and branches,
-    and removal of states `X9991-X9993`. 
+    and the removal of states `X9991-X9993`. 
  *  Encoding and decoding algorithms were made more efficient.
 
 ---
