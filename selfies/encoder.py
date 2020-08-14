@@ -187,6 +187,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
 
     selfies = ""
     selfies_len = 0
+    prev_idx = -1
 
     for bond, symbol, symbol_type in smiles_gen:
 
@@ -200,6 +201,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 selfies += f"[{bond}{symbol}]"
             counter[0] += 1
             selfies_len += 1
+            prev_idx = counter[0]
 
         elif symbol_type == BRANCH_TYPE:
             if symbol == '(':
@@ -225,7 +227,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
 
             if ring_id in rings:
                 left_bond, left_end = rings.pop(ring_id)
-                right_bond, right_end = bond, counter[0]
+                right_bond, right_end = bond, prev_idx
 
                 ring_len = right_end - left_end
                 N_as_symbols = get_symbols_from_n(ring_len - 1)

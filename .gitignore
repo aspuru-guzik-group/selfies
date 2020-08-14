@@ -146,3 +146,6 @@ error_sets/
 *.dat
 sandbox
 
+
+checkpoints
+version.smi.gz

@@ -3,11 +3,11 @@ import pytest
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--trials", action="store", default=10000,
+        "--trials", action="store", default=100000,
         help="number of trails for random tests"
     )
     parser.addoption(
-        "--dataset_samples", action="store", default=10000,
+        "--dataset_samples", action="store", default=100000,
         help="number of samples to test from the data sets"
     )
 

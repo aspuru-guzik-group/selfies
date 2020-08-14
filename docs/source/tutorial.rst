@@ -6,7 +6,7 @@ from a SELFIES. The SELFIES grammar has non-terminal symbols or states
 
 .. math::
 
-    X_0, \ldots, X_7, Q_1, Q_2, Q_3
+    X_0, \ldots, X_7, Q
 
 Derivation starts with state :math:`X_0`. The SELFIES is read symbol-by-symbol,
 with each symbol specifying a grammar rule. SELFIES derivation terminates
@@ -64,7 +64,9 @@ SELFIES ``[F][=C][=C][#N]``:
 atom ``<A>`` to the previously derived atom through bond type ``<B>``.
 If creating this bond would violate the bond constraints of the previous
 or current atom, the bond multiplicity is reduced (minimally) such that no
-constraints are violated. We present more examples below:
+constraints are violated.
+
+**Examples:**
 
 .. table::
     :align: center
@@ -82,8 +84,11 @@ constraints are violated. We present more examples below:
 Index Symbols
 #############
 
-All SELFIES symbols map states :math:`Q_{1-3}` to
-an integer or index. The mapping is summarized by the table below.
+The state :math:`Q` is used to specify the size of branches,
+and the location of ring bonds. A sequence of any SELFIES symbol(s)
+:math:`s_1, \ldots, s_{\texttt{<L>}}` maps state :math:`Q` to an integer.
+First, each symbol :math:`s_i` is converted to an index :math:`\text{idx}(s_i)`
+according to following assignment.
 
 .. table::
     :align: center
@@ -110,8 +115,14 @@ an integer or index. The mapping is summarized by the table below.
     | All other symbols assigned index 0.               |
     +-------+-----------------+-------+-----------------+
 
-The states :math:`Q_{1-3}` are used to specify the size of branches,
-and the location of ring bonds.
+Then :math:`Q` is mapped to the hexadecimal (base 16) integer specified
+by the indices. For example, in a sequence of three SELFIES symbols,
+:math:`Q` is mapped to:
+
+.. math::
+
+    Q \to (\text{idx}(s_1) \times 16^2) + (\text{idx}(s_2) \times 16) + \text{idx}(s_3)
+
 
 Branch Symbols
 ##############
@@ -120,61 +131,54 @@ Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
 main chain, analogous to the open and closed curved brackets in SMILES.
 
-.. note::
-
-    In order to prevent branches and rings from forming at the beginning
-    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
-    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
-    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
-    under these states.
-
-
 A Branch symbol ``[Branch<L>_<M>]`` maps:
 
 .. math::
 
     X_i \to \begin{cases}
-        X_i & i \leq 1 \text{ or } i \geq 9991 \\
-        B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})X_j & 2 \leq i \leq 7
+        X_i & i \leq 1 \\
+        B(Q, X_{n})X_j & i > 1
     \end{cases}
 
-:math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
+where :math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
 derivation state and :math:`j = i - n` is the next derivation state. In the
 bottom case, the ``<L>`` symbols after the Branch symbol are read,
-and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
-:math:`B(Q_1, \ldots Q_{\texttt{<L>}}, X_{9990 + n})` reads the
-indices as a hexadecimal (base 16) integer :math:`Q`, takes the
-next :math:`Q + 1` symbols, and recursively derives them with initial
-derivation state :math:`X_{9990 + n}`. The resulting fragment is taken to be
-the derived branch, and derivation proceeds with the next
-derivation state :math:`X_j`.
+and used to map :math:`Q` to an index. Then
+:math:`B(Q, X_{n})` takes the next :math:`Q + 1` symbols, and recursively
+derives them with initial derivation state :math:`X_{n}`. The resulting
+fragment is taken to be the derived branch, and derivation proceeds
+with the next derivation state :math:`X_j`.
 
 **Discussion:**  Intuitively, branch symbols are skipped for states
 :math:`X_{0-1}` because the previous atom can make at most one bond
-(branches require two bonds
-to be free). Branch symbols are also skipped for states :math:`X_{9991-9993}`
-in order to prevent branches being created at the start of branches.
-We present some examples below:
+(branches require at least two bonds to be free). It is possible
+that a branch is nested at the start of another branch; in SELFIES, both
+branches will be connected to the same main chain atom (see Example 5).
 
-+---------+-----------------------------------------+---------------+-------------------------+
-| Example | SELFIES                                 | :math:`Q + 1` | SMILES                  |
-+=========+=========================================+===============+=========================+
-| 1       | ``[C][Branch1_1][C][F][Cl]``            | 1             | ``C(F)Cl``              |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 2       | ``[C][Branch1_2][Ring2][=C][C][C][Cl]`` | 3             | ``C(=CCC)Cl``           |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 3       | ``[S][Branch1_2][C][=O][Branch1_2][C]`` | 1, 1, 1       | ``S(=O)(=O)([O-])[O-]`` |
-|         |                                         |               |                         |
-|         | ``[=O][Branch1_1][C][O-expl][O-expl]``  |               |                         |
-+---------+-----------------------------------------+---------------+-------------------------+
-| 4       | ``[C][Branch2_1][Ring1][Branch1_2][C]`` | 21            | ``C(CC...CC)F``         |
-|         |                                         |               |                         |
-|         | ``[C][C][C][C][C][C][C][C][C][C][C][C]``|               |                         |
-|         |                                         |               |                         |
-|         | ``[C][C][C][C][C][C][C][C][F]``         |               |                         |
-|         +-----------------------------------------+---------------+-------------------------+
-|         | Example 4 has a single branch of 21 carbon atoms.                                 |
-+---------+-----------------------------------------------------------------------------------+
+**Examples:**
+
++---------+-------------------------------------------------------+---------------+-------------------------+
+| Example | SELFIES                                               | :math:`Q + 1` | SMILES                  |
++=========+=======================================================+===============+=========================+
+| 1       | ``[C][Branch1_1][C][F][Cl]``                          | 1             | ``C(F)Cl``              |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 2       | ``[C][Branch1_2][Ring2][=C][C][C][Cl]``               | 3             | ``C(=CCC)Cl``           |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 3       | ``[S][Branch1_2][C][=O][Branch1_2][C]``               | 1, 1, 1       | ``S(=O)(=O)([O-])[O-]`` |
+|         |                                                       |               |                         |
+|         | ``[=O][Branch1_1][C][O-expl][O-expl]``                |               |                         |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 4       | ``[C][Branch2_1][Ring1][Branch1_2][C]``               | 21            | ``C(CC...CC)F``         |
+|         |                                                       |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C][C]``              |               |                         |
+|         |                                                       |               |                         |
+|         | ``[C][C][C][C][C][C][C][C][F]``                       |               |                         |
+|         +-------------------------------------------------------+---------------+-------------------------+
+|         | Example 4 has a single branch of 21 carbon atoms.                                               |
++---------+-------------------------------------------------------+---------------+-------------------------+
+| 5       | ``[C][Branch1_2][Branch1_1][Branch1_1][C][C][Cl][F]`` | 4, 1          | ``C(C)(Cl)F``           |
++---------+-------------------------------------------------------+---------------+-------------------------+
+
 
 Ring Symbols
 ############
@@ -184,82 +188,89 @@ where ``<L> in {1, 2, 3}`` and ``<B> in {'/', '\\', '=', '#'}`` is a
 prefix representing a bond. A ring symbol specifies a ring bond between two
 atoms, analogous to the ring numbering digits in SMILES.
 
-.. note::
-
-    In order to prevent branches and rings from forming at the beginning
-    of branches, e.g. ``C((C)CC)``, we introduce non-terminal states
-    :math:`X_{9991-9993}`. For atomic symbols, these states are identical
-    to states :math:`X_{1-3}` (respectively). However, Branch and Ring symbols behave differently
-    under these states.
-
 A Ring symbol ``[Ring<L>]`` maps:
 
 .. math::
 
     X_i \to \begin{cases}
-        X_i & i = 0 \text{ or } i \geq 9991 \\
-        R(Q_1, \ldots Q_{\texttt{<L>}})X_i & 1 \leq i \leq 7
+        X_i & i = 0 \\
+        R(Q)X_i & i \neq 0
     \end{cases}
 
-Identical to the branch case, the ``<L>`` symbols after the Branch symbol are read,
-and used to map :math:`Q_{1-\texttt{<L>}}` to an index. Then
-:math:`R(Q_1, \ldots Q_{\texttt{<L>}})` reads the
-indices as a hexadecimal (base 16) integer :math:`Q`, and connects the current
-atom to the :math:`(Q + 1)`-th previously derived atom through a single bond.
-If the :math:`(Q + 1)`-th previously derived atom does not exist,
-then the connection is made to the 1st derived atom instead.
+Identical to branch derivation, the ``<L>`` symbols after the Ring symbol are read,
+and used to map :math:`Q` to an index. Then :math:`R(Q)` connects the current
+atom to the :math:`(Q + 1)`-th preceding atom through a single bond.
+More specifically, the "current" atom is the most recently derived atom,
+excluding atoms derived in branches (see Example 5 below); and the ":math:`(Q + 1)`-th
+preceding atom" is the atom derived :math:`Q + 1` atoms before the
+current atom, counting atoms derived in branches. If the preceding atom does
+not exist, then the connection is made to the 1st derived atom instead.
+
 The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
 ``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
-previous atom through a bond of type ``<B>``.
+preceding atom through a bond of type ``<B>``.
 
 
-**Discussion**: In practice, ring bonds are created in a second pass,
-after all atoms and branches - have been derived. The candidate ring
-bonds are temporarily stored in a separate queue, and then made in
-the order they appear in the SELFIES. A ring bond will be made if
-both atoms of the bond can make the ring bond without violating any bond
-constraints. It is possible that the current atom is already bonded to the
-:math:`(Q + 1)`-th previous atom, e.g. if :math:`Q = 0`. In this case,
-the multiplicity of the existing bond is increased by the multiplicity
-of the ring bond. Similarly, if doing so would violate any bond constraints,
-then the ring bond is not made.
+**Discussion**: In practice, ring bonds are created during a second pass,
+after all atoms and branches have been derived. The candidate ring
+bonds are temporarily stored in a queue, and then made in
+the order that they appear in the SELFIES. A ring bond will be made if
+its connected atoms can make the ring bond without violating any
+bond constraints.
 
-We present some examples below:
+It is also possible that the current atom is already bonded to the
+:math:`(Q + 1)`-th preceding atom, e.g. if :math:`Q = 0`. In this case,
+the multiplicity of the existing bond is increased by the minimum
+of (1) the multiplicity of the ring bond candidate and (2) the number
+of free bonds of both connected atoms (see Example 6). Note that
+the resulting bond will be constrained to a multiplicity of at most 3.
 
-+---------+-------------------------------------------------+---------------+------------------+
-| Example | SELFIES                                         | :math:`Q + 1` | SMILES           |
-+---------+-------------------------------------------------+---------------+------------------+
-| 1       | ``[C][=C][C][=C][C][=C][Ring1][Branch1_2]``     | 5             | ``C1=CC=CC=C1``  |
-+---------+-------------------------------------------------+---------------+------------------+
-| 2       | ``[C][C][=C][C][=C][C][Expl=Ring1][Branch1_2]`` | 5             | ``C=1C=CC=CC=1`` |
-+---------+-------------------------------------------------+---------------+------------------+
-| 3       | ``[C][C][Expl=Ring1][C]``                       | 1             | ``C#C``          |
-+---------+-------------------------------------------------+---------------+------------------+
-| 4       | ``[C][C][C][C][C][C][C][C][C][C][C]``           | 21            | ``C1CC...CC1``   |
-|         |                                                 |               |                  |
-|         | ``[C][C][C][C][C][C][C][C][C][C][C]``           |               |                  |
-|         |                                                 |               |                  |
-|         | ``[Ring2][Ring1][Branch1_2]``                   |               |                  |
-+         +-------------------------------------------------+---------------+------------------+
-|         | Example 4 is a single carbon ring of 22 carbon atoms.                              |
-+---------+------------------------------------------------------------------------------------+
+**Examples:**
+
++---------+------------------------------------------------------------+---------------+------------------+
+| Example | SELFIES                                                    | :math:`Q + 1` | SMILES           |
++=========+============================================================+===============+==================+
+| 1       | ``[C][=C][C][=C][C][=C][Ring1][Branch1_2]``                | 5             | ``C1=CC=CC=C1``  |
++---------+------------------------------------------------------------+---------------+------------------+
+| 2       | ``[C][C][=C][C][=C][C][Expl=Ring1][Branch1_2]``            | 5             | ``C=1C=CC=CC=1`` |
++---------+------------------------------------------------------------+---------------+------------------+
+| 3       | ``[C][C][Expl=Ring1][C]``                                  | 1             | ``C#C``          |
++---------+------------------------------------------------------------+---------------+------------------+
+| 4       | ``[C][C][C][C][C][C][C][C][C][C][C]``                      | 21            | ``C1CC...CC1``   |
+|         |                                                            |               |                  |
+|         | ``[C][C][C][C][C][C][C][C][C][C][C]``                      |               |                  |
+|         |                                                            |               |                  |
+|         | ``[Ring2][Ring1][Branch1_2]``                              |               |                  |
+|         +------------------------------------------------------------+---------------+------------------+
+|         | Example 4 is a single carbon ring of 22 carbon atoms.                                         |
++---------+------------------------------------------------------------+---------------+------------------+
+| 5       | ``[C][C][C][C][Branch1_1][C][C][Ring1][Ring2][C][C]``      | 3             | ``C1CCC1(C)CC``  |
+|         +------------------------------------------------------------+---------------+------------------+
+|         | Note that the SMILES ``CC1CC(C1)CC`` is not outputted.                                        |
++---------+------------------------------------------------------------+---------------+------------------+
+| 6       | ``[C][C][C][C][Expl=Ring1][Ring2][Expl#Ring1][Ring2]``     | 3, 3          | ``C#1CCC#1``     |
++---------+------------------------------------------------------------+---------------+------------------+
+
+
 
 Special Symbols
 ###############
 
 The following are symbols that have a special meaning for SELFIES:
 
-+---------------+----------------------------------------------------------------------------------------------+
-| Character     | Description                                                                                  |
-+===============+==============================================================================================+
-| ``[epsilon]`` | The ``[epsilon]`` symbol maps :math:`X_0 \to X_0` and :math:`X_i \to \epsilon` (the empty    |
-|               | string) for all :math:`i \geq 1`.                                                            |
-+---------------+----------------------------------------------------------------------------------------------+
-| ``[nop]``     | The nop (no operation) symbol is always ignored and skipped over by :func:`selfies.decoder`. |
-|               |                                                                                              |
-|               | Thus, it can be used as a padding symbol for SELFIES.                                        |
-+---------------+----------------------------------------------------------------------------------------------+
-| ``.``         | The dot symbol is used to indicate disconnected or ionic compounds, similar to how it is     |
-|               |                                                                                              |
-|               | used in SMILES.                                                                              |
-+---------------+----------------------------------------------------------------------------------------------+
+.. _no operation: https://en.wikipedia.org/wiki/NOP_(code)
+
++---------------+-------------------------------------------------------------------------------------------------+
+| Character     | Description                                                                                     |
++===============+=================================================================================================+
+| ``[epsilon]`` | The ``[epsilon]`` symbol maps :math:`X_0 \to X_0` and :math:`X_i \to \epsilon` (the empty       |
+|               | string) for all :math:`i \geq 1`.                                                               |
++---------------+-------------------------------------------------------------------------------------------------+
+| ``[nop]``     | The nop (`no operation`_) symbol is always ignored and skipped over by :func:`selfies.decoder`. |
+|               |                                                                                                 |
+|               | Thus, it can be used as a padding symbol for SELFIES.                                           |
++---------------+-------------------------------------------------------------------------------------------------+
+| ``.``         | The dot symbol is used to indicate disconnected or ionic compounds, similar to how it is        |
+|               |                                                                                                 |
+|               | used in SMILES.                                                                                 |
++---------------+-------------------------------------------------------------------------------------------------+
