@@ -4,7 +4,7 @@
 ## v1.0.0 - TBD:
 ### Added:
  *  Added script to automatically Kekulize SMILES with aromatic symbols before
-    they are translated into SELFIES by `selfies.encoder`
+    they are translated into SELFIES by `selfies.encoder`.
  *  New functions to the library, such as `selfies.len_selfies` and 
     `selfies.split_selfies`. Includes functions that allow users to  
     customize the SELFIES semantic constraints, e.g. 
