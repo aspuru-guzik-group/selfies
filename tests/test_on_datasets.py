@@ -87,7 +87,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
             if not is_same_mol(in_smiles, out_smiles):
                 error_list.append((in_smiles, out_smiles))
 
-        # open and write all errors to errors_emolecule.csv
+        # open and write all errors to errors_{test_name}.csv
         with open(error_path, "a") as error_log:
             for error in error_list:
                 error_log.write(','.join(error) + "\n")
