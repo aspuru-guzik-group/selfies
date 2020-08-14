@@ -16,6 +16,7 @@ from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 faulthandler.enable()
 
 datasets = [
+    ('Custom_Cases', 'smiles'),
     ('130K_QM9', 'smiles'),
     ('51K_NonFullerene', 'smiles'),
     ('250K_ZINC', 'smiles'),
@@ -38,7 +39,8 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_{test_name}.csv")
+                              'error_sets',
+                              f"errors_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -53,14 +55,13 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     reader = pd.read_csv(test_path,
                          chunksize=10000,
                          header=0,
-                         delimiter=' ',
                          skiprows=skip)
 
     # roundtrip testing
     for chunk in reader:
         for in_smiles in chunk[column_name]:
 
-            if MolFromSmiles(in_smiles) is None:
+            if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
             selfies = sf.encoder(in_smiles)
@@ -80,9 +81,12 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
         error_found_flag = error_found_flag or error_list
         error_list = []
 
+    sf.set_semantic_constraints()  # restore defaults
+
     assert not error_found_flag
 
 
+@pytest.mark.skip(reason="covered by round-trip test")
 @pytest.mark.parametrize("test_name, column_name", datasets)
 def test_kekulize_parser(test_name, column_name, dataset_samples):
     """Tests the kekulization of SMILES, which is the first step of
@@ -93,7 +97,8 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     curr_dir = os.path.dirname(__file__)
     test_path = os.path.join(curr_dir, 'test_sets', f"{test_name}.txt")
     error_path = os.path.join(curr_dir,
-                              'error_sets', f"errors_kekulize_{test_name}.csv")
+                              'error_sets',
+                              f"errors_kekulize_{test_name}.csv")
 
     os.makedirs(os.path.dirname(error_path), exist_ok=True)
     error_list = []
@@ -108,14 +113,13 @@ def test_kekulize_parser(test_name, column_name, dataset_samples):
     reader = pd.read_csv(test_path,
                          chunksize=10000,
                          header=0,
-                         delimiter=' ',
                          skiprows=skip)
 
     # kekulize testing
     for chunk in reader:
         for smiles in chunk[column_name]:
 
-            if MolFromSmiles(smiles) is None:
+            if (MolFromSmiles(smiles) is None) or ('*' in smiles):
                 continue
 
             # build kekulized SMILES
