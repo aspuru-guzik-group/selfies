@@ -64,14 +64,14 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     # roundtrip testing
     for chunk in reader:
         for in_smiles in chunk[column_name]:
-
-            # check if SMILES in chunk is a valid RDKit molecule. if not, skip testing
-            # All inputted SMILES must be valid RDKit Mol objects to be encoded.
+            # check if SMILES in chunk is a valid RDKit molecule.
+            # if not, skip testing
+            # All inputted SMILES must be valid
+            # RDKit Mol objects to be encoded.
             if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
-
-            # encode selfies
+            # encode SELFIE string
             selfies = sf.encoder(in_smiles)
 
             # if unable to encode SMILES, write to list of errors
