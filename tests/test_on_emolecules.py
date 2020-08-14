@@ -56,7 +56,8 @@ def test_roundtrip_translation():
         with open(ckpt_path, 'r') as ckpt_file:
             checkpoint = int(ckpt_file.readlines()[0])
 
-    # if no path to a checkpoint exists, create a new directory for error logging and checkpoints
+    # if no path to a checkpoint exists,
+    # create a new directory for error logging and checkpoints
     else:
         os.makedirs(os.path.dirname(ckpt_path), exist_ok=True)
         os.makedirs(os.path.dirname(error_path), exist_ok=True)
@@ -83,8 +84,10 @@ def test_roundtrip_translation():
 
         for in_smiles in chunk[COL_NAME]:
 
-            # check if SMILES in chunk is a valid RDKit molecule. if not, skip testing
-            # All inputted SMILES must be valid RDKit Mol objects to be encoded.
+            # check if SMILES in chunk is a valid RDKit molecule.
+            # if not, skip testing
+            # All inputted SMILES must be valid
+            # RDKit Mol objects to be encoded.
             if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
                 continue
 
@@ -111,7 +114,8 @@ def test_roundtrip_translation():
         error_found_flag = error_found_flag or error_list
         error_list = []
 
-        # create checkpoint from the current pandas reader chunk, to load from and continue testing.
+        # create checkpoint from the current pandas reader chunk,
+        # to load from and continue testing.
         with open(ckpt_path, 'w+') as ckpt_file:
             ckpt_file.write(str(chunk_idx))
 
