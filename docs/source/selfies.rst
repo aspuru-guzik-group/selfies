@@ -48,9 +48,9 @@ of :mod:`selfies`.
 
 .. warning::
 
-    If custom semantic constraints are used, it is recommended to report
-    them for reproducibility reasons. SELFIES may be translated differently
-    under different semantic constraints.
+    SELFIES may be translated differently under different semantic constraints.
+    Therefore, if custom semantic constraints are used, it is recommended to report
+    them for reproducibility reasons. 
 
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
