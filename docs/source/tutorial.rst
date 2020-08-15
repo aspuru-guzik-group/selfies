@@ -43,24 +43,22 @@ that can make :math:`\alpha` bonds maximally. The atomic symbol maps:
 .. math::
 
     X_i \to \begin{cases}
-        \texttt{<A>} X_{\alpha} & i = 0 \\
-        \texttt{<B'><A>} X_{\alpha - \mu} & i \neq 0
+        \texttt{<B'><A>}  & \alpha - \mu = 0 \\
+        \texttt{<B'><A>} X_{\alpha - \mu}  & \alpha - \mu \neq 0
     \end{cases}
 
 where ``<B'>`` is a prefix representing a bond with multiplicity
-:math:`\mu = \min(\beta, \alpha, i)`, and where we replace
-:math:`X_{\alpha - \mu}` above with the empty string
-if :math:`\alpha - \mu = 0`. Note that non-terminal states :math:`X_i`
-effectively restrict the subsequent bond to a multiplicity of at most :math:`i`.
-We provide an example of the derivation of the
-SELFIES ``[F][=C][=C][#N]``:
+:math:`\mu = \min(\beta, \alpha, i)`, or the empty string if :math:`\mu = 0`.
+Note that non-terminal states :math:`X_i` effectively restrict the subsequent
+bond to a multiplicity of at most :math:`i`. We provide an example of
+the derivation of the SELFIES ``[F][=C][=C][#N]``:
 
 .. math::
 
     X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=C}X_2 \to \texttt{FC=C=N}
 
 
-**Discussion:** Intuitively, the formal grammar has the following behaviour:
+**Discussion:** Intuitively, the formal grammar has the following behaviour.
 An atomic symbol ``[<B><A>]`` connects atom ``<A>`` to the previously derived
 atom through bond type ``<B>``. If creating this bond would violate the bond
 constraints of the previous or current atom, the bond multiplicity is reduced
@@ -84,9 +82,15 @@ constraints of the previous or current atom, the bond multiplicity is reduced
 Index Symbols
 #############
 
-The state :math:`Q` is used to derive the size of branches,
-and the location of ring bonds. The branch and ring symbols denote how many symbols are used to derive a number (e.g. [Ring2] indicates that the subsequent two symbols encode the final number). Whenever the derivation is in state :math:`Q`, the subsequent one or more SELFIES symbols
-derive an integer. Each symbol :math:`s_i` is converted to an integer:
+The state :math:`Q` is used to derive the size of branches and
+the location of ring bonds. After a ring or branch symbol, the subsequent
+one or more SELFIES symbols are used to derive an integer from :math:`Q`.
+Note that the specific branch and ring symbol itself will specify exactly
+how many symbols are used in the derivation (e.g. ``[Ring3]`` indicates
+that the subsequent three symbols are used).
+
+First, each subsequent symbol :math:`s_i` is converted to an
+index :math:`\text{idx}(s_i)`, according to the following assignment:
 
 .. table::
     :align: center
@@ -114,21 +118,23 @@ derive an integer. Each symbol :math:`s_i` is converted to an integer:
     +-------+-----------------+-------+-----------------+
 
 Then :math:`Q` is mapped to the hexadecimal (base 16) integer specified
-by the indices. For example, if the the number is specified by three symbols,
-:math:`Q` is mapped to:
+by the indices. For example, if three symbols :math:`s_1, s_2, s_3` are
+used in the derivation, then :math:`Q` is mapped to:
 
 .. math::
 
     Q \to (\text{idx}(s_1) \times 16^2) + (\text{idx}(s_2) \times 16) + \text{idx}(s_3)
 
-For example, [Ring2][[Branch1_1][O] stands will derive the number 39_{16}=57.
+For example, ``[Ring3][C][Branch1_1][O]`` will derive the number :math:`(039)_{16}=57`.
 
 Branch Symbols
 ##############
 
 Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
-main chain, analogous to the open and closed curved brackets in SMILES. In SELFIES, a branch is derived by a recursive call of the SELFIES derivation.
+main chain, analogous to the open and closed curved brackets in SMILES.
+In SELFIES, a branch is derived by a recursive call to the SELFIES
+derivation.
 
 A Branch symbol ``[Branch<L>_<M>]`` maps:
 
@@ -139,18 +145,19 @@ A Branch symbol ``[Branch<L>_<M>]`` maps:
         B(Q, X_{n})X_j & i > 1
     \end{cases}
 
-where :math:`n = \min(i - 1, \texttt{<M>})` is the deriation state of a new branch,
-and :math:`j = i - n` is the new derivation state of the main branch. The number ``<L>`` specifies how many SELFIES symbols are used to derive an integer (the size of the branch) in the state :math:`Q`. Then
-:math:`B(Q, X_{n})` takes the next :math:`Q + 1` symbols, and recursively
-derives them with initial derivation state :math:`X_{n}`. The resulting
-fragment is taken to be the derived branch, and derivation proceeds
-with the next derivation state :math:`X_j`.
+where :math:`n = \min(i - 1, \texttt{<M>})` is the derivation state of a new branch,
+and :math:`j = i - n` is the new derivation state of the main chain. In the :math:`i > 1`
+case, the ``<L>`` subsequent symbols are used to derive an integer from the
+state :math:`Q`. Then :math:`B(Q, X_{n})` takes the next :math:`Q + 1` symbols,
+and recursively derives them with initial derivation state :math:`X_{n}`.
+The resulting fragment is taken to be the derived branch, and derivation
+proceeds with the next derivation state :math:`X_j`.
 
 **Discussion:**  Intuitively, branch symbols are skipped for states
 :math:`X_{0-1}` because the previous atom can make at most one bond
 (branches require at least two bonds to be free). It is possible
 that a branch is nested at the start of another branch; in SELFIES, both
-branches will be connected to the same main chain atom (see Example 5).
+branches will be connected to the same main chain atom (see Example 5 below).
 
 **Examples:**
 
@@ -194,33 +201,34 @@ A Ring symbol ``[Ring<L>]`` maps:
         R(Q)X_i & i \neq 0
     \end{cases}
 
-Identical to branch derivation, the ``<L>`` index after the Ring symbol indicates how many SELFIES symbols are used to derive the number :math:`Q`.
-Then :math:`R(Q)` connects the current
-atom to the :math:`(Q + 1)`-th preceding atom through a single bond.
-More specifically, the last derived atom is the most recently derived atom,
-excluding atoms derived in branches (see Example 5 below); and the ":math:`(Q + 1)`-th
-preceding atom" is the atom derived :math:`Q + 1` atoms before the
-current atom, counting atoms derived in branches. If the preceding atom does
-not exist, then the connection is made to the 1st derived atom instead.
+In the :math:`i \neq 0` case, the ``<L>`` subsequent symbols are used to
+derive an integer from the state :math:`Q`. Then :math:`R(Q)` connects the
+*current* atom to the :math:`(Q + 1)`-th preceding atom through a
+single bond. More specifically, the *current* atom is the most recently
+derived atom within the current derivation instance (see Example 5 below).
+If the *current* atom is the :math:`I`-th derived atom, then
+a bond is made between the :math:`I`-th derived atom and the :math:`J`-th
+derived atom, where :math:`J = \min(1, P - (Q + 1))`.
 
 The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
 ``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
 preceding atom through a bond of type ``<B>``.
-
 
 **Discussion**: In practice, ring bonds are created during a second pass,
 after all atoms and branches have been derived. The candidate ring
 bonds are temporarily stored in a queue, and then made in
 the order that they appear in the SELFIES. A ring bond will be made if
 its connected atoms can make the ring bond without violating any
-bond constraints. This is the only non-local rule in SELFIES, but is efficiently implemented as this number can be determined only by looking at one location.
+bond constraints. This is the only non-local rule in SELFIES, but is
+efficiently implemented as this number can be determined only by looking
+at one location.
 
 It is also possible that the current atom is already bonded to the
 :math:`(Q + 1)`-th preceding atom, e.g. if :math:`Q = 0`. In this case,
-the multiplicity of the existing bond is increased by the minimum
-of (1) the multiplicity of the ring bond candidate and (2) the number
-of free bonds of both connected atoms (see Example 6). Note that
-the resulting bond will be constrained to a multiplicity of at most 3.
+the multiplicity of the existing bond is increased by the multiplicity of
+the ring bond candidate. Then the multiplicity of the resulting bond is reduced
+(minimally) such that no bond constraints are violated, and the multiplicity
+is at most 3 (see Example 6 below).
 
 **Examples:**
 
