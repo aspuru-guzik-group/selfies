@@ -3,19 +3,25 @@
 
 ## v1.0.0 - TBD:
 ### Added:
- *  Added script to automatically Kekulize SMILES with aromatic symbols before
-    they are translated into SELFIES by `selfies.encoder`.
+ *  Added semantic handling of aromaticity / delocalization (by kekulizing SMILES with aromatic symbols before
+    they are translated into SELFIES by `selfies.encoder`)
+ *  Added semantic handling of tetrahedral carbons, e.g. Carbene ([C]=C)
+ *  Added semantic handling of charged species (e.g. [CH+]1CCC1)
+ *  Added semantic handling of radical species ([CH]1CCC1) or any species with explicit hydrogens (e.g. CC[CH2])
+ *  Added semantic handling of isotopes (e.g. [14CH2]=C or [235U])
+ *  Improved semantic handling of chirality (e.g. O=C[Co@@](F)(Cl)(Br)(I)S or 
+ *  Improved semantic handling of double-bond configuration (e.g. F/C=C/C=C/C) 
  *  Added new functions to the library, such as `selfies.len_selfies` and 
-    `selfies.split_selfies`. Includes functions that allow users to  
-    customize the SELFIES semantic constraints, e.g. 
+    `selfies.split_selfies`.
+ *  Added advanced-user functions to the library to customize the SELFIES semantic constraints, e.g. 
     `selfies.set_semantic_constraints`.
  *  Introduced new padding `[nop]` (no operation) symbol.
 
 ### Changed: 
- *  Major structural changes to the `selfies` language; including changes
-    to the indexing alphabet, changes to the behaviours of rings and branches,
-    and the removal of states `X9991-X9993`. 
- *  Encoding and decoding algorithms were made more efficient.
+ *  Optimized changes to the indexing alphabet (it is base-16 now)
+ *  Optimized the behaviours of rings and branches to fix an issue with specific non-standard molecules that could not be translated.
+ *  Changed behaviour of Ring/Branch, such that states `X9991-X9993` are not necessary anymore
+ *  Significantly improved encoding and decoding algorithms, it is much faster now
 
 ---
 
