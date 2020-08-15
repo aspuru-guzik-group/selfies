@@ -50,7 +50,7 @@ that can make :math:`\alpha` bonds maximally. The atomic symbol maps:
 where ``<B'>`` is a prefix representing a bond with multiplicity
 :math:`\mu = \min(\beta, \alpha, i)`, and where we replace
 :math:`X_{\alpha - \mu}` above with the empty string
-if :math:`\alpha - \mu = 0`. Note that non-terminal states :math:`X_{1-7}`
+if :math:`\alpha - \mu = 0`. Note that non-terminal states :math:`X_i`
 effectively restrict the subsequent bond to a multiplicity of at most :math:`i`.
 We provide an example of the derivation of the
 SELFIES ``[F][=C][=C][#N]``:
@@ -60,11 +60,11 @@ SELFIES ``[F][=C][=C][#N]``:
     X_0 \to \texttt{F}X_1 \to \texttt{FC}X_3 \to \texttt{FC=C}X_2 \to \texttt{FC=C=N}
 
 
-**Discussion:** Intuitively, an atomic symbol ``[<B><A>]`` connects
-atom ``<A>`` to the previously derived atom through bond type ``<B>``.
-If creating this bond would violate the bond constraints of the previous
-or current atom, the bond multiplicity is reduced (minimally) such that no
-constraints are violated.
+**Discussion:** Intuitively, the formal grammar has the following behaviour:
+An atomic symbol ``[<B><A>]`` connects atom ``<A>`` to the previously derived
+atom through bond type ``<B>``. If creating this bond would violate the bond
+constraints of the previous or current atom, the bond multiplicity is reduced
+(minimally) such that all bond constraints are fulfilled.
 
 **Examples:**
 
@@ -84,11 +84,9 @@ constraints are violated.
 Index Symbols
 #############
 
-The state :math:`Q` is used to specify the size of branches,
-and the location of ring bonds. A sequence of any SELFIES symbol(s)
-:math:`s_1, \ldots, s_{\texttt{<L>}}` maps state :math:`Q` to an integer.
-First, each symbol :math:`s_i` is converted to an index :math:`\text{idx}(s_i)`
-according to following assignment.
+The state :math:`Q` is used to derive the size of branches,
+and the location of ring bonds. The branch and ring symbols denote how many symbols are used to derive a number (e.g. [Ring2] indicates that the subsequent two symbols encode the final number). Whenever the derivation is in state :math:`Q`, the subsequent one or more SELFIES symbols
+derive an integer. Each symbol :math:`s_i` is converted to an integer:
 
 .. table::
     :align: center
@@ -116,20 +114,21 @@ according to following assignment.
     +-------+-----------------+-------+-----------------+
 
 Then :math:`Q` is mapped to the hexadecimal (base 16) integer specified
-by the indices. For example, in a sequence of three SELFIES symbols,
+by the indices. For example, if the the number is specified by three symbols,
 :math:`Q` is mapped to:
 
 .. math::
 
     Q \to (\text{idx}(s_1) \times 16^2) + (\text{idx}(s_2) \times 16) + \text{idx}(s_3)
 
+For example, [Ring2][[Branch1_1][O] stands will derive the number 39_{16}=57.
 
 Branch Symbols
 ##############
 
 Branch symbols are of the general form ``[Branch<L>_<M>]``, where
 ``<L>, <M> in {1, 2, 3}``. A branch symbol specifies a branch from the
-main chain, analogous to the open and closed curved brackets in SMILES.
+main chain, analogous to the open and closed curved brackets in SMILES. In SELFIES, a branch is derived by a recursive call of the SELFIES derivation.
 
 A Branch symbol ``[Branch<L>_<M>]`` maps:
 
@@ -140,10 +139,8 @@ A Branch symbol ``[Branch<L>_<M>]`` maps:
         B(Q, X_{n})X_j & i > 1
     \end{cases}
 
-where :math:`n = \min(i - 1, \texttt{<M>})` is the initial branch
-derivation state and :math:`j = i - n` is the next derivation state. In the
-bottom case, the ``<L>`` symbols after the Branch symbol are read,
-and used to map :math:`Q` to an index. Then
+where :math:`n = \min(i - 1, \texttt{<M>})` is the deriation state of a new branch,
+and :math:`j = i - n` is the new derivation state of the main branch. The number ``<L>`` specifies how many SELFIES symbols are used to derive an integer (the size of the branch) in the state :math:`Q`. Then
 :math:`B(Q, X_{n})` takes the next :math:`Q + 1` symbols, and recursively
 derives them with initial derivation state :math:`X_{n}`. The resulting
 fragment is taken to be the derived branch, and derivation proceeds
@@ -197,10 +194,10 @@ A Ring symbol ``[Ring<L>]`` maps:
         R(Q)X_i & i \neq 0
     \end{cases}
 
-Identical to branch derivation, the ``<L>`` symbols after the Ring symbol are read,
-and used to map :math:`Q` to an index. Then :math:`R(Q)` connects the current
+Identical to branch derivation, the ``<L>`` index after the Ring symbol indicates how many SELFIES symbols are used to derive the number :math:`Q`.
+Then :math:`R(Q)` connects the current
 atom to the :math:`(Q + 1)`-th preceding atom through a single bond.
-More specifically, the "current" atom is the most recently derived atom,
+More specifically, the last derived atom is the most recently derived atom,
 excluding atoms derived in branches (see Example 5 below); and the ":math:`(Q + 1)`-th
 preceding atom" is the atom derived :math:`Q + 1` atoms before the
 current atom, counting atoms derived in branches. If the preceding atom does
@@ -216,7 +213,7 @@ after all atoms and branches have been derived. The candidate ring
 bonds are temporarily stored in a queue, and then made in
 the order that they appear in the SELFIES. A ring bond will be made if
 its connected atoms can make the ring bond without violating any
-bond constraints.
+bond constraints. This is the only non-local rule in SELFIES, but is efficiently implemented as this number can be determined only by looking at one location.
 
 It is also possible that the current atom is already bonded to the
 :math:`(Q + 1)`-th preceding atom, e.g. if :math:`Q = 0`. In this case,
