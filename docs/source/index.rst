@@ -13,12 +13,13 @@ generation of outputs with guaranteed validity.
 
 This library is intended to be light-weight and easy to use.
 
-
-For explanation of the underlying principle (formal grammar) and experiments, 
-please see the [original paper](https://arxiv.org/abs/1905.13741).
+For explanation of the underlying principle (formal grammar) and experiments,
+please see the `original paper`_.
 
 For comments, bug reports or feature ideas, please use github issues
 or send an email to mario.krenn@utoronto.ca and alan@aspuru.com.
+
+.. _original paper: https://arxiv.org/abs/1905.13741
 
 Installation
 ############
