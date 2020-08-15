@@ -4,7 +4,8 @@
    contain the root `toctree` directive.
 
 Welcome to the SELFIES documentation!
-===================================
+=====================================
+
 SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string
 representation. A main objective is to use SELFIES as direct input into
 machine learning models, in particular in generative models, for the
@@ -12,8 +13,8 @@ generation of outputs with high validity.
 
 This library is intended to be light-weight and easy to use.
 
-For explanation of the principle and experiments:
-https://arxiv.org/abs/1905.13741
+For explanation of the principle and experiments, please see the original
+paper at https://arxiv.org/abs/1905.13741.
 
 For comments, bug reports or feature ideas, please use github issues
 or send an email to mario.krenn@utoronto.ca and alan@aspuru.com.
