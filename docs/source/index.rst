@@ -5,10 +5,10 @@
 
 Welcome to the SELFIES documentation!
 ===================================
-Please change the intro to: "SELFIES (SELF-referencIng Embedded Strings)
-is a 100% robust molecular string representation. A main objective is to
-use SELFIES as direct input into machine learning models, in particular
-in generative models, for the generation of outputs with high validity.
+SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string
+representation. A main objective is to use SELFIES as direct input into
+machine learning models, in particular in generative models, for the
+generation of outputs with high validity.
 
 This library is intended to be light-weight and easy to use.
 
