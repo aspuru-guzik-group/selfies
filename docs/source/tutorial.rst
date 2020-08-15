@@ -206,9 +206,9 @@ derive an integer from the state :math:`Q`. Then :math:`R(Q)` connects the
 *current* atom to the :math:`(Q + 1)`-th preceding atom through a
 single bond. More specifically, the *current* atom is the most recently
 derived atom within the current derivation instance (see Example 5 below).
-If the *current* atom is the :math:`I`-th derived atom, then
-a bond is made between the :math:`I`-th derived atom and the :math:`J`-th
-derived atom, where :math:`J = \min(1, P - (Q + 1))`.
+If the *current* atom is the :math:`m`-th derived atom, then
+a bond is made between the :math:`m`-th derived atom and the :math:`n`-th
+derived atom, where :math:`n = \max(1, m - (Q + 1))`.
 
 The Ring symbol ``[Expl<B>Ring<L>]`` has an equivalent function to
 ``[Ring<L>]``, except that it connects the current and :math:`(Q + 1)`-th
