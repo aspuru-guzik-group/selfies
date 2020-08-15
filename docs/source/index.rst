@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SELFIES' documentation!
+Welcome to the SELFIES documentation!
 ===================================
 Please change the intro to: "SELFIES (SELF-referencIng Embedded Strings)
 is a 100% robust molecular string representation. A main objective is to
