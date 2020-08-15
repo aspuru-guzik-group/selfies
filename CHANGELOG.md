@@ -9,7 +9,7 @@
  *  Added semantic handling of charged species (e.g. [CH+]1CCC1)
  *  Added semantic handling of radical species ([CH]1CCC1) or any species with explicit hydrogens (e.g. CC[CH2])
  *  Added semantic handling of isotopes (e.g. [14CH2]=C or [235U])
- *  Improved semantic handling of chirality (e.g. O=C[Co@@](F)(Cl)(Br)(I)S or 
+ *  Improved semantic handling of chirality (e.g. O=C\[Co@@\](F)(Cl)(Br)(I)S or 
  *  Improved semantic handling of double-bond configuration (e.g. F/C=C/C=C/C) 
  *  Added new functions to the library, such as `selfies.len_selfies` and 
     `selfies.split_selfies`.
