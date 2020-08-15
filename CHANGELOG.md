@@ -14,7 +14,7 @@
  *  Added new functions to the library, such as `selfies.len_selfies` and 
     `selfies.split_selfies`.
  *  Added advanced-user functions to the library to customize the SELFIES semantic constraints, e.g. 
-    `selfies.set_semantic_constraints`.
+    `selfies.set_semantic_constraints`. Allows to encode for instance diborane, [BH2]1[H][BH2][H]1.
  *  Introduced new padding `[nop]` (no operation) symbol.
 
 ### Changed: 
