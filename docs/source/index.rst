@@ -3,20 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SELFIES documentation!
+Welcome to SELFIES' documentation!
 ===================================
-SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string representation. A main objective is to use SELFIES as direct input into machine learning models, in particular in generative models, for the generation of outputs with high validity.
+Please change the intro to: "SELFIES (SELF-referencIng Embedded Strings)
+is a 100% robust molecular string representation. A main objective is to
+use SELFIES as direct input into machine learning models, in particular
+in generative models, for the generation of outputs with high validity.
 
-This library is intended to be light-weight and easy to use. It is a general-purpose, sequence-based, robust representation of semantically constrained graphs. It is based on a Chomsky type-2 grammar, augmented with two self-referencing functions. 
+This library is intended to be light-weight and easy to use.
 
-The code presented here is a concrete application of SELFIES in chemistry, for
-the robust representation of molecules (see the original paper on
-`arXiv <https://arxiv.org/abs/1905.13741>`_). This library is intended to
-be light-weight and easy to use, and also, allow users the flexibility
-to customize the SELFIES language to their needs.
-
-For comments, bug reports or feature ideas, please use github issues or send an email to
-mario.krenn@utoronto.ca and alan@aspuru.com.
+For comments, bug reports or feature ideas, please use github issues
+or send an email to mario.krenn@utoronto.ca and alan@aspuru.com.
 
 Installation
 ############
