@@ -6,17 +6,6 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-<<<<<<< HEAD
-    name    = "selfies",
-    version = "0.2.4",
-    author  = "Mario Krenn",
-    author_email = "mario.krenn@utoronto.ca, alan@aspuru.com",
-    description  = "Self-referencing embedded strings",
-    long_description = long_description,
-    long_description_content_type = "text/markdown",
-	url = "https://github.com/aspuru-guzik-group/selfies",
-    packages = setuptools.find_packages(),
-=======
     name="selfies",
     version="1.0.0",
     author="Mario Krenn",
@@ -28,7 +17,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/aspuru-guzik-group/selfies",
     packages=setuptools.find_packages(),
->>>>>>> 69573b07009f09eebba551db7d151f56660029b0
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
