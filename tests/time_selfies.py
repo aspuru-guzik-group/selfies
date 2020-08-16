@@ -11,7 +11,7 @@ from selfies.kekulize import kekulize_parser
 
 def time_roundtrip(file_path: str, sample_size: int = -1):
     """Tests the amount of time it takes to encode and then decode an
-    entire .txt file of SMILES strings <n> times. If <sample_size> is positive,
+    entire .txt file of SMILES strings. If <sample_size> is positive,
     then a random sample is taken from the file instead.
     """
 
