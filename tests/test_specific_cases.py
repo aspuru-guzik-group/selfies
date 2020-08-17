@@ -220,7 +220,7 @@ def test_consecutive_rings():
            == "C=1CCC=1"
 
 
-def test_unconstrained_symbol():
+def test_unconstrained_symbols():
     """Tests SELFIES with symbols that are not semantically constrained.
     """
 
