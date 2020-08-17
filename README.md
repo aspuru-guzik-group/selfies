@@ -23,6 +23,12 @@ Use pip to install ``selfies``.
 pip install selfies
 ```
 
+## Documentation
+
+The documentation can be found on
+[ReadTheDocs](https://selfies.readthedocs.io/en/latest/).
+Alternatively, it can be built from the ``docs/`` directory.
+
 ## Usage
 
 ### Standard Functions
@@ -105,12 +111,6 @@ variational autoencoder that runs on the SELFIES language.
 * This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
 genetic algorithm to achieve state-of-the-art performance for inverse design,
 with the [code here](https://github.com/aspuru-guzik-group/GA).
-
-## Documentation
-
-The documentation can be found on
-[ReadTheDocs](https://selfies.readthedocs.io/en/latest/).
-Alternatively, it can be built from the ``docs/`` directory.
 
 
 ## Tests
