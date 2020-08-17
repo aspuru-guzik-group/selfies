@@ -25,7 +25,7 @@
 
 ---
 
-## v0.2.4 - 01-10-2019:
+## v0.2.4 - 01.10.2019:
 ### Added:
  *  Function ``get_alphabet()`` which returns a list of 29 selfies symbols
     whose arbitrary combination produce >99.99% valid molecules.
@@ -42,7 +42,7 @@ for suggestions and bug reports.
 
 ---
 
-## v0.2.2 - 19-09-2019:
+## v0.2.2 - 19.09.2019:
 
 ### Added:
  *  Enabled ``[C@],[C@H],[C@@],[C@@H],[H]`` to use in a semantic
@@ -52,7 +52,7 @@ We thank Andrew Brereton for suggestions and bug reports.
 
 ---
 
-## v0.2.1 - 02-09-2019:
+## v0.2.1 - 02.09.2019:
 
 ### Added:
  *  Decoder: added optional argument to restrict nitrogen to 3 bonds. 
@@ -78,5 +78,5 @@ for suggestions and bug reports.
 
 ---
 
-## v0.1.1 - 04-06-2019: 
+## v0.1.1 - 04.06.2019: 
  * initial release 
