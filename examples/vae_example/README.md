@@ -20,8 +20,7 @@ using Conda.
     into integer-encoded or one-hot encoded vectors. 
     
 ### Tested at:
-- Python 3.7.1
-- Python 3.6.8 
+- Python 3.7 
               
 CPU and GPU supported
 
