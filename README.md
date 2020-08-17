@@ -146,7 +146,7 @@ where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
 if ``dataset_samples`` is negative or exceeds the length of the dataset,
 the whole dataset is used.
 
-## version history
+## Version History
 See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md).
 
 ## Credits
