@@ -13,7 +13,7 @@ graphs which are syntactically and semantically valid.
 
 See the paper by Mario Krenn, Florian Haese, AkshatKumar Nigam,
 Pascal Friederich, and Alan Aspuru-Guzik at
-arXiv (https://arxiv.org/abs/1905.13741).
+https://arxiv.org/abs/1905.13741.
 
 
 ## Installation
@@ -109,7 +109,7 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 ## Documentation
 
 The documentation can be found on
-[ReadTheDocs](https://selfies-mirror.readthedocs.io/en/latest/?).
+[ReadTheDocs](https://selfies.readthedocs.io/en/latest/).
 Alternatively, it can be built from the ``docs/`` directory.
 
 
@@ -145,6 +145,9 @@ tox -- --trials 100 --dataset_samples 100
 where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
 if ``dataset_samples`` is negative or exceeds the length of the dataset,
 the whole dataset is used.
+
+## version history
+See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md).
 
 ## Credits
 
