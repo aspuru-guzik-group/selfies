@@ -220,7 +220,7 @@ def test_consecutive_rings():
            == "C=1CCC=1"
 
 
-def test_unconstrained_symbol():
+def test_unconstrained_symbols():
     """Tests SELFIES with symbols that are not semantically constrained.
     """
 
@@ -238,6 +238,61 @@ def test_unconstrained_symbol():
                       "[Branch1_1][C][F][Branch1_1][C][F][Branch1_1][C][F]"
                       "[Branch1_1][C][F][Branch1_1][C][F][Branch1_1][C][F]") \
            == "[Xe-2](F)CF"
+
+    sf.set_semantic_constraints()
+
+
+def test_isotope_symbols():
+    """Tests that SELFIES symbols with isotope specifications are
+     constrained properly.
+    """
+
+    assert sf.decoder("[13Cexpl][Branch1_1][C][Cl][Branch1_1][C][F]"
+                      "[Branch1_1][C][Br][Branch1_1][C][I]") \
+           == "[13C](Cl)(F)(Br)CI"
+    assert sf.decoder("[C][36Clexpl][C]") == "C[36Cl]"
+
+
+def test_chiral_symbols():
+    """Tests that SELFIES symbols with chirality specifications are
+    constrained properly.
+    """
+
+    assert sf.decoder("[C@@expl][Branch1_1][C][Cl][Branch1_1][C][F]"
+                      "[Branch1_1][C][Br][Branch1_1][C][I]") \
+           == "[C@@](Cl)(F)(Br)CI"
+    assert sf.decoder("[C@Hexpl][Branch1_1][C][Cl][Branch1_1][C][F]"
+                      "[Branch1_1][C][Br]") \
+           == "[C@H](Cl)(F)CBr"
+
+
+def test_explicit_hydrogen_symbols():
+    """Tests that SELFIES symbols with explicit hydrogen specifications
+     are constrained properly.
+     """
+
+    assert sf.decoder("[CHexpl][Branch1_1][C][Cl][#C]") == "[CH](Cl)=C"
+    assert sf.decoder("[CH3expl][=C]") == "[CH3]C"
+
+
+def test_charged_symbols():
+    """Tests that SELFIES symbols with charges are constrained properly.
+    """
+
+    constraints = sf.get_semantic_constraints()
+    constraints['Sn+4'] = 1
+    constraints['O-2'] = 2
+    sf.set_semantic_constraints(constraints)
+
+    # the following molecules don't make sense, but we use them to test
+    # selfies. Hence, we can't verify them with RDKit
+    assert sf.decoder("[Sn++++expl][=C]") == "[Sn++++]C"
+    assert sf.decoder("[Sn+4expl][=C]") == "[Sn+4]C"
+    assert sf.decoder("[O--expl][#C]") == "[O--]=C"
+    assert sf.decoder("[O-2expl][#C]") == "[O-2]=C"
+
+    # mixing many symbol types
+    assert sf.decoder("[17O@@H-2expl][#C]") == "[17O@@H-2]C"
 
     sf.set_semantic_constraints()
 
