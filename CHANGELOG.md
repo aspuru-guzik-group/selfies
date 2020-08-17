@@ -1,7 +1,7 @@
 # Changelog
 
 
-## v1.0.0 - TBD:
+## v1.0.0 - 17.08.2020:
 ### Added:
  *  Added semantic handling of aromaticity / delocalization (by kekulizing SMILES with aromatic symbols before
     they are translated into SELFIES by `selfies.encoder`)
