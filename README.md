@@ -23,6 +23,13 @@ Use pip to install ``selfies``.
 pip install selfies
 ```
 
+To check if the correct version of SELFIES is installed (latest version: ``1.0.0``), use the following pip command:
+
+```bash
+pip show selfies
+```
+
+
 ## Documentation
 
 The documentation can be found on
