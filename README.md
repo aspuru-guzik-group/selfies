@@ -29,6 +29,11 @@ To check if the correct version of SELFIES is installed (latest version: ``1.0.0
 pip show selfies
 ```
 
+To upgrade to the latest release of SELFIES if you are using an older version, use the following pip command:
+
+```bash
+pip install selfies --upgrade 
+```
 
 ## Documentation
 
