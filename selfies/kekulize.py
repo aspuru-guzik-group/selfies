@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Dict, Iterable, List, Set, Tuple, Union
 
 from selfies.grammar_rules import find_element, get_num_from_bond, \
@@ -43,7 +41,7 @@ def kekulize_parser(smiles_gen: Iterable[Tuple[str, str, int]]) \
         yield tuple(x)
 
 
-def _build_molecular_graph(graph: MolecularGraph,
+def _build_molecular_graph(graph,
                            smiles_symbols: List[List[Union[str, int]]],
                            rings: Dict[int, Tuple[int, int]],
                            prev_idx: int = -1,
@@ -105,7 +103,7 @@ def _build_molecular_graph(graph: MolecularGraph,
     return curr_idx
 
 
-def _kekulize(mol_graph: MolecularGraph) -> None:
+def _kekulize(mol_graph) -> None:
     """Kekulizes the molecular graph.
 
     :param mol_graph: a molecular graph to be kekulized.
@@ -167,8 +165,8 @@ def _is_aromatic(atom_symbol: str) -> bool:
         return False
 
     if element not in _aromatic_valences:
-        raise ValueError(f"Kekulization Failed: aromatic symbol {atom_symbol} "
-                         f"not recognized.")
+        raise ValueError("Kekulization Failed: aromatic symbol {} "
+                         "not recognized.".format(atom_symbol))
     return True
 
 
@@ -199,7 +197,8 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:
-        raise ValueError(f"Kekulization Failed: {atom_symbol} not supported.")
+        raise ValueError("Kekulization Failed: "
+                         "{} not supported.".format(atom_symbol))
 
     elif h_count == 1:  # e.g. [nH]
         used_electrons += 1
@@ -226,9 +225,6 @@ class MolecularGraph:
     :ivar aro_indices: a set of indices of atom(s) from ``smiles_symbols``
         that are aromatic in the molecular graph.
     """
-    smiles_symbols: List[List[Union[str, int]]]
-    graph: Dict[int, List[Bond]]
-    aro_indices: Set[int]
 
     def __init__(self, smiles_symbols: List[List[Union[str, int]]]):
         self.smiles_symbols = smiles_symbols
@@ -377,7 +373,7 @@ class MolecularGraph:
     def dfs_assign_bonds(self, idx: int,
                          visited: Set[int],
                          matched_nodes: Set[int],
-                         matched_edges: Set[Bond]) -> bool:
+                         matched_edges) -> bool:
         """After calling ``prune_to_pi_subgraph``, this method assigns
         double bonds between pairs of nodes such that every node is
         paired or matched.
@@ -490,10 +486,6 @@ class Bond:
     :ivar bond_symbol: the SMILES symbol representing this bond (e.g. '#').
     :ivar bond_idx: the index of this bond or edge.
     """
-    idx_a: int
-    idx_b: int
-    bond_symbol: str
-    bond_idx: int
 
     def __init__(self, idx_a, idx_b, bond_symbol, bond_idx):
         self.idx_a = idx_a

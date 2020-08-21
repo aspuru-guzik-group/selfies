@@ -135,7 +135,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             i += 3
 
         else:
-            raise ValueError(f"Unknown symbol '{smiles[i]}' in SMILES.")
+            raise ValueError("Unknown symbol '{}'.".format(smiles[i]))
 
         yield bond, symbol, symbol_type
 
@@ -196,9 +196,9 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
 
         if symbol_type == ATOM_TYPE:
             if symbol[0] == '[':
-                selfies += f"[{bond}{symbol[1:-1]}expl]"
+                selfies += "[{}{}expl]".format(bond, symbol[1:-1])
             else:
-                selfies += f"[{bond}{symbol}]"
+                selfies += "[{}{}]".format(bond, symbol)
             counter[0] += 1
             selfies_len += 1
             prev_idx = counter[0]
@@ -215,7 +215,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 N_as_symbols = get_symbols_from_n(branch_len - 1)
                 bond_num = get_num_from_bond(bond)
 
-                selfies += f"[Branch{len(N_as_symbols)}_{bond_num}]"
+                selfies += "[Branch{}_{}]".format(len(N_as_symbols), bond_num)
                 selfies += ''.join(N_as_symbols) + branch
                 selfies_len += 1 + len(N_as_symbols) + branch_len
 
@@ -233,11 +233,13 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 N_as_symbols = get_symbols_from_n(ring_len - 1)
 
                 if left_bond != '':
-                    selfies += f"[Expl{left_bond}Ring{len(N_as_symbols)}]"
+                    selfies += "[Expl{}Ring{}]".format(left_bond,
+                                                       len(N_as_symbols))
                 elif right_bond != '':
-                    selfies += f"[Expl{right_bond}Ring{len(N_as_symbols)}]"
+                    selfies += "[Expl{}Ring{}]".format(right_bond,
+                                                       len(N_as_symbols))
                 else:
-                    selfies += f"[Ring{len(N_as_symbols)}]"
+                    selfies += "[Ring{}]".format(len(N_as_symbols))
 
                 selfies += ''.join(N_as_symbols)
                 selfies_len += 1 + len(N_as_symbols)
