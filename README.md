@@ -23,13 +23,16 @@ Use pip to install ``selfies``.
 pip install selfies
 ```
 
-To check if the correct version of SELFIES is installed (see [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md) to verify latest version), use the following pip command:
+To check if the correct version of ``selfies`` is installed 
+(see [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md) 
+to verify the latest version), use the following pip command:
 
 ```bash
 pip show selfies
 ```
 
-To upgrade to the latest release of SELFIES if you are using an older version, use the following pip command:
+To upgrade to the latest release of ``selfies`` if you are using an 
+older version, use the following pip command:
 
 ```bash
 pip install selfies --upgrade 
