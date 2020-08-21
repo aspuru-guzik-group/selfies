@@ -60,7 +60,8 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
         except Exception:
             is_valid = False
 
-        assert is_valid, f"Invalid SMILES {smiles} decoded from {rand_mol}."
+        assert is_valid, \
+            "Invalid SMILES {} decoded from {}.".format(smiles, rand_mol)
 
 
 def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
