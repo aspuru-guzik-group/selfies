@@ -7,7 +7,8 @@
 ### Bug Fixes: 
  *  Minor bug fixes in the encoder for SMILES ending in branches (e.g. `C(Cl)(F)`),
     and SMILES with ring numbers between branches (e.g. `C(Cl)1(Br)CCCC1`)
-    
+ *  Minor bug fix with ring ordering in decoder (e.g. `C1CC2CCC12` vs `C1CC2CCC21`).  
+
 ---
 
 ## v1.0.0 - 17.08.2020:

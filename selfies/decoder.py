@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from selfies.grammar_rules import get_bond_from_num, get_n_from_symbols, \
@@ -257,7 +258,7 @@ def _form_rings_bilocally(derived: List[List[Union[str, int]]],
     # due to the behaviour of allowing multiple rings between the same atom
     # pair, or rings between already bonded atoms, we first resolve all rings
     # so that only valid rings are left and placed into <ring_locs>.
-    ring_locs = {}
+    ring_locs = OrderedDict()
 
     for left_idx, right_idx, bond_symbol in rings:
 
