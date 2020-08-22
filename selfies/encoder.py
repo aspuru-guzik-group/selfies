@@ -113,7 +113,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
                 i += 1
 
         elif smiles[i] in ('(', ')'):  # open and closed branch brackets
-            bond = smiles[i + 1]
+            bond = smiles[i + 1: i + 2]
             symbol = smiles[i]
             symbol_type = BRANCH_TYPE
             i += 1
