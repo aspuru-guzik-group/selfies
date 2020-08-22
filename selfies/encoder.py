@@ -199,9 +199,9 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 selfies += "[{}{}expl]".format(bond, symbol[1:-1])
             else:
                 selfies += "[{}{}]".format(bond, symbol)
+            prev_idx = counter[0]
             counter[0] += 1
             selfies_len += 1
-            prev_idx = counter[0]
 
         elif symbol_type == BRANCH_TYPE:
             if symbol == '(':
@@ -245,6 +245,6 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 selfies_len += 1 + len(N_as_symbols)
 
             else:
-                rings[ring_id] = (bond, counter[0])
+                rings[ring_id] = (bond, prev_idx)
 
     return selfies, selfies_len
