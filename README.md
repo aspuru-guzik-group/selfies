@@ -1,7 +1,12 @@
 # SELFIES
 
+[![GitHub release](https://img.shields.io/github/release/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/releases/)
 ![versions](https://img.shields.io/pypi/pyversions/selfies.svg)
+[![Documentation Status](https://readthedocs.org/projects/selfies/badge/?version=latest)](http://selfies.readthedocs.io/?badge=latest)
+[![GitHub issues](https://img.shields.io/github/issues/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/issues/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/aspuru-guzik-group/selfies/graphs/commit-activity)
+[![GitHub contributors](https://img.shields.io/github/contributors/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/graphs/contributors/)
 
 
 SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular
