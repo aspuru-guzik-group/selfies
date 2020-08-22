@@ -4,6 +4,12 @@
 ### Changed: 
  *  Code so that is compatible with python >= 3.5
 
+### Bug Fixes: 
+ *  Minor bug fixes in the encoder for SMILES ending in branches (e.g. `C(Cl)(F)`),
+    and SMILES with ring numbers between branches (e.g. `C(Cl)1(Br)CCCC1`)
+    
+---
+
 ## v1.0.0 - 17.08.2020:
 ### Added:
  *  Added semantic handling of aromaticity / delocalization (by kekulizing SMILES with aromatic symbols before
