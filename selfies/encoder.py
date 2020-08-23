@@ -126,6 +126,12 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             symbol_type = ATOM_TYPE
             i = r_idx + 1
 
+            # quick chirality specification check
+            chiral_i = symbol.find('@')
+            if symbol[chiral_i + 1].isalpha() and symbol[chiral_i + 1] != 'H':
+                raise ValueError("chiral specification '{}' not supported"
+                                 .format(symbol))
+
         elif smiles[i].isdigit():  # one-digit ring number
             symbol = smiles[i]
             symbol_type = RING_TYPE
