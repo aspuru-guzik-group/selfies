@@ -110,11 +110,12 @@ def set_semantic_constraints(
 
         # error checking
         if '?' not in bond_constraints:
-            raise ValueError("'?' not a key in bond_constraints")
+            raise ValueError("bond_constraints missing '?' as a key.")
 
         for key, value in bond_constraints.items():
             if not (1 <= value <= 8):
-                raise ValueError("Value in bond_constraints not in [1, 8]")
+                raise ValueError("bond_constraints['{}'] not between "
+                                 "1 and 8 inclusive.".format(key))
 
         _bond_constraints = dict(bond_constraints)
 
@@ -161,8 +162,8 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
                                       _bond_constraints['?'])
 
     if h_count >= max_bonds:
-        raise ValueError("Too many Hs in SELFIES Symbol '{}'. "
-                         "Consider adjusting bond constraints.".format(symbol))
+        raise ValueError("too many Hs in symbol '{}'; consider "
+                         "adjusting bond constraints".format(symbol))
     max_bonds -= h_count  # hydrogens consume 1 bond
 
     # calculate next state
@@ -201,7 +202,7 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
     branch_type = int(branch_symbol[-2])  # branches of the form [BranchL_X]
 
     if not (1 <= branch_type <= 3):
-        raise ValueError("Unknown branch symbol: {}".format(branch_symbol))
+        raise ValueError("unknown branch symbol '{}'".format(branch_symbol))
 
     if 2 <= state <= 8:
         branch_init_state = min(state - 1, branch_type)

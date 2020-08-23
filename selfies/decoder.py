@@ -42,8 +42,7 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
 
     except ValueError as err:
         if print_error:
-            print(err)
-            print("Could not decode SELFIES. Please contact authors.")
+            print("Decoding error '{}': {}.".format(selfies, err))
         return None
 
 

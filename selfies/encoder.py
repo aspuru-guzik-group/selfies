@@ -58,6 +58,9 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     """
 
     try:
+        if '*' in smiles:
+            raise ValueError("wildcard atom '*' not supported")
+
         all_selfies = []  # process dot-separated fragments separately
         for s in smiles.split("."):
             all_selfies.append(_translate_smiles(s))
@@ -65,8 +68,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
 
     except ValueError as err:
         if print_error:
-            print(err)
-            print('Could not encode SMILES. Please contact authors.')
+            print("Encoding error '{}': {}.".format(smiles, err))
         return None
 
 
@@ -135,7 +137,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             i += 3
 
         else:
-            raise ValueError("Unknown symbol '{}'.".format(smiles[i]))
+            raise ValueError("unrecognized symbol '{}'".format(smiles[i]))
 
         yield bond, symbol, symbol_type
 

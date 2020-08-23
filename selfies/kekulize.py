@@ -116,7 +116,7 @@ def _kekulize(mol_graph) -> None:
     for i in mol_graph.get_nodes_by_num_edges():
         success = mol_graph.dfs_assign_bonds(i, visited, set(), set())
         if not success:
-            raise ValueError("Kekulization Failed.")
+            raise ValueError("kekulization algorithm failed")
 
     mol_graph.write_to_smiles_symbols()
 
@@ -165,8 +165,8 @@ def _is_aromatic(atom_symbol: str) -> bool:
         return False
 
     if element not in _aromatic_valences:
-        raise ValueError("Kekulization Failed: aromatic symbol {} "
-                         "not recognized.".format(atom_symbol))
+        raise ValueError("unrecognized aromatic symbol '{}'"
+                         .format(atom_symbol))
     return True
 
 
@@ -197,8 +197,8 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:
-        raise ValueError("Kekulization Failed: "
-                         "{} not supported.".format(atom_symbol))
+        raise ValueError("unrecognized aromatic symbol '{}'"
+                         .format(atom_symbol))
 
     elif h_count == 1:  # e.g. [nH]
         used_electrons += 1
