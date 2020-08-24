@@ -174,6 +174,10 @@ def _translate_smiles(smiles: str) -> str:
 
     selfies, _ = _translate_smiles_derive(smiles_gen, rings, derive_counter)
 
+    if rings:
+        raise ValueError("malformed ring numbering or ring numbering "
+                         "across a dot symbol")
+
     return selfies
 
 
