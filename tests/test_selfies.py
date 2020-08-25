@@ -51,7 +51,7 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
 
         # create random SELFIES and decode
         rand_len = random.randint(1, max_len)
-        rand_mol = ''.join(random.choices(alphabet, k=rand_len))
+        rand_mol = ''.join([random.choice(alphabet) for _ in range(rand_len)])
         smiles = sf.decoder(rand_mol)
 
         # check if SMILES is valid
@@ -60,7 +60,8 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
         except Exception:
             is_valid = False
 
-        assert is_valid, f"Invalid SMILES {smiles} decoded from {rand_mol}."
+        assert is_valid, \
+            "Invalid SMILES {} decoded from {}.".format(smiles, rand_mol)
 
 
 def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
@@ -77,8 +78,7 @@ def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
 
         # create random SELFIES with and without [nop]
         rand_len = random.randint(1, max_len)
-
-        rand_mol = random.choices(alphabet, k=rand_len)
+        rand_mol = [random.choice(alphabet) for _ in range(rand_len)]
         rand_mol.extend(['[nop]'] * rand_len)
         random.shuffle(rand_mol)
 

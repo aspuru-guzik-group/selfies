@@ -27,21 +27,21 @@ def time_roundtrip(file_path: str, sample_size: int = -1):
             smiles = random.sample(smiles, sample_size)
         selfies = list(map(sf.encoder, smiles))
 
-    print(f"Timing {len(smiles)} SMILES from {file_path}")
+    print("Timing {} SMILES from {}".format(len(smiles), file_path))
 
     # time sf.encoder
     start = time.time()
     for s in smiles:
         sf.encoder(s)
     enc_time = time.time() - start
-    print(f"--> selfies.encoder: {enc_time:0.7f}s")
+    print("--> selfies.encoder: {:0.7f}s".format(enc_time))
 
     # time sf.decoder
     start = time.time()
     for s in selfies:
         sf.decoder(s)
     dec_time = time.time() - start
-    print(f"--> selfies.decoder: {dec_time:0.7f}s")
+    print("--> selfies.decoder: {:0.7f}s".format(dec_time))
 
 
 def time_kekulize(file_path: str, sample_size: int = -1):
@@ -56,14 +56,15 @@ def time_kekulize(file_path: str, sample_size: int = -1):
         if sample_size > 0:
             smiles = random.sample(smiles, sample_size)
 
-    print(f"Timing Kekulization of {len(smiles)} SMILES from {file_path}")
+    print("Timing Kekulization of {} SMILES from {}".format(len(smiles),
+                                                            file_path))
 
     # time selfies kekulization
     start = time.time()
     for s in smiles:
         list(kekulize_parser(_parse_smiles(s)))
     selfies_time = time.time() - start
-    print(f"--> selfies kekulize: {selfies_time:0.7f}s")
+    print("--> selfies kekulize: {:0.7f}s".format(selfies_time))
 
     # time RDKit kekulization
     start = time.time()
@@ -72,11 +73,10 @@ def time_kekulize(file_path: str, sample_size: int = -1):
         Kekulize(m)
         MolToSmiles(m, kekuleSmiles=True)
     rdkit_time = time.time() - start
-    print(f"--> RDKit kekulize: {rdkit_time:0.7f}s")
+    print("--> RDKit kekulize: {:0.7f}s".format(rdkit_time))
 
 
 if __name__ == '__main__':
 
     # temporary example
     time_roundtrip('test_sets/250K_ZINC.txt')
-    # time_kekulize('test_sets/250K_ZINC.txt')

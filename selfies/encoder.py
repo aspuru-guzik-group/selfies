@@ -58,6 +58,9 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     """
 
     try:
+        if '*' in smiles:
+            raise ValueError("wildcard atom '*' not supported")
+
         all_selfies = []  # process dot-separated fragments separately
         for s in smiles.split("."):
             all_selfies.append(_translate_smiles(s))
@@ -65,8 +68,7 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
 
     except ValueError as err:
         if print_error:
-            print(err)
-            print('Could not encode SMILES. Please contact authors.')
+            print("Encoding error '{}': {}.".format(smiles, err))
         return None
 
 
@@ -113,7 +115,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
                 i += 1
 
         elif smiles[i] in ('(', ')'):  # open and closed branch brackets
-            bond = smiles[i + 1]
+            bond = smiles[i + 1: i + 2]
             symbol = smiles[i]
             symbol_type = BRANCH_TYPE
             i += 1
@@ -123,6 +125,12 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             symbol = smiles[i: r_idx + 1]
             symbol_type = ATOM_TYPE
             i = r_idx + 1
+
+            # quick chirality specification check
+            chiral_i = symbol.find('@')
+            if symbol[chiral_i + 1].isalpha() and symbol[chiral_i + 1] != 'H':
+                raise ValueError("chiral specification '{}' not supported"
+                                 .format(symbol))
 
         elif smiles[i].isdigit():  # one-digit ring number
             symbol = smiles[i]
@@ -135,7 +143,7 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             i += 3
 
         else:
-            raise ValueError(f"Unknown symbol '{smiles[i]}' in SMILES.")
+            raise ValueError("unrecognized symbol '{}'".format(smiles[i]))
 
         yield bond, symbol, symbol_type
 
@@ -165,6 +173,10 @@ def _translate_smiles(smiles: str) -> str:
     rings = {}
 
     selfies, _ = _translate_smiles_derive(smiles_gen, rings, derive_counter)
+
+    if rings:
+        raise ValueError("malformed ring numbering or ring numbering "
+                         "across a dot symbol")
 
     return selfies
 
@@ -196,12 +208,12 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
 
         if symbol_type == ATOM_TYPE:
             if symbol[0] == '[':
-                selfies += f"[{bond}{symbol[1:-1]}expl]"
+                selfies += "[{}{}expl]".format(bond, symbol[1:-1])
             else:
-                selfies += f"[{bond}{symbol}]"
+                selfies += "[{}{}]".format(bond, symbol)
+            prev_idx = counter[0]
             counter[0] += 1
             selfies_len += 1
-            prev_idx = counter[0]
 
         elif symbol_type == BRANCH_TYPE:
             if symbol == '(':
@@ -215,7 +227,7 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 N_as_symbols = get_symbols_from_n(branch_len - 1)
                 bond_num = get_num_from_bond(bond)
 
-                selfies += f"[Branch{len(N_as_symbols)}_{bond_num}]"
+                selfies += "[Branch{}_{}]".format(len(N_as_symbols), bond_num)
                 selfies += ''.join(N_as_symbols) + branch
                 selfies_len += 1 + len(N_as_symbols) + branch_len
 
@@ -233,16 +245,18 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 N_as_symbols = get_symbols_from_n(ring_len - 1)
 
                 if left_bond != '':
-                    selfies += f"[Expl{left_bond}Ring{len(N_as_symbols)}]"
+                    selfies += "[Expl{}Ring{}]".format(left_bond,
+                                                       len(N_as_symbols))
                 elif right_bond != '':
-                    selfies += f"[Expl{right_bond}Ring{len(N_as_symbols)}]"
+                    selfies += "[Expl{}Ring{}]".format(right_bond,
+                                                       len(N_as_symbols))
                 else:
-                    selfies += f"[Ring{len(N_as_symbols)}]"
+                    selfies += "[Ring{}]".format(len(N_as_symbols))
 
                 selfies += ''.join(N_as_symbols)
                 selfies_len += 1 + len(N_as_symbols)
 
             else:
-                rings[ring_id] = (bond, counter[0])
+                rings[ring_id] = (bond, prev_idx)
 
     return selfies, selfies_len

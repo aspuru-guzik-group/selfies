@@ -36,19 +36,19 @@ def get_semantic_robust_alphabet() -> Set[str]:
             continue
 
         if a in organic_subset:
-            symbol = f"[{b}{a}]"
+            symbol = "[{}{}]".format(b, a)
         else:
-            symbol = f"[{b}{a}expl]"
+            symbol = "[{}{}expl]".format(b, a)
 
         alphabet_subset.add(symbol)
 
     # add branch and ring symbols
     for i in range(1, 4):
-        alphabet_subset.add(f"[Ring{i}]")
-        alphabet_subset.add(f"[Expl=Ring{i}]")
+        alphabet_subset.add("[Ring{}]".format(i))
+        alphabet_subset.add("[Expl=Ring{}]".format(i))
 
         for j in range(1, 4):
-            alphabet_subset.add(f"[Branch{i}_{j}]")
+            alphabet_subset.add("[Branch{}_{}]".format(i, j))
 
     return alphabet_subset
 
@@ -110,11 +110,12 @@ def set_semantic_constraints(
 
         # error checking
         if '?' not in bond_constraints:
-            raise ValueError("'?' not a key in bond_constraints")
+            raise ValueError("bond_constraints missing '?' as a key.")
 
         for key, value in bond_constraints.items():
             if not (1 <= value <= 8):
-                raise ValueError("Value in bond_constraints not in [1, 8]")
+                raise ValueError("bond_constraints['{}'] not between "
+                                 "1 and 8 inclusive.".format(key))
 
         _bond_constraints = dict(bond_constraints)
 
@@ -145,7 +146,7 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
     bond_num = get_num_from_bond(bond)
 
     if symbol[-5:] == 'expl]':  # e.g. [C@@Hexpl]
-        smiles_symbol = f"[{symbol[1 + len(bond):-5]}]"
+        smiles_symbol = "[{}]".format(symbol[1 + len(bond):-5])
     else:
         smiles_symbol = symbol[1 + len(bond):-1]
 
@@ -155,14 +156,14 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
     if charge == 0:
         atom_or_ion = element
     else:
-        atom_or_ion = f"{element}{charge:+}"
+        atom_or_ion = "{}{:+}".format(element, charge)
 
     max_bonds = _bond_constraints.get(atom_or_ion,
                                       _bond_constraints['?'])
 
     if h_count >= max_bonds:
-        raise ValueError(f"Too many Hs in SELFIES Symbol '{symbol}'. "
-                         f"Consider adjusting bond constraints.")
+        raise ValueError("too many Hs in symbol '{}'; consider "
+                         "adjusting bond constraints".format(symbol))
     max_bonds -= h_count  # hydrogens consume 1 bond
 
     # calculate next state
@@ -201,7 +202,7 @@ def get_next_branch_state(branch_symbol: str, state: int) -> Tuple[int, int]:
     branch_type = int(branch_symbol[-2])  # branches of the form [BranchL_X]
 
     if not (1 <= branch_type <= 3):
-        raise ValueError(f"Unknown branch symbol: {branch_symbol}")
+        raise ValueError("unknown branch symbol '{}'".format(branch_symbol))
 
     if 2 <= state <= 8:
         branch_init_state = min(state - 1, branch_type)
