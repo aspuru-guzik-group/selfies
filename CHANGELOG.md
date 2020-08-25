@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.1 - 24.08.2020
+## v1.0.1 - 25.08.2020
 ### Changed: 
  *  Code so that is compatible with python >= 3.5.
  *  More descriptive error messages.
