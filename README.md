@@ -171,9 +171,9 @@ See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGE
 
 ## Credits
 
-We thank Kevin Ryan (LeanAndMean@github), Theophile Gaudin, Andrew Brereton,
-Benjamin Sanchez-Lengeling, and Zhenpeng Yao for their suggestions and
-bug reports.
+We thank Jacques Boitreaud, Andrew Brereton, Matthew Carbone (x94carbone), Theophile Gaudin,
+Hyunmin Kim (hmkim), Vincent Mallet, Kevin Ryan (LeanAndMean),  Benjamin Sanchez-Lengeling,
+and Zhenpeng Yao for their suggestions and bug reports.
 
 ## License
 
