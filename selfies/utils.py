@@ -1,4 +1,4 @@
-from typing import Iterable, Set, Tuple, List, Union, cast
+from typing import Iterable, Set, Tuple, List, Union
 
 
 def len_selfies(selfies: str) -> int:
@@ -19,7 +19,7 @@ def len_selfies(selfies: str) -> int:
     5
     """
 
-    return selfies.count('[') + selfies.count('.')
+    return selfies.count("[") + selfies.count(".")
 
 
 def split_selfies(selfies: str) -> Iterable[str]:
@@ -43,16 +43,16 @@ def split_selfies(selfies: str) -> Iterable[str]:
     ['[C]', '[=C]', '[F]', '.', '[C]']
     """
 
-    left_idx = selfies.find('[')
+    left_idx = selfies.find("[")
 
     while 0 <= left_idx < len(selfies):
-        right_idx = selfies.find(']', left_idx + 1)
+        right_idx = selfies.find("]", left_idx + 1)
         next_symbol = selfies[left_idx: right_idx + 1]
         yield next_symbol
 
         left_idx = right_idx + 1
-        if selfies[left_idx: left_idx + 1] == '.':
-            yield '.'
+        if selfies[left_idx: left_idx + 1] == ".":
+            yield "."
             left_idx += 1
 
 
@@ -83,20 +83,25 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
         for symbol in split_selfies(s):
             alphabet.add(symbol)
 
-    alphabet.discard('.')
+    alphabet.discard(".")
 
     return alphabet
 
 
-def selfies_to_hot(selfies: str, largest_selfie_len: int, alphabet: Union[List[str], Set[str]]) -> Tuple[List[int], List[List[int]]]:
+def selfies_to_hot(
+    selfies: str, largest_selfie_len: int, alphabet: Union[List[str], Set[str]]
+) -> Tuple[List[int], List[List[int]]]:
     """Go from a single selfies string to a one-hot encoding.
-    
+
     :param selfies: SELFIES string to be converted.
-    :param largest_selfie_len: Length of largest SELFIES used in construction of ``alphabet``.
+    :param largest_selfie_len: Length of largest SELFIES used in
+        construction of ``alphabet``.
     :param alphabet: Alphabet constructed from iterable of SELFIES.
-    
-    :return integer_encoded: padded, integer-encoded representation of ``selfies``.
-    :return onehot_encoded: one-hot encoded representation with shape (largest_selfie_len, len(alphabet)).
+
+    :return integer_encoded: padded, integer-encoded representation
+        of ``selfies``.
+    :return onehot_encoded: one-hot encoded representation with shape
+        (largest_selfie_len, len(alphabet)).
 
     :Example:
 
@@ -108,11 +113,11 @@ def selfies_to_hot(selfies: str, largest_selfie_len: int, alphabet: Union[List[s
 
     # Should be a sorted list to preserve order of elements
     alphabet = sorted(list(alphabet))
-    
+
     char_to_int = dict((c, i) for i, c in enumerate(alphabet))
 
     # pad with [nop]
-    selfies += '[nop]' * (largest_selfie_len - len_selfies(selfies))
+    selfies += "[nop]" * (largest_selfie_len - len_selfies(selfies))
 
     # integer encode
     char_list = split_selfies(selfies)
@@ -128,13 +133,18 @@ def selfies_to_hot(selfies: str, largest_selfie_len: int, alphabet: Union[List[s
     return (integer_encoded, onehot_encoded)
 
 
-def multiple_selfies_to_hot(selfies_list: List[str], largest_selfie_len: int, alphabet: Union[List[str], Set[str]]) -> List[List[int]]:
+def multiple_selfies_to_hot(
+    selfies_list: List[str],
+    largest_selfie_len: int,
+    alphabet: Union[List[str], Set[str]],
+) -> List[List[int]]:
     """Convert a list of selfies strings to flattened one-hot encodings.
-    
+
     :param selfies_list: SELFIES strings to be converted.
-    :param largest_selfie_len: Length of largest SELFIES used in construction of ``alphabet``.
+    :param largest_selfie_len: Length of largest SELFIES used in construction
+        of ``alphabet``.
     :param alphabet: Alphabet constructed from iterable of SELFIES.
-    
+
     :return hot_list: flattened one-hot encoded representations.
 
     :Example:
@@ -149,24 +159,31 @@ def multiple_selfies_to_hot(selfies_list: List[str], largest_selfie_len: int, al
 
     # Should be a sorted list to preserve order of elements
     alphabet = sorted(list(alphabet))
-    
+
     hot_list = list()
-    
+
     for selfies in selfies_list:
-        _, onehot_encoded = selfies_to_hot(selfies, largest_selfie_len, alphabet)
-        flattened = [elem for vec in onehot_encoded for elem in vec]        
+        _, onehot_encoded = selfies_to_hot(
+            selfies, largest_selfie_len, alphabet
+        )
+        flattened = [elem for vec in onehot_encoded for elem in vec]
         hot_list.append(flattened)
-        
+
     return hot_list
 
 
-def hot_to_selfies(onehot_encoded: List[int], largest_selfie_len: int, alphabet: Union[List[str], Set[str]]) -> str:
+def hot_to_selfies(
+    onehot_encoded: List[int],
+    largest_selfie_len: int,
+    alphabet: Union[List[str], Set[str]],
+) -> str:
     """Convert a flattened one-hot encoding to a SELFIES string.
-    
+
     :param onehot_encoded: one-hot encoded representation of a SELFIES.
-    :param largest_selfie_len: Length of largest SELFIES used in construction of ``alphabet``.
+    :param largest_selfie_len: Length of largest SELFIES used in construction
+        of ``alphabet``.
     :param alphabet: Alphabet constructed from iterable of SELFIES.
-    
+
     :return selfies: SELFIES string.
 
     :Example:
@@ -181,36 +198,41 @@ def hot_to_selfies(onehot_encoded: List[int], largest_selfie_len: int, alphabet:
 
     # Should be a sorted list to preserve order of elements
     alphabet = sorted(list(alphabet))
-    
-    # Reshape to an N x M array where each column represents an alphabet 
+
+    # Reshape to an N x M array where each column represents an alphabet
     # entry and each row is a position in the selfies
     twod_onehot = []
     N = largest_selfie_len
     M = len(alphabet)
     for i in range(N):
-        twod_onehot.append(onehot_encoded[M*i:M*(i+1)])
+        twod_onehot.append(onehot_encoded[M * i: M * (i + 1)])
 
     int_to_char = dict((i, c) for i, c in enumerate(alphabet))
     integer_encoded = list()
-    
+
     # Get integer encoding
     for row in twod_onehot:
         integer_encoded.append(row.index(1))
-        
+
     # Integer encoding -> SELFIES
     char_list = [int_to_char[i] for i in integer_encoded]
-    selfies = ''.join(char_list)
-    
+    selfies = "".join(char_list)
+
     return selfies
 
 
-def multiple_hot_to_selfies(onehot_encoded_list: List[List[int]], largest_selfie_len: int, alphabet: Union[List[str], Set[str]]) -> List[str]:
+def multiple_hot_to_selfies(
+    onehot_encoded_list: List[List[int]],
+    largest_selfie_len: int,
+    alphabet: Union[List[str], Set[str]],
+) -> List[str]:
     """Convert a list of one-hot encodings to SELFIES strings.
-    
+
     :param onehot_encoded_list: one-hot encoded representations of SELFIES.
-    :param largest_selfie_len: Length of largest SELFIES used in construction of ``alphabet``.
+    :param largest_selfie_len: Length of largest SELFIES used in construction
+        of ``alphabet``.
     :param alphabet: Alphabet constructed from iterable of SELFIES.
-    
+
     :return selfies_list: SELFIES strings.
 
     :Example:
@@ -225,11 +247,11 @@ def multiple_hot_to_selfies(onehot_encoded_list: List[List[int]], largest_selfie
 
     # Should be a sorted list to preserve order of elements
     alphabet = sorted(list(alphabet))
-    
+
     selfies_list = []
-    
+
     for onehot in onehot_encoded_list:
         selfies = hot_to_selfies(onehot, largest_selfie_len, alphabet)
         selfies_list.append(selfies)
-        
+
     return selfies_list

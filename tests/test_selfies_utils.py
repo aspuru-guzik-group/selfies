@@ -10,13 +10,13 @@ def test_cases():
         "[C][C][C]": (3, ["[C]", "[C]", "[C]"]),
         "[C].[C]": (3, ["[C]", ".", "[C]"]),
         "[C].[C][nop]": (4, ["[C]", ".", "[C]", "[nop]"]),
-        "[C][epsilon][C]": (3, ["[C]", "[epsilon]", "[C]"])
+        "[C][epsilon][C]": (3, ["[C]", "[epsilon]", "[C]"]),
     }
 
 
 @pytest.fixture()
 def test_cases_alphabet():
-    return {'[C]', '[nop]', '[epsilon]'}
+    return {"[C]", "[nop]", "[epsilon]"}
 
 
 @pytest.fixture()
@@ -31,7 +31,11 @@ def test_int_encodings():
 
 @pytest.fixture()
 def test_onehot_encodings():
-    return [[1, 0, 0, 1, 0, 0, 1, 0, 0], [1, 0, 0, 0, 1, 0, 1, 0, 0], [1, 0, 0, 0, 0, 1, 0, 0, 1]]
+    return [
+        [1, 0, 0, 1, 0, 0, 1, 0, 0],
+        [1, 0, 0, 0, 1, 0, 1, 0, 0],
+        [1, 0, 0, 0, 0, 1, 0, 0, 1],
+    ]
 
 
 def test_len_selfies(test_cases):
@@ -50,7 +54,9 @@ def test_get_alphabet_from_selfies(test_cases, test_cases_alphabet):
     assert alphabet == test_cases_alphabet
 
 
-def test_selfies_to_hot(onehot_test_cases, test_cases_alphabet, test_int_encodings):
+def test_selfies_to_hot(
+    onehot_test_cases, test_cases_alphabet, test_int_encodings
+):
     alphabet = sorted(list(test_cases_alphabet))
 
     for idx, s in enumerate(onehot_test_cases):
@@ -59,7 +65,9 @@ def test_selfies_to_hot(onehot_test_cases, test_cases_alphabet, test_int_encodin
         assert len(onehot_encoded) == 3
 
 
-def test_multiple_selfies_to_hot(onehot_test_cases, test_cases_alphabet, test_onehot_encodings):
+def test_multiple_selfies_to_hot(
+    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
+):
     alphabet = sorted(list(test_cases_alphabet))
 
     hot_list = sf.multiple_selfies_to_hot(onehot_test_cases, 3, alphabet)
@@ -67,7 +75,9 @@ def test_multiple_selfies_to_hot(onehot_test_cases, test_cases_alphabet, test_on
         assert v1 == v2
 
 
-def test_hot_to_selfies(onehot_test_cases, test_cases_alphabet, test_onehot_encodings):
+def test_hot_to_selfies(
+    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
+):
     alphabet = sorted(list(test_cases_alphabet))
 
     for idx, oh in enumerate(test_onehot_encodings):
@@ -75,8 +85,12 @@ def test_hot_to_selfies(onehot_test_cases, test_cases_alphabet, test_onehot_enco
         assert selfies == onehot_test_cases[idx]
 
 
-def test_multiple_hot_to_selfies(onehot_test_cases, test_cases_alphabet, test_onehot_encodings):
+def test_multiple_hot_to_selfies(
+    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
+):
     alphabet = sorted(list(test_cases_alphabet))
 
-    selfies_list = sf.multiple_hot_to_selfies(test_onehot_encodings, 3, alphabet)
+    selfies_list = sf.multiple_hot_to_selfies(
+        test_onehot_encodings, 3, alphabet
+    )
     assert onehot_test_cases == selfies_list
