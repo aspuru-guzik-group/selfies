@@ -19,3 +19,4 @@ CN(C)c1ccc(-c2cc(-c3ccc(N)cc3)[te+]c(-c3ccc(N)cc3)c2)cc1
 Nc1ccc(-c2cc(-c3ccccc3)cc(-c3ccc(N4CCOCC4)cc3)[te+]2)cc1
 Nc1ccc(-c2cc(-c3ccc(N4CCOCC4)cc3)cc(-c3ccc(N4CCOCC4)cc3)[te+]2)cc1
 Nc1ccc(-c2cc(-c3ccc(N4CCOCC4)cc3)cc(-c3ccc(N)cc3)[te+]2)cc1
+OC(=O)c1[te]ccc1
