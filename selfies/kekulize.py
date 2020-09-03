@@ -127,7 +127,7 @@ def _kekulize(mol_graph) -> None:
 # Note: wild card '*' not supported currently
 _aromatic_valences = {
     'b': 3, 'c': 4, 'n': 5, 'p': 5, 'as': 5,
-    'o': 6, 's': 6, 'se': 6
+    'o': 6, 's': 6, 'se': 6, 'te': 6
 }
 
 
