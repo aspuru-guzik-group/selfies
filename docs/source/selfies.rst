@@ -11,6 +11,8 @@ Standard Functions
 .. autofunction:: split_selfies
 .. autofunction:: get_alphabet_from_selfies
 .. autofunction:: get_semantic_robust_alphabet
+.. autofunction:: selfies_to_hot
+.. autofunction:: hot_to_selfies
 
 Advanced Functions
 ------------------------
