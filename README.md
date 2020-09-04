@@ -53,7 +53,7 @@ Alternatively, it can be built from the ``docs/`` directory.
 
 ### Standard Functions
 
-The ``selfies`` library has six standard functions:
+The ``selfies`` library has eight standard functions:
 
 | Function | Description |
 | -------- | ----------- |
@@ -63,6 +63,8 @@ The ``selfies`` library has six standard functions:
 | ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
 | ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. |
 | ``selfies.get_semantic_robust_alphabet`` | Returns a subset of all SELFIES symbols that are semantically constrained. |
+| ``selfies.selfies_to_hot`` | One-hot encoding of a SELFIES. |
+| ``selfies.hot_to_selfies`` | Translates a one-hot encoding into a SELFIES. |
 
 Please read the documentation for more detailed descriptions of these
 functions, and to view the advanced functions, which allow users to
