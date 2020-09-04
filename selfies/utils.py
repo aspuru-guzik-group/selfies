@@ -111,8 +111,7 @@ def selfies_to_hot(
 
     """
 
-    # Should be a sorted list to preserve order of elements
-    alphabet = sorted(list(alphabet))
+    alphabet = list(alphabet)
 
     char_to_int = dict((c, i) for i, c in enumerate(alphabet))
 
@@ -157,8 +156,7 @@ def multiple_selfies_to_hot(
 
     """
 
-    # Should be a sorted list to preserve order of elements
-    alphabet = sorted(list(alphabet))
+    alphabet = list(alphabet)
 
     hot_list = list()
 
@@ -196,8 +194,7 @@ def hot_to_selfies(
 
     """
 
-    # Should be a sorted list to preserve order of elements
-    alphabet = sorted(list(alphabet))
+    alphabet = list(alphabet)
 
     # Reshape to an N x M array where each column represents an alphabet
     # entry and each row is a position in the selfies
@@ -245,8 +242,7 @@ def multiple_hot_to_selfies(
 
     """
 
-    # Should be a sorted list to preserve order of elements
-    alphabet = sorted(list(alphabet))
+    alphabet = list(alphabet)
 
     selfies_list = []
 
