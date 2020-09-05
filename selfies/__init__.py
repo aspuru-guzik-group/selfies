@@ -36,10 +36,10 @@ __all__ = [
     "len_selfies",
     "split_selfies",
     "get_alphabet_from_selfies",
-    "selfies_to_hot",
-    "multiple_selfies_to_hot",
-    "hot_to_selfies",
-    "multiple_hot_to_selfies",
+    "selfies_to_encoding",
+    "batch_selfies_to_flat_hot",
+    "encoding_to_selfies",
+    "batch_flat_hot_to_selfies",
 ]
 
 from .decoder import decoder
@@ -53,8 +53,8 @@ from .utils import (
     get_alphabet_from_selfies,
     len_selfies,
     split_selfies,
-    selfies_to_hot,
-    multiple_selfies_to_hot,
-    hot_to_selfies,
-    multiple_hot_to_selfies,
+    selfies_to_encoding,
+    batch_selfies_to_flat_hot,
+    encoding_to_selfies,
+    batch_flat_hot_to_selfies,
 )

@@ -11,8 +11,8 @@ Standard Functions
 .. autofunction:: split_selfies
 .. autofunction:: get_alphabet_from_selfies
 .. autofunction:: get_semantic_robust_alphabet
-.. autofunction:: selfies_to_hot
-.. autofunction:: hot_to_selfies
+.. autofunction:: selfies_to_encoding
+.. autofunction:: encoding_to_selfies
 
 Advanced Functions
 ------------------------
@@ -52,7 +52,7 @@ of :mod:`selfies`.
 
     SELFIES may be translated differently under different semantic constraints.
     Therefore, if custom semantic constraints are used, it is recommended to report
-    them for reproducibility reasons. 
+    them for reproducibility reasons.
 
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
