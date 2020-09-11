@@ -91,10 +91,10 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
-#### Integer encoding SELFIES:
+#### Label (Integer) encoding SELFIES:
 In this example we first build an alphabet
 from a dataset of SELFIES, and then convert a SELFIES into a
-padded, integer-encoded representation. Note that we use the
+padded, label-encoded representation. Note that we use the
 ``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
 ignored and skipped over by ``selfies.decoder``, making it a useful
@@ -112,18 +112,14 @@ print(alphabet)  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
 pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5
 symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
 
-# SELFIES to integer encode
+# SELFIES to label encode
 dimethyl_ether = dataset[0]  # '[C][O][C]'
 
-# pad the SELFIES
-dimethyl_ether += '[nop]' * (pad_to_len - sf.len_selfies(dimethyl_ether))
-
-# integer encode the SELFIES
-int_encoded = []
-for symbol in sf.split_selfies(dimethyl_ether):
-    int_encoded.append(symbol_to_idx[symbol])
-
-print(int_encoded)  # [1, 3, 1, 4, 4]
+# [1, 3, 1, 4, 4]
+print(sf.selfies_to_encoding(dimethyl_ether,
+                             vocab_stoi=symbol_to_idx,
+                             pad_to_len=pad_to_len,
+                             enc_type='label'))
 ```
 
 ### More Examples
