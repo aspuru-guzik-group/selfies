@@ -63,7 +63,7 @@ def get_semantic_constraints() -> Dict[str, int]:
     then returned. See :func:`selfies.set_semantic_constraints` for further
     explanation.
 
-    :return: The bond constraints :mod:`selfies` is currently operating on.
+    :return: the bond constraints :mod:`selfies` is currently operating on.
     """
 
     global _bond_constraints

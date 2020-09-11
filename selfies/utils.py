@@ -7,8 +7,8 @@ def len_selfies(selfies: str) -> int:
     The symbol length is the number of symbols that make up the SELFIES,
     and not the length of the string itself (i.e. ``len(selfies)``).
 
-    :param selfies: A SELFIES.
-    :return: The symbol length of ``selfies``.
+    :param selfies: a SELFIES.
+    :return: the symbol length of ``selfies``.
 
     :Example:
 
@@ -30,8 +30,8 @@ def split_selfies(selfies: str) -> Iterable[str]:
     either indicated by an open and closed square bracket, or are the ``'.'``
     dot-bond symbol.
 
-    :param selfies: The SELFIES to be read.
-    :return: An iterable of the symbols of ``selfies`` in the same order
+    :param selfies: the SELFIES to be read.
+    :return: an iterable of the symbols of ``selfies`` in the same order
         they appear in the string.
 
     :Example:
@@ -65,8 +65,8 @@ def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     Note that the symbol ``'.'`` will not be added as a member of the
     returned set, even if it appears in the input.
 
-    :param selfies_iter: An iterable of SELFIES.
-    :return: The SElFIES alphabet built from the SELFIES in ``selfies_iter``.
+    :param selfies_iter: an iterable of SELFIES.
+    :return: the SElFIES alphabet built from the SELFIES in ``selfies_iter``.
 
     :Example:
 
@@ -252,7 +252,7 @@ def batch_flat_hot_to_selfies(
     :param vocab_itos: a dictionary that maps non-negative indices (the keys)
         to SELFIES symbols. We expect the indices of the dictionary
         to be contiguous and starting from 0.
-    :return selfies_list: a list of SELFIES strings.
+    :return: a list of SELFIES strings.
 
     :Example:
 

@@ -3,16 +3,21 @@ Code Documentation
 
 .. currentmodule:: selfies
 
-Standard Functions
+Core Functions
 ------------------------
 .. autofunction:: encoder
 .. autofunction:: decoder
+
+Utility Functions
+------------------------
 .. autofunction:: len_selfies
 .. autofunction:: split_selfies
 .. autofunction:: get_alphabet_from_selfies
 .. autofunction:: get_semantic_robust_alphabet
 .. autofunction:: selfies_to_encoding
 .. autofunction:: encoding_to_selfies
+.. autofunction:: batch_selfies_to_flat_hot
+.. autofunction:: batch_flat_hot_to_selfies
 
 Advanced Functions
 ------------------------
@@ -56,4 +61,3 @@ of :mod:`selfies`.
 
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
-

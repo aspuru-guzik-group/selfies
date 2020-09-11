@@ -16,8 +16,8 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     Additionally, :func:`selfies.decoder` will attempt to preserve the
     atom and branch order of the input SELFIES.
 
-    :param selfies: The SELFIES to be translated.
-    :param print_error: If True, error messages will be printed to console.
+    :param selfies: the SELFIES to be translated.
+    :param print_error: if True, error messages will be printed to console.
         Defaults to False.
     :return: the SMILES translation of ``selfies``. If an error occurs,
         and ``selfies`` cannot be translated, ``None`` is returned instead.
