@@ -144,7 +144,7 @@ By default, SELFIES is tested against a random subset
 (of size ``dataset_samples=100000``) on various datasets:
 
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
- * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database),
+ * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database)
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
  * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet
