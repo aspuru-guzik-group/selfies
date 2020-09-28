@@ -215,7 +215,8 @@ def batch_selfies_to_flat_hot(
         If ``pad_to_len`` is less than or equal to the symbol
         length of the SELFIES, then no padding is added. Defaults to ``-1``.
     :return: the flattened one-hot encoded representations of the SELFIES
-        from the batch. This is a 2D list of size ``(batch_size, pad_to_len)``.
+        from the batch. This is a 2D list of size
+        ``(batch_size, N * len(vocab_stoi))``.
 
     :Example:
 
