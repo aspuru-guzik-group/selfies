@@ -98,3 +98,16 @@ def test_get_semantic_constraints():
     # The appropriate symbols are in the constraints
     constraints = sf.get_semantic_constraints()
     assert '?' in constraints
+
+
+def test_malformed_smiles_encoder():
+    """Tests selfies.encoder() terminates on a malformed SMILES."""
+    sf.encoder("C(Cl)(Cl)CC[13C")
+    assert True
+
+
+def test_malformed_selfies_decoder():
+    """Tests selfies.decoder() terminates on a malformed SELFIES.
+    """
+    sf.decoder("[O][=C][O][C][C][C][C][O][N][Branch2_3")
+    assert True

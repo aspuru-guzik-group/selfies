@@ -62,6 +62,11 @@ def _parse_selfies(selfies: str) -> Iterable[str]:
 
     while 0 <= left_idx < len(selfies):
         right_idx = selfies.find(']', left_idx + 1)
+
+        if (selfies[left_idx] != '[') or (right_idx == -1):
+            raise ValueError("malformed SELIFES, "
+                             "misplaced or missing brackets")
+
         next_symbol = selfies[left_idx: right_idx + 1]
         left_idx = right_idx + 1
 
