@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.0.2 - TBD
+### Added: 
+ * Support for aromatic Te and triple bonds. 
+ * New SELFIES to one-hot or label encoding functions.  
+ 
+### Changed:
+ * Changed the default constraints by constraining charged atoms (e.g. `[N+]`, `[S-]`)
+   and raising the bond capacity of `P` to 7 bonds (from 5 bonds). 
+ 
+### Bug Fixes: 
+ * Fixed bug, where `selfies.decoder` does not terminate for malformed SELFIES
+   that are missing the closed bracket `']'`. 
+
 ## v1.0.1 - 25.08.2020
 ### Changed: 
  *  Code so that is compatible with python >= 3.5.
