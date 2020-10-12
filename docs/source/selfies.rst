@@ -38,12 +38,18 @@ By default, :mod:`selfies` operates under the following semantic constraints
     +-----------+------------------------------+
     | 4         | ``C``                        |
     +-----------+------------------------------+
-    | 5         | ``P``                        |
-    +-----------+------------------------------+
     | 6         | ``S``                        |
+    +-----------+------------------------------+
+    | 7         | ``P``                        |
     +-----------+------------------------------+
     | 8         | All other atoms              |
     +-----------+------------------------------+
+
+The ``+1`` and ``-1`` charged versions of ``O, N, C, S, P`` are also constrained,
+where a ``+1`` increases the maximum bond capacity of the neutral atom by 1,
+and a ``-1`` decreases the maximum bond capacity of the neutral atom by 1.
+For example, ``N+1`` has a bond capacity of :math:`3 + 1 = 4`,
+and ``N-1`` has a bond capacity of :math:`3 - 1 = 2`.
 
 However, the default constraints are inadequate for SMILES that violate them. For
 example, nitrobenzene ``O=N(=O)C1=CC=CC=C1`` has a nitrogen with 6 bonds and

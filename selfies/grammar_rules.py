@@ -3,11 +3,11 @@ from typing import Dict, List, Optional, Set, Tuple
 
 default_bond_constraints = {
     'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
-    'O': 2,
-    'N': 3,
-    'C': 4,
-    'P': 5,
-    'S': 6,
+    'O': 2, 'O+1': 3, 'O-1': 1,
+    'N': 3, 'N+1': 4, 'N-1': 2,
+    'C': 4, 'C+1': 5, 'C-1': 3,
+    'S': 6, 'S+1': 7, 'S-1': 5,
+    'P': 7, 'P+1': 8, 'P-1': 6,
     '?': 8,
 }
 

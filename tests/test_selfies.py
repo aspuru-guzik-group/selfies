@@ -18,25 +18,29 @@ def max_len():
 def hard_alphabet():
     """A challenging alphabet of SELFIES symbols.
     """
-    alphabet = ['[#Br]', '[#C@@Hexpl]', '[#C@@expl]', '[#C@Hexpl]',
-                '[#C@expl]', '[#C]', '[#Cl]', '[#F]', '[#Hexpl]', '[#I]',
-                '[#NHexpl]', '[#N]', '[#O]', '[#P]', '[#S]', '[/Br]',
-                '[/C@@Hexpl]', '[/C@@expl]', '[/C@Hexpl]', '[/C@expl]', '[/C]',
-                '[/Cl]', '[/F]', '[/Hexpl]', '[/I]', '[/NHexpl]', '[/N]',
-                '[/O]', '[/P]', '[/S]', '[=Br]', '[=C@@Hexpl]', '[=C@@expl]',
-                '[=C@Hexpl]', '[=C@expl]', '[=C]', '[=Cl]', '[=F]', '[=Hexpl]',
-                '[=I]', '[=NHexpl]', '[=N]', '[=O]', '[=P]', '[=S]', '[Br]',
-                '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Branch2_1]',
-                '[Branch2_2]', '[Branch2_3]', '[Branch3_1]', '[Branch3_2]',
-                '[Branch3_3]', '[C@@Hexpl]', '[C@@expl]', '[C@Hexpl]',
-                '[C@expl]', '[C]', '[Cl]', '[Expl#Ring1]', '[Expl=Ring1]',
-                '[F]', '[Hexpl]', '[I]', '[NHexpl]', '[N]', '[O]', '[P]',
-                '[Ring1]', '[Ring2]', '[Ring3]', '[S]', '[\\Br]',
-                '[\\C@@Hexpl]', '[\\C@@expl]', '[\\C@Hexpl]', '[\\C@expl]',
-                '[\\C]', '[\\Cl]', '[\\F]', '[\\Hexpl]', '[\\I]', '[\\NHexpl]',
-                '[\\N]', '[\\O]', '[\\P]', '[\\S]', '[epsilon]', '[nop]']
 
-    return alphabet
+    alphabet = sf.get_semantic_robust_alphabet()
+    alphabet.update(
+        '[#Br]', '[#C@@Hexpl]', '[#C@@expl]', '[#C@Hexpl]',
+        '[#C@expl]', '[#C]', '[#Cl]', '[#F]', '[#Hexpl]', '[#I]',
+        '[#NHexpl]', '[#N]', '[#O]', '[#P]', '[#S]', '[/Br]',
+        '[/C@@Hexpl]', '[/C@@expl]', '[/C@Hexpl]', '[/C@expl]', '[/C]',
+        '[/Cl]', '[/F]', '[/Hexpl]', '[/I]', '[/NHexpl]', '[/N]',
+        '[/O]', '[/P]', '[/S]', '[=Br]', '[=C@@Hexpl]', '[=C@@expl]',
+        '[=C@Hexpl]', '[=C@expl]', '[=C]', '[=Cl]', '[=F]', '[=Hexpl]',
+        '[=I]', '[=NHexpl]', '[=N]', '[=O]', '[=P]', '[=S]', '[Br]',
+        '[Branch1_1]', '[Branch1_2]', '[Branch1_3]', '[Branch2_1]',
+        '[Branch2_2]', '[Branch2_3]', '[Branch3_1]', '[Branch3_2]',
+        '[Branch3_3]', '[C@@Hexpl]', '[C@@expl]', '[C@Hexpl]',
+        '[C@expl]', '[C]', '[Cl]', '[Expl#Ring1]', '[Expl=Ring1]',
+        '[F]', '[Hexpl]', '[I]', '[NHexpl]', '[N]', '[O]', '[P]',
+        '[Ring1]', '[Ring2]', '[Ring3]', '[S]', '[\\Br]',
+        '[\\C@@Hexpl]', '[\\C@@expl]', '[\\C@Hexpl]', '[\\C@expl]',
+        '[\\C]', '[\\Cl]', '[\\F]', '[\\Hexpl]', '[\\I]', '[\\NHexpl]',
+        '[\\N]', '[\\O]', '[\\P]', '[\\S]', '[epsilon]', '[nop]'
+    )
+
+    return list(alphabet)
 
 
 def test_random_selfies_decoder(trials, max_len, hard_alphabet):
@@ -64,7 +68,7 @@ def test_random_selfies_decoder(trials, max_len, hard_alphabet):
             "Invalid SMILES {} decoded from {}.".format(smiles, rand_mol)
 
 
-def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
+def test_nop_symbol_decoder(max_len, hard_alphabet):
     """Tests that the '[nop]' symbol is decoded properly, i.e., it is
     always skipped over.
     """
@@ -74,7 +78,7 @@ def test_nop_symbol_decoder(trials, max_len, hard_alphabet):
     alphabet = list(hard_alphabet)
     alphabet.remove('[nop]')
 
-    for _ in range(trials):
+    for _ in range(1000):
 
         # create random SELFIES with and without [nop]
         rand_len = random.randint(1, max_len)
