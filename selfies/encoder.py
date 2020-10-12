@@ -32,8 +32,8 @@ def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
     It is recommended to use RDKit to first verify that the SMILES are
     valid.
 
-    :param smiles: The SMILES to be translated.
-    :param print_error: If True, error messages will be printed to console.
+    :param smiles: the SMILES to be translated.
+    :param print_error: if True, error messages will be printed to console.
         Defaults to False.
     :return: the SELFIES translation of ``smiles``. If an error occurs,
         and ``smiles`` cannot be translated, :code:`None` is returned instead.
@@ -125,6 +125,9 @@ def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
             symbol = smiles[i: r_idx + 1]
             symbol_type = ATOM_TYPE
             i = r_idx + 1
+
+            if r_idx == -1:
+                raise ValueError("malformed SMILES, missing ']'")
 
             # quick chirality specification check
             chiral_i = symbol.find('@')

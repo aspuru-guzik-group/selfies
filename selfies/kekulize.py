@@ -127,7 +127,7 @@ def _kekulize(mol_graph) -> None:
 # Note: wild card '*' not supported currently
 _aromatic_valences = {
     'b': 3, 'c': 4, 'n': 5, 'p': 5, 'as': 5,
-    'o': 6, 's': 6, 'se': 6
+    'o': 6, 's': 6, 'se': 6, 'te': 6
 }
 
 
@@ -193,7 +193,11 @@ def _in_pi_subgraph(atom_symbol: str, bonds: Tuple[str]) -> bool:
         used_electrons += get_num_from_bond(b)
 
     # e.g. c1ccccc1
-    if (atom == 'c') and (h_count == charge == 0) and (len(bonds) == 2):
+    # this also covers the neutral carbon radical case (e.g. C1=[C]NC=C1),
+    # which is treated equivalently to a 1-H carbon (e.g. C1=[CH]NC=C1)
+    if (atom == 'c') and (h_count == charge == 0) \
+            and (len(bonds) == 2) and ('#' not in bonds):
+
         h_count += 1  # implied bonded hydrogen
 
     if h_count > 1:

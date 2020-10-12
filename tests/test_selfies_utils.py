@@ -3,94 +3,123 @@ import pytest
 import selfies as sf
 
 
+class Case:
+
+    def __init__(self, selfies, length, symbols, label, one_hot):
+        self.selfies = selfies
+        self.length = length
+        self.symbols = symbols
+        self.label = label
+        self.one_hot = one_hot
+
+
 @pytest.fixture()
 def test_cases():
-    return {
-        "": (0, []),
-        "[C][C][C]": (3, ["[C]", "[C]", "[C]"]),
-        "[C].[C]": (3, ["[C]", ".", "[C]"]),
-        "[C].[C][nop]": (4, ["[C]", ".", "[C]", "[nop]"]),
-        "[C][epsilon][C]": (3, ["[C]", "[epsilon]", "[C]"]),
-    }
+    stoi = {"[nop]": 0, "[epsilon]": 1, ".": 2, "[C]": 3, "[F]": 4}
+    itos = {i: c for c, i in stoi.items()}
+    pad_to_len = 4
 
-
-@pytest.fixture()
-def test_cases_alphabet():
-    return {"[C]", "[nop]", "[epsilon]"}
-
-
-@pytest.fixture()
-def onehot_test_cases():
-    return ["[C][C][C]", "[C][epsilon][C]", "[C][nop][nop]"]
-
-
-@pytest.fixture()
-def test_int_encodings():
-    return [[0, 0, 0], [0, 1, 0], [0, 2, 2]]
-
-
-@pytest.fixture()
-def test_onehot_encodings():
-    return [
-        [1, 0, 0, 1, 0, 0, 1, 0, 0],
-        [1, 0, 0, 0, 1, 0, 1, 0, 0],
-        [1, 0, 0, 0, 0, 1, 0, 0, 1],
+    cases = [
+        Case(selfies="", length=0,
+             symbols=[],
+             label=[0, 0, 0, 0],
+             one_hot=[[1, 0, 0, 0, 0],
+                          [1, 0, 0, 0, 0],
+                          [1, 0, 0, 0, 0],
+                          [1, 0, 0, 0, 0]]),
+        Case(selfies="[C][C][C]", length=3,
+             symbols=["[C]", "[C]", "[C]"],
+             label=[3, 3, 3, 0],
+             one_hot=[[0, 0, 0, 1, 0],
+                          [0, 0, 0, 1, 0],
+                          [0, 0, 0, 1, 0],
+                          [1, 0, 0, 0, 0]]),
+        Case(selfies="[C].[C]", length=3,
+             symbols=["[C]", ".", "[C]"],
+             label=[3, 2, 3, 0],
+             one_hot=[[0, 0, 0, 1, 0],
+                          [0, 0, 1, 0, 0],
+                          [0, 0, 0, 1, 0],
+                          [1, 0, 0, 0, 0]]),
+        Case(selfies="[C][epsilon][C][F]", length=4,
+             symbols=["[C]", "[epsilon]", "[C]", "[F]"],
+             label=[3, 1, 3, 4],
+             one_hot=[[0, 0, 0, 1, 0],
+                          [0, 1, 0, 0, 0],
+                          [0, 0, 0, 1, 0],
+                          [0, 0, 0, 0, 1]]),
+        Case(selfies="[C][epsilon][C]", length=3,
+             symbols=["[C]", "[epsilon]", "[C]"],
+             label=[3, 1, 3, 0],
+             one_hot=[[0, 0, 0, 1, 0],
+                          [0, 1, 0, 0, 0],
+                          [0, 0, 0, 1, 0],
+                          [1, 0, 0, 0, 0]])
     ]
+
+    return cases, (stoi, itos, pad_to_len)
+
+
+@pytest.fixture()
+def test_cases_flat_hots(test_cases):
+    flat_hots = []
+    for case in test_cases[0]:
+        hot = [elm for vec in case.one_hot for elm in vec]
+        flat_hots.append(hot)
+    return flat_hots
 
 
 def test_len_selfies(test_cases):
-    for s, (length, _) in test_cases.items():
-        assert sf.len_selfies(s) == length
+    for case in test_cases[0]:
+        assert sf.len_selfies(case.selfies) == case.length
 
 
 def test_split_selfies(test_cases):
-    for s, (_, symbols) in test_cases.items():
-        assert list(sf.split_selfies(s)) == symbols
+    for case in test_cases[0]:
+        assert list(sf.split_selfies(case.selfies)) == case.symbols
 
 
-def test_get_alphabet_from_selfies(test_cases, test_cases_alphabet):
-    alphabet = sf.get_alphabet_from_selfies(test_cases.keys())
+def test_get_alphabet_from_selfies(test_cases):
+    case_list, (vocab_stoi, _, _) = test_cases
 
-    assert alphabet == test_cases_alphabet
+    selfies = [case.selfies for case in case_list]
+    alphabet = sf.get_alphabet_from_selfies(selfies)
+    alphabet.add("[nop]")
+    alphabet.add(".")
 
-
-def test_selfies_to_hot(
-    onehot_test_cases, test_cases_alphabet, test_int_encodings
-):
-    alphabet = sorted(list(test_cases_alphabet))
-
-    for idx, s in enumerate(onehot_test_cases):
-        int_encoded, onehot_encoded = sf.selfies_to_hot(s, 3, alphabet)
-        assert int_encoded == test_int_encodings[idx]
-        assert len(onehot_encoded) == 3
+    assert alphabet == set(vocab_stoi.keys())
 
 
-def test_multiple_selfies_to_hot(
-    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
-):
-    alphabet = sorted(list(test_cases_alphabet))
+def test_selfies_to_encoding(test_cases):
+    case_list, (vocab_stoi, vocab_itos, pad_to_len) = test_cases
 
-    hot_list = sf.multiple_selfies_to_hot(onehot_test_cases, 3, alphabet)
-    for v1, v2 in zip(test_onehot_encodings, hot_list):
-        assert v1 == v2
+    for case in case_list:
+        label, one_hot = sf.selfies_to_encoding(case.selfies, vocab_stoi,
+                                                pad_to_len=pad_to_len,
+                                                enc_type='both')
+        assert label == case.label
+        assert one_hot == case.one_hot
+
+        # recover original selfies
+        selfies = sf.encoding_to_selfies(label, vocab_itos,
+                                         enc_type='label')
+        selfies = selfies.replace("[nop]", "")
+        assert selfies == case.selfies
+
+        selfies = sf.encoding_to_selfies(one_hot, vocab_itos,
+                                         enc_type='one_hot')
+        selfies = selfies.replace("[nop]", "")
+        assert selfies == case.selfies
 
 
-def test_hot_to_selfies(
-    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
-):
-    alphabet = sorted(list(test_cases_alphabet))
+def test_selfies_to_flat_hot(test_cases, test_cases_flat_hots):
+    case_list, (vocab_stoi, vocab_itos, pad_to_len) = test_cases
 
-    for idx, oh in enumerate(test_onehot_encodings):
-        selfies = sf.hot_to_selfies(oh, 3, alphabet)
-        assert selfies == onehot_test_cases[idx]
+    selfies_batch = [case.selfies for case in case_list]
+    flat_hots = sf.batch_selfies_to_flat_hot(selfies_batch,
+                                             vocab_stoi,
+                                             pad_to_len)
+    assert flat_hots == test_cases_flat_hots
 
-
-def test_multiple_hot_to_selfies(
-    onehot_test_cases, test_cases_alphabet, test_onehot_encodings
-):
-    alphabet = sorted(list(test_cases_alphabet))
-
-    selfies_list = sf.multiple_hot_to_selfies(
-        test_onehot_encodings, 3, alphabet
-    )
-    assert onehot_test_cases == selfies_list
+    selfies_recover = sf.batch_flat_hot_to_selfies(flat_hots, vocab_itos)
+    assert selfies_batch == [s.replace("[nop]", "") for s in selfies_recover]

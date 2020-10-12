@@ -85,7 +85,7 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
             # compare original SMILES to decoded SELFIE string.
             # if not the same string, write to list of errors.
             if not is_same_mol(in_smiles, out_smiles):
-                error_list.append((in_smiles, out_smiles))
+                error_list.append((in_smiles, str(out_smiles)))
 
         # open and write all errors to errors_{test_name}.csv
         with open(error_path, "a") as error_log:

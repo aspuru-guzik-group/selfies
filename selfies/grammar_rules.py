@@ -3,11 +3,11 @@ from typing import Dict, List, Optional, Set, Tuple
 
 default_bond_constraints = {
     'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
-    'O': 2,
-    'N': 3,
-    'C': 4,
-    'P': 5,
-    'S': 6,
+    'O': 2, 'O+1': 3, 'O-1': 1,
+    'N': 3, 'N+1': 4, 'N-1': 2,
+    'C': 4, 'C+1': 5, 'C-1': 3,
+    'S': 6, 'S+1': 7, 'S-1': 5,
+    'P': 7, 'P+1': 8, 'P-1': 6,
     '?': 8,
 }
 
@@ -63,7 +63,7 @@ def get_semantic_constraints() -> Dict[str, int]:
     then returned. See :func:`selfies.set_semantic_constraints` for further
     explanation.
 
-    :return: The bond constraints :mod:`selfies` is currently operating on.
+    :return: the bond constraints :mod:`selfies` is currently operating on.
     """
 
     global _bond_constraints
@@ -161,7 +161,7 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
     max_bonds = _bond_constraints.get(atom_or_ion,
                                       _bond_constraints['?'])
 
-    if h_count >= max_bonds:
+    if (h_count > max_bonds) or (h_count == max_bonds and state > 0):
         raise ValueError("too many Hs in symbol '{}'; consider "
                          "adjusting bond constraints".format(symbol))
     max_bonds -= h_count  # hydrogens consume 1 bond
