@@ -20,7 +20,7 @@ def hard_alphabet():
     """
 
     alphabet = sf.get_semantic_robust_alphabet()
-    alphabet.update(
+    alphabet.update([
         '[#Br]', '[#C@@Hexpl]', '[#C@@expl]', '[#C@Hexpl]',
         '[#C@expl]', '[#C]', '[#Cl]', '[#F]', '[#Hexpl]', '[#I]',
         '[#NHexpl]', '[#N]', '[#O]', '[#P]', '[#S]', '[/Br]',
@@ -38,7 +38,7 @@ def hard_alphabet():
         '[\\C@@Hexpl]', '[\\C@@expl]', '[\\C@Hexpl]', '[\\C@expl]',
         '[\\C]', '[\\Cl]', '[\\F]', '[\\Hexpl]', '[\\I]', '[\\NHexpl]',
         '[\\N]', '[\\O]', '[\\P]', '[\\S]', '[epsilon]', '[nop]'
-    )
+    ])
 
     return list(alphabet)
 
