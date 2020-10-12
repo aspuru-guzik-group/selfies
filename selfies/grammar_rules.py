@@ -161,7 +161,7 @@ def get_next_state(symbol: str, state: int) -> Tuple[str, int]:
     max_bonds = _bond_constraints.get(atom_or_ion,
                                       _bond_constraints['?'])
 
-    if h_count >= max_bonds:
+    if (h_count > max_bonds) or (h_count == max_bonds and state > 0):
         raise ValueError("too many Hs in symbol '{}'; consider "
                          "adjusting bond constraints".format(symbol))
     max_bonds -= h_count  # hydrogens consume 1 bond
