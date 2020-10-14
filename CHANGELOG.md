@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.2 - TBD
+## v1.0.2 - 14.10.2020
 ### Added: 
  * Support for aromatic Te and triple bonds. 
  * Inbuild SELFIES to 1hot encoding, and 1hot encoding to SELFIES
