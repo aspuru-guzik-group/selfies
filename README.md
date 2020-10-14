@@ -11,18 +11,18 @@
 
 **SELFIES (SELF-referencIng Embedded Strings) is a 100% robust molecular string representation.**
 
-A main objective is to use SELFIES as direct input into machine learning
-models, in particular in generative models, for the generation of molecular
-graphs which are syntactically and semantically valid.
+A main objective is to use SELFIES as direct input into machine learning models,<br>
+in particular in generative models, for the generation of molecular graphs<br>
+which are syntactically and semantically valid.
 
-
+See paper:<br>
 **Self-Referencing Embedded Strings (SELFIES): A 100% robust molecular string representation**<br>
 _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_<br>
 [Machine Learning: Science and Technology, (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [arXiv](https://arxiv.org/abs/1905.13741).
 
 
 
-<center><img src="https://github.com/aspuru-guzik-group/selfies/blob/master/examples/VAE_LS_Validity.png" alt="SELFIES validity in a VAE latent space" width="450px"></center>
+<center><img src="https://github.com/aspuru-guzik-group/selfies/blob/master/examples/VAE_LS_Validity.png" alt="SELFIES validity in a VAE latent space" width="666px"></center>
 
 
 ## Installation
