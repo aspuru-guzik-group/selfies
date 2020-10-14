@@ -11,8 +11,8 @@
 
 **Self-Referencing Embedded Strings (SELFIES): A 100% robust molecular string representation**<br>
 _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_<br>
-[Machine Learning: Science and Technology, (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [arXiv](https://arxiv.org/abs/1905.13741).
-
+[Machine Learning: Science and Technology, (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [arXiv](https://arxiv.org/abs/1905.13741).<br>
+Major contributors since v1.0.0: _[Alston Lo](https://github.com/aspuru-guzik-group/selfies/commits?author=alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_
 
 A main objective is to use SELFIES as direct input into machine learning models,<br>
 in particular in generative models, for the generation of molecular graphs<br>
