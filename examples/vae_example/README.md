@@ -6,7 +6,7 @@ for a VAE using reconstruction quality, diversity, and latent space validity
 as metrics of interest. 
  
 ## Dependencies 
-Dependencies are ``pytorch``, ``rdkit``, and ``yaml``, which can be installed 
+Dependencies are ``pytorch``, ``rdkit``, and ``pyyaml``, which can be installed 
 using Conda. 
       
 ## Files 
