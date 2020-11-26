@@ -47,7 +47,7 @@ from rdkit.Chem import MolFromSmiles
 from torch import nn
 
 import selfies as sf
-from examples.vae_example.data_loader import \
+from data_loader import \
     multiple_selfies_to_hot, multiple_smile_to_hot
 
 rdBase.DisableLog('rdApp.error')
