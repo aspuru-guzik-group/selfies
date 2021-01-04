@@ -92,7 +92,7 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 ```
 
-#### Label (Integer) encoding SELFIES:
+#### Integer and one-hot encoding SELFIES:
 In this example we first build an alphabet
 from a dataset of SELFIES, and then convert a SELFIES into a
 padded, label-encoded representation. Note that we use the
@@ -121,6 +121,12 @@ print(sf.selfies_to_encoding(dimethyl_ether,
                              vocab_stoi=symbol_to_idx,
                              pad_to_len=pad_to_len,
                              enc_type='label'))
+                             
+# [[0, 1, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 0, 0, 0, 1]]
+print(sf.selfies_to_encoding(dimethyl_ether,
+                             vocab_stoi=symbol_to_idx,
+                             pad_to_len=pad_to_len,
+                             enc_type='one_hot'))
 ```
 
 ### More Examples
