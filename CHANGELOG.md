@@ -1,5 +1,10 @@
 # Changelog
-
+## v1.0.3 - 13.01.2021
+### Added: 
+ * Support for aromatic Si and Al (is not officially supported by Daylight SMILES, but RDKit supports it and examples exist in PubChem). 
+ 
+ ---
+ 
 ## v1.0.2 - 14.10.2020
 ### Added: 
  * Support for aromatic Te and triple bonds. 
@@ -12,6 +17,8 @@
 ### Bug Fixes: 
  * Fixed bug: `selfies.decoder` did not terminate for malformed SELFIES
    that are missing the closed bracket `']'`. 
+
+---
 
 ## v1.0.1 - 25.08.2020
 ### Changed: 
