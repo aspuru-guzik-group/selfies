@@ -177,7 +177,7 @@ See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGE
 ## Credits
 
 We thank Jacques Boitreaud, Andrew Brereton, Matthew Carbone (x94carbone), Nathan Frey (ncfrey), Theophile Gaudin,
-Hyunmin Kim (hmkim), Minjie Li, Vincent Mallet, Kevin Ryan (LeanAndMean),  Benjamin Sanchez-Lengeling,
+HelloJocelynLu, Hyunmin Kim (hmkim), Minjie Li, Vincent Mallet, Kevin Ryan (LeanAndMean), Benjamin Sanchez-Lengeling,
 and Zhenpeng Yao for their suggestions and bug reports, and Robert Pollice for chemistry advices.
 
 ## License
