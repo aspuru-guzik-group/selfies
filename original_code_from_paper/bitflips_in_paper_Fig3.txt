@@ -1,0 +1,42 @@
+smiles:
+1mutation
+CNC(C)CC1=CC=CNC(=C1)OCO2 : no
+CNC(C)CC1=CC=C2C(=C1FOCO2 : no
+CFC(C)CC1=CC=C2C(=C1)OCO2 : no
+
+2mutation
+CNC(C)OC1=CC=C2C(=C1COCO2 : no
+CNC(C)CC1=CCOCCC(=C1)OCO2 : no
+CNC(C)#C1=CC=C2C(=C1)OCON : no
+
+3mutation
+CNC(C)CC1=CCCC2#F=C1)OCO2 : no
+C=C(C#CC1=CC=C2C(=CN)OCO2 : no
+CNO(C)CC1=CC=C2C(#F1)OCO2 : no
+
+
+selfies
+1mutation                                                                                                  
+[C][N][C][Branch1_3][epsilon][C][C][C][=C][C][=C][C][Branch1_2][=O][=C][Ring1][#N][O][C][O][Ring1][#N]  -  CNC(C)CC1=CC=C2C(C1)OCO2 : yes
+[C][N][C][Branch1_3][epsilon][C][C][C][=C][C][=C][C][Branch1_3][=O][=C][=N][#N][O][C][O][Ring1][#N]  -  CNC(C)CC=CC=CC(=C=NN)OCO : yes
+[C][N][C][Branch1_3][epsilon][C][C][C][=C][N][=C][C][Branch1_3][=O][=C][Ring1][#N][O][C][O][Ring1][#N]  -  CNC(C)CC1=CN=C2C(=C1)OCO2 : yes
+
+CNC(C)CC1=CC=C2C(C1)OCO2
+CNC(C)CC=CC=CC(=C=NN)OCO
+CNC(C)CC1=CN=C2C(=C1)OCO2
+
+2mutation
+[C][N][C][Branch1_3][epsilon][C][C][C][=C][C][=C][C][Branch1_3][Branch1_2][Branch1_3][Ring1][#N][O][C][O][Ring1][#N]  -  CNC(C)CC=CC=C1C(=NOCO1) : yes
+[C][N][C][Branch1_3][epsilon][C][C][=N][=C][C][=C][C][Branch1_3][=O][=C][Ring1][F][O][C][O][Ring1][#N]  -  CNC(C)C=NCC1=C2C(=C1)OCO2 : yes
+[C][N][C][Branch1_3][epsilon][C][C][C][=C][C][=C][Ring1][Branch1_3][=O][=C][Ring1][#N][O][C][O][Ring1][#N]  -  C1NC(C)CC=CC=C1O : yes
+
+CNC(C)CC=CC=C1C(=NOCO1)
+CNC(C)C=NCC1=C2C(=C1)OCO2
+C1NC(C)CC=CC=C1O
+
+
+
+3mutation
+[C][N][C][Branch1_3][=C][C][C][C][=C][C][=C][Branch1_3][Branch1_3][=O][=C][Ring1][#N][=N][C][O][Ring1][#N]  -  CNC(CCC1=CC=C2(O))C1=NCO2 : yes
+[C][N][#C][Branch1_3][epsilon][C][C][#N][=C][C][=C][C][Branch1_3][=O][=C][Ring1][#N][O][C][O][Ring1][#N]  -  CN=C(C)C#N : yes
+[C][N][=N][Branch1_3][epsilon][C][C][C][=N][Branch1_3][=C][C][Branch1_3][=O][=C][Ring1][#N][O][C][O][Ring1][#N]  -  CN=NC1CC=NC(=C1)OCO : yes
