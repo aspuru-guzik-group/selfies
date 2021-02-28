@@ -142,12 +142,12 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 If an invalid input is presented to the encoder or decoder, the return value is `None`.
 The error can be analysed by using the `encoder(...,print_error=True)` option.
 ```python
-from selfies import encoder, decoder
+import selfies as sf
 invalid_smiles="C[C@H](O)[C@@(*)C1=CC=CC=C1"
-selfies_string=encoder(invalid_smiles) 
+selfies_string=sf.encoder(invalid_smiles) 
 
 if selfies_string==None:
-    selfies_string=encoder(invalid_smiles,print_error=True) 
+    selfies_string=sf.encoder(invalid_smiles,print_error=True) 
     # 'Encoding error 'C[C@H](O)[C@@(*)C1=CC=CC=C1': wildcard atom '*' not supported.'
 ```
 
