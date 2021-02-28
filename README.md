@@ -138,6 +138,18 @@ genetic algorithm to achieve state-of-the-art performance for inverse design,
 with the [code here](https://github.com/aspuru-guzik-group/GA).
 
 
+## Handling invalid inputs
+If an invalid input is presented to the encoder or decoder, the return value is `None`.
+The error can be analysed by using the `encoder(...,print_error=True)` option.
+```
+from selfies import encoder, decoder
+invalid_smiles="C[C@H](O)[C@@(*)C1=CC=CC=C1"
+selfies_string=encoder(invalid_smiles) # type(selfies)_string=NonType
+
+if type(selfies)_string=NonType:
+    selfies_string=encoder(invalid_smiles,print_error=True) # 'Encoding error 'C[C@H](O)[C@@(*)C1=CC=CC=C1': wildcard atom '*' not supported.'
+```
+
 ## Tests
 SELFIES uses `pytest` with `tox` as its testing framework.
 All tests can be found in  the `tests/` directory. To run the test suite for
