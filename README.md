@@ -132,10 +132,12 @@ print(sf.selfies_to_encoding(dimethyl_ether,
 ### More Examples
 
 * More examples can be found in the ``examples/`` directory, including a
-variational autoencoder that runs on the SELFIES language.
+[variational autoencoder that runs on the SELFIES](https://github.com/aspuru-guzik-group/selfies/tree/master/examples/vae_example) language.
 * This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
 genetic algorithm to achieve state-of-the-art performance for inverse design,
 with the [code here](https://github.com/aspuru-guzik-group/GA).
+* SELFIES allows for [highly efficient exploration and interpolation of the chemical space](https://chemrxiv.org/articles/preprint/Beyond_Generative_Models_Superfast_Traversal_Optimization_Novelty_Exploration_and_Discovery_STONED_Algorithm_for_Molecules_using_SELFIES/13383266), with a [deterministic algorithms, see code](https://github.com/aspuru-guzik-group/stoned-selfies).
+* We use SELFIES for [Deep Molecular dreaming](https://arxiv.org/abs/2012.09712), a new generative model inspired by interpretable neural networks in computational vision. See the [code of PASITHEA here](https://github.com/aspuru-guzik-group/Pasithea).
 
 
 ## Handling invalid inputs
