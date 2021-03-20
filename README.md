@@ -14,6 +14,7 @@ _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-G
 [*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).<br>
 [Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).<br>
 Major contributors since v1.0.0: _[Alston Lo](https://github.com/aspuru-guzik-group/selfies/commits?author=alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_
+Chemistry Advisor: [Robert Pollice](https://scholar.google.at/citations?user=JR2N3JIAAAAJ)
 
 A main objective is to use SELFIES as direct input into machine learning models,<br>
 in particular in generative models, for the generation of molecular graphs<br>
