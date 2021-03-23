@@ -74,7 +74,11 @@ def get_default_constraints() -> Dict[str, int]:
 
 
 def get_octet_rule_constraints() -> Dict[str, int]:
-    """Returns the preset "octet rule" bond constraint settings.
+    """Returns the preset "octet rule" bond constraint settings. These
+    constraints are a harsher version of the default constraints, so that
+    the octet rule is obeyed. In particular, ``S`` and ``P`` are
+    restricted to a 2 and 3 bond capacity, respectively (and similarly with
+    ``S+``, ``S-``, ``P+``, ``P-``).
 
     :return: the octet rule constraint settings.
     """
@@ -84,7 +88,11 @@ def get_octet_rule_constraints() -> Dict[str, int]:
 
 
 def get_hypervalent_constraints() -> Dict[str, int]:
-    """Returns the preset "hypervalent" bond constraint settings.
+    """Returns the preset "hypervalent" bond constraint settings. These
+    constraints are a relaxed version of the default constraints, to allow
+    for hypervalent molecules. In particular, ``Cl``, ``Br``, and ``I``
+    are relaxed to a 7 bond capacity, and ``N`` is relaxed to a 5 bond
+    capacity.
 
     :return: the hypervalent constraint settings.
     """
