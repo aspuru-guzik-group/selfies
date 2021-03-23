@@ -65,5 +65,7 @@ of :mod:`selfies`.
     Therefore, if custom semantic constraints are used, it is recommended to report
     them for reproducibility reasons.
 
+.. autofunction:: get_default_constraints
+.. autofunction:: get_hypervalent_constraints
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
