@@ -39,7 +39,11 @@ def decoder(selfies: str,
     >>> selfies.decoder('[C][=C][F]')
     'C=CF'
 
-    .. seealso:: The "octet_rule" and "hypervalent" preset bond constraints
+    .. seealso:: The
+        `"octet_rule" <https://en.wikipedia.org/wiki/Octet_rule>`_
+        and
+        `"hypervalent" <https://en.wikipedia.org/wiki/Hypervalent_molecule>`_
+        preset bond constraints
         can be viewed with :func:`selfies.get_octet_rule_constraints` and
         :func:`selfies.get_hypervalent_constraints`, respectively. These
         presets are variants of the "default" bond constraints, which can
