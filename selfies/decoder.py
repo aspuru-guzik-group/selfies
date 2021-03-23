@@ -5,6 +5,7 @@ from selfies.grammar_rules import (get_bond_from_num,
                                    get_hypervalent_constraints,
                                    get_n_from_symbols, get_next_branch_state,
                                    get_next_state, get_num_from_bond,
+                                   get_octet_rule_constraints,
                                    get_semantic_constraints,
                                    set_semantic_constraints)
 
@@ -42,6 +43,8 @@ def decoder(selfies: str,
     old_constraints = get_semantic_constraints()
     if constraints is None:
         pass
+    elif constraints == 'octet_rule':
+        set_semantic_constraints(get_octet_rule_constraints())
     elif constraints == 'hypervalent':
         set_semantic_constraints(get_hypervalent_constraints())
     else:
