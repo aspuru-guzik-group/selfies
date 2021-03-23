@@ -3,11 +3,24 @@ from rdkit import Chem
 import selfies as sf
 
 
+def reset_alphabet():
+    sf.set_semantic_constraints({
+        'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
+        'O': 2, 'O+1': 3, 'O-1': 1,
+        'N': 6, 'N+1': 4, 'N-1': 2,
+        'C': 4, 'C+1': 5, 'C-1': 3,
+        'S': 6, 'S+1': 7, 'S-1': 5,
+        'P': 7, 'P+1': 8, 'P-1': 6,
+        '?': 8,
+    })
+
+
 def test_branch_and_ring_at_state_X0():
     """Tests SELFIES with branches and rings at state X0 (i.e. at the
     very beginning of a SELFIES). These symbols should be skipped.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[Branch3_1][C][S][C][O]"), "CSCO")
     assert is_eq(sf.decoder("[Ring3][C][S][C][O]"), "CSCO")
     assert is_eq(sf.decoder("[Branch1_1][Ring1][Ring3][C][S][C][O]"), "CSCO")
@@ -17,6 +30,8 @@ def test_branch_at_state_X1():
     """Test SELFIES with branches at state X1 (i.e. at an atom that
     can only make one bond. In this case, the branch symbol should be skipped.
     """
+
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][C][O][Branch1_1][C][I]"), "CCOCI")
     assert is_eq(sf.decoder("[C][C][C][O][Branch3_3][C][I]"), "CCCOCI")
 
@@ -25,6 +40,7 @@ def test_branch_at_end_of_selfies():
     """Test SELFIES that have a branch symbol as its very last symbol.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][C][C][C][Branch1_1]"), "CCCC")
     assert is_eq(sf.decoder("[C][C][C][C][Branch3_3]"), "CCCC")
 
@@ -33,6 +49,7 @@ def test_ring_at_end_of_selfies():
     """Test SELFIES that have a ring symbol as its very last symbol.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][C][C][C][C][Ring1]"), "CCCC=C")
     assert is_eq(sf.decoder("[C][C][C][C][C][Ring3]"), "CCCC=C")
 
@@ -42,6 +59,7 @@ def test_branch_with_no_atoms():
     Such branches should not be made in the outputted SMILES.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][Branch1_1][Ring2][Branch1_1]"
                             "[Branch1_1][Branch1_1][F]"),
                  "CF")
@@ -62,6 +80,7 @@ def test_oversized_branch():
     of the SELFIES
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][Branch2_1][O][O][C][C][S][F][C]"), "C(CCSF)")
     assert is_eq(sf.decoder("[C][Branch2_3][O][O][#C][C][S][F]"), "C(#CCSF)")
 
@@ -71,6 +90,7 @@ def test_oversized_ring():
     previously derived atom does not exist.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][C][C][C][Ring1][O]"), "C1CCC1")
     assert is_eq(sf.decoder("[C][C][C][C][Ring2][O][C]"), "C1CCC1")
 
@@ -85,6 +105,8 @@ def test_oversized_ring():
 def test_branch_at_beginning_of_branch():
     """Test SELFIES that have a branch immediately at the start of a branch.
     """
+
+    reset_alphabet()
 
     # [C@]((Br)Cl)F
     assert is_eq(sf.decoder("[C@expl][Branch1_2][Branch1_1]"
@@ -111,6 +133,8 @@ def test_ring_at_beginning_of_branch():
     """Test SELFIES that have a ring immediately at the start of a branch.
     """
 
+    reset_alphabet()
+
     # CC1CCC(1CCl)F
     assert is_eq(sf.decoder("[C][C][C][C][C][Branch1_1][Branch1_1]"
                             "[Ring1][Ring2][C][Cl][F]"),
@@ -126,6 +150,8 @@ def test_branch_and_ring_at_beginning_of_branch():
     """Test SELFIES that have a branch and ring immediately at the start
     of a branch.
     """
+
+    reset_alphabet()
 
     # CC1CCCS((Br)1Cl)F
     assert is_eq(sf.decoder("[C][C][C][C][C][S][Branch1_2][Branch1_3]"
@@ -151,6 +177,8 @@ def test_ring_immediately_following_branch():
     """Test SELFIES that have a ring immediately following after a branch.
     """
 
+    reset_alphabet()
+
     # CCC1CCCC(OCO)1
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[Ring1][Branch1_1]"),
@@ -167,6 +195,8 @@ def test_ring_after_branch():
     immediately after a branch.
     """
 
+    reset_alphabet()
+
     # CCCCCCC1(OCO)1
     assert is_eq(sf.decoder("[C][C][C][C][C][C][C][Branch1_1][Ring2][O][C][O]"
                             "[C][Ring1][Branch1_1]"),
@@ -182,6 +212,8 @@ def test_ring_on_top_of_existing_bond():
     in the main scaffold.
     """
 
+    reset_alphabet()
+
     # C1C1, C1C=1, C1C#1, ...
     assert is_eq(sf.decoder("[C][C][Ring1][C]"), "C=C")
     assert is_eq(sf.decoder("[C][/C][Ring1][C]"), "C=C")
@@ -193,6 +225,7 @@ def test_consecutive_rings():
     """Test SELFIES which have multiple consecutive rings.
     """
 
+    reset_alphabet()
     assert is_eq(sf.decoder("[C][C][C][C][Ring1][Ring2][Ring1][Ring2]"),
                  "C=1CCC=1")  # 1 + 1
     assert is_eq(sf.decoder("[C][C][C][C][Ring1][Ring2][Ring1][Ring2]"
@@ -224,6 +257,7 @@ def test_unconstrained_symbols():
     """Tests SELFIES with symbols that are not semantically constrained.
     """
 
+    reset_alphabet()
     assert sf.decoder("[Xe-2expl][Branch1_1][C][F][Branch1_1][C][F]"
                       "[Branch1_1][C][F][Branch1_1][C][F][Branch1_1][C][F]"
                       "[Branch1_1][C][F][Branch1_1][C][F][Branch1_1][C][F]") \
@@ -247,6 +281,7 @@ def test_isotope_symbols():
      constrained properly.
     """
 
+    reset_alphabet()
     assert sf.decoder("[13Cexpl][Branch1_1][C][Cl][Branch1_1][C][F]"
                       "[Branch1_1][C][Br][Branch1_1][C][I]") \
            == "[13C](Cl)(F)(Br)CI"
@@ -258,6 +293,7 @@ def test_chiral_symbols():
     constrained properly.
     """
 
+    reset_alphabet()
     assert sf.decoder("[C@@expl][Branch1_1][C][Cl][Branch1_1][C][F]"
                       "[Branch1_1][C][Br][Branch1_1][C][I]") \
            == "[C@@](Cl)(F)(Br)CI"
@@ -271,6 +307,7 @@ def test_explicit_hydrogen_symbols():
      are constrained properly.
      """
 
+    reset_alphabet()
     assert sf.decoder("[CHexpl][Branch1_1][C][Cl][#C]") == "[CH](Cl)=C"
     assert sf.decoder("[CH3expl][=C]") == "[CH3]C"
 
@@ -279,6 +316,7 @@ def test_charged_symbols():
     """Tests that SELFIES symbols with charges are constrained properly.
     """
 
+    reset_alphabet()
     constraints = sf.get_semantic_constraints()
     constraints['Sn+4'] = 1
     constraints['O-2'] = 2
