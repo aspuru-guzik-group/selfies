@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
-from selfies.grammar_rules import (get_bond_from_num, get_default_constraints,
+from selfies.grammar_rules import (get_bond_from_num,
                                    get_hypervalent_constraints,
                                    get_n_from_symbols, get_next_branch_state,
                                    get_next_state, get_num_from_bond,
@@ -26,9 +26,8 @@ def decoder(selfies: str,
     :param print_error: if True, error messages will be printed to console.
         Defaults to False.
     :param constraints: if ``None``, :func:`selfies.decoder` will use the
-        currently configured bond constraints. If ``'default'`` or
-        ``'hypervalent'``, the corresponding preset bond constraints
-        will be used instead.
+        currently configured bond constraints. If ``'hypervalent'``,
+        the corresponding preset bond constraints will be used instead.
     :return: the SMILES translation of ``selfies``. If an error occurs,
         and ``selfies`` cannot be translated, ``None`` is returned instead.
 
@@ -42,8 +41,6 @@ def decoder(selfies: str,
     old_constraints = get_semantic_constraints()
     if constraints is None:
         pass
-    elif constraints == 'default':
-        set_semantic_constraints(get_default_constraints())
     elif constraints == 'hypervalent':
         set_semantic_constraints(get_hypervalent_constraints())
     else:
