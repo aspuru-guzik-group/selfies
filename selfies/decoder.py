@@ -38,6 +38,17 @@ def decoder(selfies: str,
     >>> import selfies
     >>> selfies.decoder('[C][=C][F]')
     'C=CF'
+
+    .. seealso:: The "octet_rule" and "hypervalent" preset bond constraints
+        can be viewed with :func:`selfies.get_octet_rule_constraints` and
+        :func:`selfies.get_hypervalent_constraints`, respectively. These
+        presets are variants of the "default" bond constraints, which can
+        be viewed with :func:`selfies.get_default_constraints`. Their
+        differences can be summarized as follows:
+
+            * def. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
+            * oct. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 3, ``P+1``: 4, ``P-1``: 2, ``S``: 2, ``S+1``: 3, ``S-1``: 1
+            * hyp. : ``Cl``, ``Br``, ``I``: 7, ``N``: 5, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
     """
 
     old_constraints = get_semantic_constraints()
