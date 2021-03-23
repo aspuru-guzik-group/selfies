@@ -25,9 +25,10 @@ def decoder(selfies: str,
     :param selfies: the SELFIES to be translated.
     :param print_error: if True, error messages will be printed to console.
         Defaults to False.
-    :param constraints: if ``None``, :func:`selfies.decoder` will use the
-        currently configured bond constraints. If ``'hypervalent'``,
+    :param constraints: if ``'octet_rule'`` or ``'hypervalent'``,
         the corresponding preset bond constraints will be used instead.
+        If ``None``, :func:`selfies.decoder` will use the
+        currently configured bond constraints. Defaults to ``None``.
     :return: the SMILES translation of ``selfies``. If an error occurs,
         and ``selfies`` cannot be translated, ``None`` is returned instead.
 

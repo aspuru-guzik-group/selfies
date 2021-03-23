@@ -32,6 +32,7 @@ __all__ = [
     "decoder",
     "get_semantic_robust_alphabet",
     "get_default_constraints",
+    "get_octet_rule_constraints",
     "get_hypervalent_constraints",
     "get_semantic_constraints",
     "set_semantic_constraints",
@@ -49,6 +50,7 @@ from .encoder import encoder
 from .grammar_rules import (
     get_semantic_robust_alphabet,
     get_default_constraints,
+    get_octet_rule_constraints,
     get_hypervalent_constraints,
     get_semantic_constraints,
     set_semantic_constraints,

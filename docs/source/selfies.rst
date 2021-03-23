@@ -34,9 +34,11 @@ By default, :mod:`selfies` operates under the following semantic constraints
     +-----------+------------------------------+
     | 2         | ``O``                        |
     +-----------+------------------------------+
-    | 3         | ``N``, ``P``                 |
+    | 3         | ``N``                        |
     +-----------+------------------------------+
     | 4         | ``C``                        |
+    +-----------+------------------------------+
+    | 5         | ``P``                        |
     +-----------+------------------------------+
     | 6         | ``S``                        |
     +-----------+------------------------------+
@@ -64,6 +66,7 @@ of :mod:`selfies`.
     them for reproducibility reasons.
 
 .. autofunction:: get_default_constraints
+.. autofunction:: get_octet_rule_constraints
 .. autofunction:: get_hypervalent_constraints
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
