@@ -68,7 +68,7 @@ def get_default_constraints() -> Dict[str, int]:
 
     :return: the default constraint settings.
     """
-    
+
     global default_bond_constraints
     return dict(default_bond_constraints)
 
