@@ -104,7 +104,7 @@ standard_derived_smiles=sf.decoder(hypervalence_selfies)
 # standard_derived_smiles -> 'OI', because octet rule for iodine allows for only one bond
 
 relaxed_derived_smiles=sf.decoder(hypervalence_selfies,constraints='hypervalent')
-# relaxed_derived_smiles -> 'O=I(O)(O)(O)(O)O', hypervalences allow for 7 bonds
+# relaxed_derived_smiles -> 'O=I(O)(O)(O)(O)O', hypervalences for iodine allow for 7 bonds 
 
 ```
 
