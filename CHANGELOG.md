@@ -1,4 +1,13 @@
 # Changelog
+## v1.0.4 - 23.04.2021
+### Added: 
+ * decoder option for relaxed hypervalence rules, `decoder(...,constraints='hypervalent')`
+ * decoder option for strict octet rules, `decoder(...,constraints='octet')`
+### Bug Fix: 
+ * Fixed constraint for Phosphorus
+ 
+ ---
+ 
 ## v1.0.3 - 13.01.2021
 ### Added: 
  * Support for aromatic Si and Al (is not officially supported by Daylight SMILES, but RDKit supports it and examples exist in PubChem). 
