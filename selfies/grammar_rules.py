@@ -6,10 +6,20 @@ default_bond_constraints = {
     'O': 2, 'O+1': 3, 'O-1': 1,
     'N': 3, 'N+1': 4, 'N-1': 2,
     'C': 4, 'C+1': 5, 'C-1': 3,
+    'P': 5, 'P+1': 6, 'P-1': 4,
     'S': 6, 'S+1': 7, 'S-1': 5,
-    'P': 7, 'P+1': 8, 'P-1': 6,
-    '?': 8,
+    '?': 8
 }
+
+octet_rule_bond_constraints = dict(default_bond_constraints)
+octet_rule_bond_constraints.update(
+    {'S': 2, 'S+1': 3, 'S-1': 1, 'P': 3, 'P+1': 4, 'P-1': 2}
+)
+
+hypervalent_bond_constraints = dict(default_bond_constraints)
+hypervalent_bond_constraints.update(
+    {'Cl': 7, 'Br': 7, 'I': 7, 'N': 5}
+)
 
 _bond_constraints = default_bond_constraints
 
@@ -51,6 +61,47 @@ def get_semantic_robust_alphabet() -> Set[str]:
             alphabet_subset.add("[Branch{}_{}]".format(i, j))
 
     return alphabet_subset
+
+
+def get_default_constraints() -> Dict[str, int]:
+    """Returns the preset "default" bond constraint settings.
+
+    :return: the default constraint settings.
+    """
+
+    global default_bond_constraints
+    return dict(default_bond_constraints)
+
+
+def get_octet_rule_constraints() -> Dict[str, int]:
+    """Returns the preset "octet rule" bond constraint settings. These
+    constraints are a harsher version of the default constraints, so that
+    the `octet rule <https://en.wikipedia.org/wiki/Octet_rule>`_
+    is obeyed. In particular, ``S`` and ``P`` are
+    restricted to a 2 and 3 bond capacity, respectively (and similarly with
+    ``S+``, ``S-``, ``P+``, ``P-``).
+
+    :return: the octet rule constraint settings.
+    """
+
+    global octet_rule_bond_constraints
+    return dict(octet_rule_bond_constraints)
+
+
+def get_hypervalent_constraints() -> Dict[str, int]:
+    """Returns the preset "hypervalent" bond constraint settings. These
+    constraints are a relaxed version of the default constraints, to allow
+    for `hypervalent molecules
+    <https://en.wikipedia.org/wiki/Hypervalent_molecule>`_.
+    In particular, ``Cl``, ``Br``, and ``I``
+    are relaxed to a 7 bond capacity, and ``N`` is relaxed to a 5 bond
+    capacity.
+
+    :return: the hypervalent constraint settings.
+    """
+
+    global hypervalent_bond_constraints
+    return dict(hypervalent_bond_constraints)
 
 
 def get_semantic_constraints() -> Dict[str, int]:

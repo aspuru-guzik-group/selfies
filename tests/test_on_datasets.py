@@ -32,9 +32,15 @@ def test_roundtrip_translation(test_name, column_name, dataset_samples):
     """
 
     # modify semantic bond constraints
-    constraints = sf.get_semantic_constraints()
-    constraints['N'] = 6
-    sf.set_semantic_constraints(constraints)
+    sf.set_semantic_constraints({
+        'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
+        'O': 2, 'O+1': 3, 'O-1': 1,
+        'N': 6, 'N+1': 4, 'N-1': 2,
+        'C': 4, 'C+1': 5, 'C-1': 3,
+        'S': 6, 'S+1': 7, 'S-1': 5,
+        'P': 7, 'P+1': 8, 'P-1': 6,
+        '?': 8,
+    })
 
     # file I/O
     curr_dir = os.path.dirname(__file__)

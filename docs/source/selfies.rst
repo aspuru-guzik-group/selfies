@@ -38,9 +38,9 @@ By default, :mod:`selfies` operates under the following semantic constraints
     +-----------+------------------------------+
     | 4         | ``C``                        |
     +-----------+------------------------------+
-    | 6         | ``S``                        |
+    | 5         | ``P``                        |
     +-----------+------------------------------+
-    | 7         | ``P``                        |
+    | 6         | ``S``                        |
     +-----------+------------------------------+
     | 8         | All other atoms              |
     +-----------+------------------------------+
@@ -65,5 +65,8 @@ of :mod:`selfies`.
     Therefore, if custom semantic constraints are used, it is recommended to report
     them for reproducibility reasons.
 
+.. autofunction:: get_default_constraints
+.. autofunction:: get_octet_rule_constraints
+.. autofunction:: get_hypervalent_constraints
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints

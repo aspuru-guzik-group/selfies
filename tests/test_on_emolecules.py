@@ -40,7 +40,7 @@ def test_roundtrip_translation():
     """
 
     # modify constraints
-    constraints = sf.get_semantic_constraints()
+    constraints = sf.get_hypervalent_constraints()
     constraints['N'] = 6
     constraints['Br'] = 7
     constraints['Cl'] = 7

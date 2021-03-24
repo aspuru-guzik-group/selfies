@@ -1,11 +1,18 @@
 from collections import OrderedDict
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
-from selfies.grammar_rules import get_bond_from_num, get_n_from_symbols, \
-    get_next_branch_state, get_next_state, get_num_from_bond
+from selfies.grammar_rules import (get_bond_from_num,
+                                   get_hypervalent_constraints,
+                                   get_n_from_symbols, get_next_branch_state,
+                                   get_next_state, get_num_from_bond,
+                                   get_octet_rule_constraints,
+                                   get_semantic_constraints,
+                                   set_semantic_constraints)
 
 
-def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
+def decoder(selfies: str,
+            print_error: bool = False,
+            constraints: Optional[str] = None) -> Optional[str]:
     """Translates a SELFIES into a SMILES.
 
     The SELFIES to SMILES translation operates based on the :mod:`selfies`
@@ -19,6 +26,10 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     :param selfies: the SELFIES to be translated.
     :param print_error: if True, error messages will be printed to console.
         Defaults to False.
+    :param constraints: if ``'octet_rule'`` or ``'hypervalent'``,
+        the corresponding preset bond constraints will be used instead.
+        If ``None``, :func:`selfies.decoder` will use the
+        currently configured bond constraints. Defaults to ``None``.
     :return: the SMILES translation of ``selfies``. If an error occurs,
         and ``selfies`` cannot be translated, ``None`` is returned instead.
 
@@ -27,7 +38,32 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
     >>> import selfies
     >>> selfies.decoder('[C][=C][F]')
     'C=CF'
+
+    .. seealso:: The
+        `"octet_rule" <https://en.wikipedia.org/wiki/Octet_rule>`_
+        and
+        `"hypervalent" <https://en.wikipedia.org/wiki/Hypervalent_molecule>`_
+        preset bond constraints
+        can be viewed with :func:`selfies.get_octet_rule_constraints` and
+        :func:`selfies.get_hypervalent_constraints`, respectively. These
+        presets are variants of the "default" bond constraints, which can
+        be viewed with :func:`selfies.get_default_constraints`. Their
+        differences can be summarized as follows:
+
+            * def. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
+            * oct. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 3, ``P+1``: 4, ``P-1``: 2, ``S``: 2, ``S+1``: 3, ``S-1``: 1
+            * hyp. : ``Cl``, ``Br``, ``I``: 7, ``N``: 5, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
     """
+
+    old_constraints = get_semantic_constraints()
+    if constraints is None:
+        pass
+    elif constraints == 'octet_rule':
+        set_semantic_constraints(get_octet_rule_constraints())
+    elif constraints == 'hypervalent':
+        set_semantic_constraints(get_hypervalent_constraints())
+    else:
+        raise ValueError("unrecognized constraint type")
 
     try:
         all_smiles = []  # process dot-separated fragments separately
@@ -38,9 +74,15 @@ def decoder(selfies: str, print_error: bool = False) -> Optional[str]:
             if smiles != "":  # prevent malformed dots (e.g. [C]..[C], .[C][C])
                 all_smiles.append(smiles)
 
+        if constraints is not None:  # restore old constraints
+            set_semantic_constraints(old_constraints)
+
         return '.'.join(all_smiles)
 
     except ValueError as err:
+        if constraints is not None:  # restore old constraints
+            set_semantic_constraints(old_constraints)
+
         if print_error:
             print("Decoding error '{}': {}.".format(selfies, err))
         return None
