@@ -94,7 +94,10 @@ symbols_benzene = list(sf.split_selfies(encoded_selfies))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
 
 
-# More relaxed derivations to allow for hypervalences:
+# More relaxed derivations to allow for hypervalences
+# (Caution: Hypervalences rules are much less understood as octet rules.
+# Some molecules containing hypervalences are important, generally it is not
+# known which molecules are stable/reasonable).
 hypervalence_selfies=sf.encoder('O=I(O)(O)(O)(O)O') #  orthoperiodic acid
 standard_derived_smiles=sf.decoder(hypervalence_selfies)
 # standard_derived_smiles -> 'OI', because octet rule for iodine allows for only one bond
