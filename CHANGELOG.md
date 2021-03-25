@@ -2,7 +2,7 @@
 ## v1.0.4 - 23.04.2021
 ### Added: 
  * decoder option for relaxed hypervalence rules, `decoder(...,constraints='hypervalent')`
- * decoder option for strict octet rules, `decoder(...,constraints='octet')`
+ * decoder option for strict octet rules, `decoder(...,constraints='octet_rule')`
 ### Bug Fix: 
  * Fixed constraint for Phosphorus
  
