@@ -23,7 +23,7 @@ nbformat==5.0.7
 nbsphinx==0.7.1
 packaging==20.4
 pandocfilters==1.4.2
-Pygments==2.6.1
+Pygments==2.7.4
 pyparsing==2.4.7
 pyrsistent==0.16.0
 pytz==2020.1
