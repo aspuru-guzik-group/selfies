@@ -308,8 +308,11 @@ def get_symbols_from_n(n: int) -> List[str]:
     if n == 0:
         return [_index_alphabet[0]]
 
-    symbols = []
     base = len(_index_alphabet)
+    if n < 0 or n > 2 ** base:
+        raise IndexError(f"got value of {n} outside of bounds [0, {2**base}]")
+
+    symbols = []
     while n:
         symbols.append(_index_alphabet[n % base])
         n //= base
