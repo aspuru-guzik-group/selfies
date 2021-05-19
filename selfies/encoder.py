@@ -244,6 +244,14 @@ def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
                 left_bond, left_end = rings.pop(ring_id)
                 right_bond, right_end = bond, prev_idx
 
+                if right_end > left_end:
+                    pass
+                else:
+                    # interchange left and right end
+                    tmp = left_bond, left_end
+                    left_bond, left_end = right_bond, right_end
+                    right_bond, right_end = tmp
+
                 ring_len = right_end - left_end
                 N_as_symbols = get_symbols_from_n(ring_len - 1)
 
