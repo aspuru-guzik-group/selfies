@@ -346,7 +346,7 @@ def test_decoder_infinite_loop_on_ring_order():
      strictly increasing order, don't produce infinite looping.
     """
     smil = "O=C1NC6=C(C=CC=C6)C21OCC3(COC(C(NC5=C4C=CC=C5)=O)4OC3)CO2"
-    equi = "O=C2NC1=C(C=CC=C1)C26OC4C5(COC4(C(NC3=CC=CC=C3)=O)OC5)CO6"
+    equi = "O=C1NC6=C(C=CC=C6)C21OCC3(COC4(C(NC5=C4C=CC=C5)=O)OC3)CO2"
+    result2 = sf.encoder(equi)
     result1 = sf.encoder(smil)
-    out = sf.decoder(result1)
-    assert out == equi
+    assert result1 == result2
