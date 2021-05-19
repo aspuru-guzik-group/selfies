@@ -339,3 +339,14 @@ def test_charged_symbols():
 
 def is_eq(smiles1, smiles2):
     return Chem.CanonSmiles(smiles1) == Chem.CanonSmiles(smiles2)
+
+
+def test_decoder_infinite_loop_on_ring_order():
+    """Tests that selfies containing interlocking loops, entered in non
+     strictly increasing order, don't produce infinite looping.
+    """
+    smil = "O=C1NC6=C(C=CC=C6)C21OCC3(COC(C(NC5=C4C=CC=C5)=O)4OC3)CO2"
+    equi = "O=C2NC1=C(C=CC=C1)C26OC4C5(COC4(C(NC3=CC=CC=C3)=O)OC5)CO6"
+    result1 = sf.encoder(smil)
+    out = sf.decoder(result1)
+    assert out == equi
