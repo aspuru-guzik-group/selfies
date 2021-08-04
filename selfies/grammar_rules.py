@@ -1,3 +1,4 @@
+from functools import lru_cache
 from itertools import product
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -24,6 +25,7 @@ hypervalent_bond_constraints.update(
 _bond_constraints = default_bond_constraints
 
 
+@lru_cache()
 def get_semantic_robust_alphabet() -> Set[str]:
     """Returns a subset of all symbols that are semantically constrained
     by :mod:`selfies`.
