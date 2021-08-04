@@ -172,6 +172,9 @@ def set_semantic_constraints(
 
         _bond_constraints = dict(bond_constraints)
 
+        # clear cache since we changed alphabet
+        get_semantic_robust_alphabet.cache_clear()
+
 
 # Symbol State Dict Functions ==============================================
 
