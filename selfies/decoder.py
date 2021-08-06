@@ -90,33 +90,39 @@ def decoder(selfies: str,
 
 def _parse_selfies(selfies: str) -> Iterable[str]:
     """Parses a SELFIES into its symbols.
-
     A generator, which parses a SELFIES and yields its symbols
     one-by-one. When no symbols are left in the SELFIES, the empty
     string is infinitely yielded. As a precondition, the input SELFIES contains
     no dots, so all symbols are enclosed by square brackets, e.g. [X].
-
     :param selfies: the SElFIES string to be parsed.
     :return: an iterable of the symbols of the SELFIES.
     """
 
-    left_idx = selfies.find('[')
+    stack = []
+    syntax_err = "malformed SELIFES, misplaced or missing brackets"
 
-    while 0 <= left_idx < len(selfies):
-        right_idx = selfies.find(']', left_idx + 1)
+    for char in selfies:
 
-        if (selfies[left_idx] != '[') or (right_idx == -1):
-            raise ValueError("malformed SELIFES, "
-                             "misplaced or missing brackets")
+        if char == "[" and len(stack) == 0:
+            symbol = ""
+            stack.append(char)
 
-        next_symbol = selfies[left_idx: right_idx + 1]
-        left_idx = right_idx + 1
+        elif char == "]" and len(stack) == 1:
+            stack.pop()
+            if symbol != "nop":  # skip [nop]
+                yield "[" + symbol + "]"
 
-        if next_symbol != '[nop]':  # skip [nop]
-            yield next_symbol
+        elif char not in "[]" and len(stack) == 1:
+            symbol += char
+
+        else:
+            raise ValueError(syntax_err)
+
+    if len(stack) > 0:
+        raise ValueError(syntax_err)
 
     while True:  # no more symbols left
-        yield ''
+        yield ""
 
 
 def _parse_selfies_symbols(selfies_symbols: List[str]) -> Iterable[str]:
