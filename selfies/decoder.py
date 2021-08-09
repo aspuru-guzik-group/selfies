@@ -98,31 +98,30 @@ def _parse_selfies(selfies: str) -> Iterable[str]:
     :return: an iterable of the symbols of the SELFIES.
     """
 
-    stack = []
     syntax_err = "malformed SELIFES, misplaced or missing brackets"
+    save = False
 
     for char in selfies:
 
-        if char == "[" and len(stack) == 0:
-            symbol = ""
-            stack.append(char)
-
-        elif char == "]" and len(stack) == 1:
-            stack.pop()
-            if symbol != "nop":  # skip [nop]
-                yield "[" + symbol + "]"
-
-        elif char not in "[]" and len(stack) == 1:
+        if char not in "[]" and save:
             symbol += char
 
+        elif char == "[" and not save:
+            symbol = ""
+            save = True
+
+        elif char == "]" and save:
+            save = False
+            if symbol != "nop":  # skip [nop]
+                yield "[" + symbol + "]"
         else:
             raise ValueError(syntax_err)
 
-    if len(stack) > 0:
+    if save:
         raise ValueError(syntax_err)
 
     while True:  # no more symbols left
-        yield ""
+        yield ''
 
 
 def _parse_selfies_symbols(selfies_symbols: List[str]) -> Iterable[str]:
