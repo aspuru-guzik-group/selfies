@@ -114,7 +114,7 @@ def _parse_selfies(selfies: str) -> Iterable[str]:
                              "misplaced or missing brackets")
 
         next_symbol = selfies[left_idx: right_idx + 1]
-        if '[' in next_symbol:
+        if '[' in next_symbol[1:]:
             raise ValueError("malformed SELFIES, "
                              "misplaced or missing brackets")
         left_idx = right_idx + 1
