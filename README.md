@@ -13,7 +13,7 @@
 _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_<br>
 [*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).<br>
 [Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).<br>
-[Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)
+[Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)<br>
 Major contributors since v1.0.0: _[Alston Lo](https://github.com/aspuru-guzik-group/selfies/commits?author=alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_<br>
 Chemistry Advisor: [Robert Pollice](https://scholar.google.at/citations?user=JR2N3JIAAAAJ)
 
