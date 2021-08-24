@@ -1,195 +1,79 @@
-"""Lengthy tests that are run on testing data sets.
-"""
-
 import faulthandler
-import os
+import pathlib
 import random
 
 import pandas as pd
 import pytest
-from rdkit.Chem import MolFromSmiles, MolToSmiles
+from rdkit import Chem
 
 import selfies as sf
-from selfies.encoder import _parse_smiles
-from selfies.kekulize import BRANCH_TYPE, RING_TYPE, kekulize_parser
 
 faulthandler.enable()
 
-datasets = [
-    ('Custom_Cases', 'smiles'),
-    ('130K_QM9', 'smiles'),
-    ('51K_NonFullerene', 'smiles'),
-    ('250K_ZINC', 'smiles'),
-    ('8k_Tox21', 'smiles'),
-    ('93k_PubChem_MUV_bioassay', 'smiles')
-]
+TEST_SET_PATH = pathlib.Path(__file__).parent / "test_sets"
+ERROR_SET_PATH = pathlib.Path(__file__).parent / "error_sets"
+ERROR_SET_PATH.mkdir(exist_ok=True)
+
+datasets = list(TEST_SET_PATH.glob("**/*.csv"))
 
 
-@pytest.mark.parametrize("test_name, column_name", datasets)
-def test_roundtrip_translation(test_name, column_name, dataset_samples):
-    """Tests a roundtrip SMILES -> SELFIES -> SMILES translation of the
-    SMILES examples in QM9, NonFullerene, Zinc, etc.
+@pytest.mark.parametrize("test_path", datasets)
+def test_roundtrip_translation(test_path, dataset_samples):
+    """Tests SMILES -> SELFIES -> SMILES translation on various datasets.
     """
 
-    # modify semantic bond constraints
-    sf.set_semantic_constraints({
-        'H': 1, 'F': 1, 'Cl': 1, 'Br': 1, 'I': 1,
-        'O': 2, 'O+1': 3, 'O-1': 1,
-        'N': 6, 'N+1': 4, 'N-1': 2,
-        'C': 4, 'C+1': 5, 'C-1': 3,
-        'S': 6, 'S+1': 7, 'S-1': 5,
-        'P': 7, 'P+1': 8, 'P-1': 6,
-        '?': 8,
-    })
+    # very relaxed constraints
+    constraints = sf.get_preset_constraints("hypervalent")
+    constraints.update({"P": 7, "P-1": 8, "P+1": 6, "?": 12})
+    sf.set_semantic_constraints(constraints)
 
-    # file I/O
-    curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, 'test_sets', test_name + ".txt")
-    error_path = os.path.join(curr_dir,
-                              'error_sets',
-                              "errors_{}.csv".format(test_name))
-
-    # create error directory
-    os.makedirs(os.path.dirname(error_path), exist_ok=True)
-    error_list = []
-
-    # add header in error log text file
+    error_path = ERROR_SET_PATH / "{}.csv".format(test_path.name[:-4])
     with open(error_path, "w+") as error_log:
         error_log.write("In, Out\n")
-    error_found_flag = False
 
-    # make pandas reader
-    N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if (0 < dataset_samples <= N) else N
-    skip = sorted(random.sample(range(1, N + 1), N - S))
-    reader = pd.read_csv(test_path,
-                         chunksize=10000,
-                         header=0,
-                         skiprows=skip)
+    error_data = []
+    error_found = False
 
-    # roundtrip testing
+    n_lines = sum(1 for _ in open(test_path)) - 1
+    n_keep = dataset_samples if (0 < dataset_samples <= n_lines) else n_lines
+    skip = random.sample(range(1, n_lines + 1), n_lines - n_keep)
+    reader = pd.read_csv(test_path, chunksize=10000, header=0, skiprows=skip)
+
     for chunk in reader:
-        for in_smiles in chunk[column_name]:
-            # check if SMILES in chunk is a valid RDKit molecule.
-            # if not, skip testing
-            # All inputted SMILES must be valid
-            # RDKit Mol objects to be encoded.
-            if (MolFromSmiles(in_smiles) is None) or ('*' in in_smiles):
+
+        for in_smiles in chunk["smiles"]:
+            in_smiles = in_smiles.strip()
+
+            mol = Chem.MolFromSmiles(in_smiles, sanitize=True)
+            if (mol is None) or ("*" in in_smiles):
                 continue
 
-            # encode SELFIE string
-            selfies = sf.encoder(in_smiles)
-
-            # if unable to encode SMILES, write to list of errors
-            if selfies is None:
-                error_list.append((in_smiles, ''))
+            try:
+                selfies = sf.encoder(in_smiles, strict=True)
+                out_smiles = sf.decoder(selfies)
+            except (sf.EncoderError, sf.DecoderError):
+                error_data.append((in_smiles, ""))
                 continue
 
-            # take encoeded SELFIES and decode
-            out_smiles = sf.decoder(selfies)
-
-            # compare original SMILES to decoded SELFIE string.
-            # if not the same string, write to list of errors.
             if not is_same_mol(in_smiles, out_smiles):
-                error_list.append((in_smiles, str(out_smiles)))
-
-        # open and write all errors to errors_{test_name}.csv
-        with open(error_path, "a") as error_log:
-            for error in error_list:
-                error_log.write(','.join(error) + "\n")
-        error_found_flag = error_found_flag or error_list
-        error_list = []
-
-    sf.set_semantic_constraints()  # restore defaults
-
-    assert not error_found_flag
-
-
-@pytest.mark.skip(reason="covered by round-trip test")
-@pytest.mark.parametrize("test_name, column_name", datasets)
-def test_kekulize_parser(test_name, column_name, dataset_samples):
-    """Tests the kekulization of SMILES, which is the first step of
-    selfies.encoder().
-    """
-
-    # file I/O
-    curr_dir = os.path.dirname(__file__)
-    test_path = os.path.join(curr_dir, 'test_sets', test_name + ".txt")
-    error_path = os.path.join(curr_dir,
-                              'error_sets',
-                              "errors_kekulize_{}.csv".format(test_name))
-
-    os.makedirs(os.path.dirname(error_path), exist_ok=True)
-    error_list = []
-    with open(error_path, "w+") as error_log:
-        error_log.write("In\n")
-    error_found_flag = False
-
-    # make pandas reader
-    N = sum(1 for _ in open(test_path)) - 1
-    S = dataset_samples if (0 < dataset_samples <= N) else N
-    skip = sorted(random.sample(range(1, N + 1), N - S))
-    reader = pd.read_csv(test_path,
-                         chunksize=10000,
-                         header=0,
-                         skiprows=skip)
-
-    # kekulize testing
-    for chunk in reader:
-        for smiles in chunk[column_name]:
-
-            if (MolFromSmiles(smiles) is None) or ('*' in smiles):
-                continue
-
-            # build kekulized SMILES
-            kekule_fragments = []
-
-            for fragment in smiles.split("."):
-
-                kekule_gen = kekulize_parser(_parse_smiles(fragment))
-
-                k = []
-                for bond, symbol, symbol_type in kekule_gen:
-                    if symbol_type == BRANCH_TYPE:
-                        bond = ''
-                    k.append(bond)
-
-                    if symbol_type == RING_TYPE and len(symbol) == 2:
-                        k.append('%')
-                    k.append(symbol)
-
-                kekule_fragments.append(''.join(k))
-
-            kekule_smiles = '.'.join(kekule_fragments)
-
-            if not is_same_mol(smiles, kekule_smiles):
-                error_list.append(smiles)
+                error_data.append((in_smiles, out_smiles))
 
         with open(error_path, "a") as error_log:
-            error_log.write("\n".join(error_list))
-        error_found_flag = error_found_flag or error_list
-        error_list = []
+            for entry in error_data:
+                error_log.write(",".join(entry) + "\n")
 
-    assert not error_found_flag
+        error_found = error_found or error_data
+        error_data = []
 
+    sf.set_semantic_constraints()  # restore constraints
 
-# Helper Methods
+    assert not error_found
+
 
 def is_same_mol(smiles1, smiles2):
-    """Helper method that returns True if smiles1 and smiles2 correspond
-    to the same molecule.
-    """
-
-    if smiles1 is None or smiles2 is None:
+    try:
+        can_smiles1 = Chem.CanonSmiles(smiles1)
+        can_smiles2 = Chem.CanonSmiles(smiles2)
+        return can_smiles1 == can_smiles2
+    except Exception:
         return False
-
-    m1 = MolFromSmiles(smiles1)
-    m2 = MolFromSmiles(smiles2)
-
-    if m1 is None or m2 is None:
-        return False
-
-    can1 = MolToSmiles(m1)
-    can2 = MolToSmiles(m2)
-
-    return can1 == can2

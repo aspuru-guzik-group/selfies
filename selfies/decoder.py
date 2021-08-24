@@ -1,372 +1,186 @@
-from collections import OrderedDict
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from selfies.exceptions import DecoderError
+from selfies.grammar_rules import (
+    get_index_from_selfies,
+    next_atom_state,
+    next_branch_state,
+    parse_atom_selfies,
+    parse_branch_selfies,
+    parse_ring_selfies
+)
+from selfies.mol_graph import MolecularDFSTree
+from selfies.utils.selfies_utils import split_selfies
+from selfies.utils.smiles_utils import mol_to_smiles
 
-from selfies.grammar_rules import (get_bond_from_num,
-                                   get_hypervalent_constraints,
-                                   get_n_from_symbols, get_next_branch_state,
-                                   get_next_state, get_num_from_bond,
-                                   get_octet_rule_constraints,
-                                   get_semantic_constraints,
-                                   set_semantic_constraints)
+
+def decoder(selfies: str) -> str:
+    smiles_fragments = []
+
+    for s in selfies.split("."):
+        mol = _parse_selfies(s)
+        if len(mol) == 0:  # prevent malformed dots (e.g. [C]..[C], .[C][C])
+            continue
+        smiles_fragments.append(mol_to_smiles(mol))
+
+    return ".".join(smiles_fragments)
 
 
-def decoder(selfies: str,
-            print_error: bool = False,
-            constraints: Optional[str] = None) -> Optional[str]:
-    """Translates a SELFIES into a SMILES.
-
-    The SELFIES to SMILES translation operates based on the :mod:`selfies`
-    grammar rules, which can be configured using
-    :func:`selfies.set_semantic_constraints`. Given the appropriate settings,
-    the decoded SMILES will always be syntactically and semantically correct.
-    That is, the output SMILES will satisfy the specified bond constraints.
-    Additionally, :func:`selfies.decoder` will attempt to preserve the
-    atom and branch order of the input SELFIES.
-
-    :param selfies: the SELFIES to be translated.
-    :param print_error: if True, error messages will be printed to console.
-        Defaults to False.
-    :param constraints: if ``'octet_rule'`` or ``'hypervalent'``,
-        the corresponding preset bond constraints will be used instead.
-        If ``None``, :func:`selfies.decoder` will use the
-        currently configured bond constraints. Defaults to ``None``.
-    :return: the SMILES translation of ``selfies``. If an error occurs,
-        and ``selfies`` cannot be translated, ``None`` is returned instead.
-
-    :Example:
-
-    >>> import selfies
-    >>> selfies.decoder('[C][=C][F]')
-    'C=CF'
-
-    .. seealso:: The
-        `"octet_rule" <https://en.wikipedia.org/wiki/Octet_rule>`_
-        and
-        `"hypervalent" <https://en.wikipedia.org/wiki/Hypervalent_molecule>`_
-        preset bond constraints
-        can be viewed with :func:`selfies.get_octet_rule_constraints` and
-        :func:`selfies.get_hypervalent_constraints`, respectively. These
-        presets are variants of the "default" bond constraints, which can
-        be viewed with :func:`selfies.get_default_constraints`. Their
-        differences can be summarized as follows:
-
-            * def. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
-            * oct. : ``Cl``, ``Br``, ``I``: 1, ``N``: 3, ``P``: 3, ``P+1``: 4, ``P-1``: 2, ``S``: 2, ``S+1``: 3, ``S-1``: 1
-            * hyp. : ``Cl``, ``Br``, ``I``: 7, ``N``: 5, ``P``: 5, ``P+1``: 6, ``P-1``: 4, ``S``: 6, ``S+1``: 7, ``S-1``: 5
-    """
-
-    old_constraints = get_semantic_constraints()
-    if constraints is None:
-        pass
-    elif constraints == 'octet_rule':
-        set_semantic_constraints(get_octet_rule_constraints())
-    elif constraints == 'hypervalent':
-        set_semantic_constraints(get_hypervalent_constraints())
+def _tokenize_selfies(selfies):
+    if isinstance(selfies, str):
+        selfies_iter = split_selfies(selfies)
+    elif isinstance(selfies, list):
+        selfies_iter = selfies
     else:
-        raise ValueError("unrecognized constraint type")
+        raise ValueError()  # should not happen
 
     try:
-        all_smiles = []  # process dot-separated fragments separately
-
-        for s in selfies.split("."):
-            smiles = _translate_selfies(s)
-
-            if smiles != "":  # prevent malformed dots (e.g. [C]..[C], .[C][C])
-                all_smiles.append(smiles)
-
-        if constraints is not None:  # restore old constraints
-            set_semantic_constraints(old_constraints)
-
-        return '.'.join(all_smiles)
-
-    except ValueError as err:
-        if constraints is not None:  # restore old constraints
-            set_semantic_constraints(old_constraints)
-
-        if print_error:
-            print("Decoding error '{}': {}.".format(selfies, err))
-        return None
-
-
-def _parse_selfies(selfies: str) -> Iterable[str]:
-    """Parses a SELFIES into its symbols.
-
-    A generator, which parses a SELFIES and yields its symbols
-    one-by-one. When no symbols are left in the SELFIES, the empty
-    string is infinitely yielded. As a precondition, the input SELFIES contains
-    no dots, so all symbols are enclosed by square brackets, e.g. [X].
-
-    :param selfies: the SElFIES string to be parsed.
-    :return: an iterable of the symbols of the SELFIES.
-    """
-
-    left_idx = selfies.find('[')
-
-    while 0 <= left_idx < len(selfies):
-        right_idx = selfies.find(']', left_idx + 1)
-
-        if (selfies[left_idx] != '[') or (right_idx == -1):
-            raise ValueError("malformed SELIFES, "
-                             "misplaced or missing brackets")
-
-        next_symbol = selfies[left_idx: right_idx + 1]
-        left_idx = right_idx + 1
-
-        if next_symbol != '[nop]':  # skip [nop]
-            yield next_symbol
-
-    while True:  # no more symbols left
-        yield ''
-
-
-def _parse_selfies_symbols(selfies_symbols: List[str]) -> Iterable[str]:
-    """Equivalent to ``_parse_selfies``, except the input SELFIES is presented
-    as a list of SELFIES symbols, as opposed to a string.
-
-    :param selfies_symbols: a SELFIES represented as a list of SELFIES symbols.
-    :return: an iterable of the symbols of the SELFIES.
-    """
-    for symbol in selfies_symbols:
-
-        if symbol != '[nop]':
+        for symbol in selfies_iter:
+            if symbol == "[nop]":
+                continue
             yield symbol
+    except ValueError as err:
+        raise DecoderError(str(err)) from None
 
-    while True:
-        yield ''
 
-
-def _translate_selfies(selfies: str) -> str:
-    """A helper for ``selfies.decoder``, which translates a SELFIES into a
-    SMILES (assuming the input SELFIES contains no dots).
-
-    :param selfies: the SELFIES to be translated.
-    :return: the SMILES translation of the SELFIES.
-    """
-
-    selfies_gen = _parse_selfies(selfies)
-
-    # derived[i] is a list with three elements:
-    #  (1) a string representing the i-th derived atom, and its connecting
-    #      bond (e.g. =C, #N, N, C are all possible)
-    #  (2) the number of available bonds the i-th atom has to make
-    #  (3) the index of the previously derived atom that the i-th derived
-    #      atom is bonded to
-    # Example: if the 6-th derived atom was 'C', had 2 available bonds,
-    # and was connected to the 5-th derived atom by a double bond, then
-    # derived[6] = ['=C', 2, 5]
-    derived = []
-
-    # each item of <branches> is a key-value pair of indices that represents
-    # the branches to be made. If a branch starts at the i-th derived atom
-    # and ends at the j-th derived atom, then branches[i] = j. No two
-    # branches should start at the same atom, e.g. C((C)Cl)C
-    branches = {}
-
-    # each element of <rings> is a tuple of size three that represents the
-    # rings to be made, in the same order they appear in the SELFIES (left
-    # to right). If the i-th ring is between the j-th and k-th derived atoms
-    # (j <= k) and has bond symbol s ('=', '#', '\', etc.), then
-    # rings[i] = (j, k, s).
+def _parse_selfies(selfies):
+    selfies_iter = _tokenize_selfies(selfies)
+    mol = MolecularDFSTree()
     rings = []
 
-    _translate_selfies_derive(selfies_gen, 0, derived, -1, branches, rings)
-    _form_rings_bilocally(derived, rings)
+    _derive_main_tree(
+        mol, selfies, selfies_iter, float('inf'),
+        init_state=-1, root_atom=None, rings=rings
+    )
 
-    # create branches
-    for lb, rb in branches.items():
-        derived[lb][0] = '(' + derived[lb][0]
-        derived[rb][0] += ')'
+    _form_rings_bilocally(mol, rings)
 
-    smiles = ""
-    for s, _, _ in derived:  # construct SMILES from <derived>
-        smiles += s
-    return smiles
+    return mol
 
 
-# flake8: noqa: C901
-# noinspection PyTypeChecker
-def _translate_selfies_derive(selfies_gen: Iterable[str],
-                              init_state: int,
-                              derived: List[List[Union[str, int]]],
-                              prev_idx: int,
-                              branches: Dict[int, int],
-                              rings: List[Tuple[int, int, str]]) -> None:
-    """Recursive helper for _translate_selfies.
-
-    Derives the SMILES symbols one-by-one from a SELFIES, and
-    populates derived, branches, and rings. The main chain and side branches
-    of the SELFIES are translated recursively. Rings are not actually
-    translated, but saved to the rings list to be added later.
-
-    :param selfies_gen: an iterable of the symbols of the SELFIES to be
-        translated, created by ``_parse_selfies``.
-    :param init_state: the initial derivation state.
-    :param derived: see ``derived`` in ``_translate_selfies``.
-    :param prev_idx: the index of the previously derived atom, or -1,
-        if no atoms have been derived yet.
-    :param branches: see ``branches`` in ``_translate_selfies``.
-    :param rings: see ``rings`` in ``_translate_selfies``.
-    :return: ``None``.
-    """
-
-    curr_symbol = next(selfies_gen)
+def _derive_main_tree(
+    mol, selfies, selfies_iter, max_derive,
+    init_state, root_atom, rings
+):
+    n_derived = 0
     state = init_state
+    prev_atom = root_atom
 
-    while curr_symbol != '' and state >= 0:
+    while (state != 0) and (n_derived < max_derive):
 
-        # Case 1: Branch symbol (e.g. [Branch1_2])
-        if 'Branch' in curr_symbol:
+        try:  # retrieve next symbol
+            symbol = next(selfies_iter)
+            n_derived += 1
+        except StopIteration:
+            break
 
-            branch_init_state, new_state = \
-                get_next_branch_state(curr_symbol, state)
+        # Case 1: Branch symbol (e.g. [Branch1])
+        if 'ch' in symbol[-4:-2]:
 
-            if state <= 1:  # state = 0, 1
-                pass  # ignore no symbols
+            output = parse_branch_selfies(symbol)
+            if output is None:
+                _raise_decoder_error(selfies, symbol)
+            branch_type, n = output
+            br_init_state, new_state = next_branch_state(branch_type, state)
 
-            else:
-                L = int(curr_symbol[-4])  # corresponds to [BranchL_X]
-                L_symbols = []
-                for _ in range(L):
-                    L_symbols.append(next(selfies_gen))
+            if state > 1:
+                Q = _read_index_from_selfies(selfies_iter, n_symbols=n)
+                n_derived += n
 
-                N = get_n_from_symbols(*L_symbols)
-
-                branch_symbols = []
-                for _ in range(N + 1):
-                    branch_symbols.append(next(selfies_gen))
-                branch_gen = _parse_selfies_symbols(branch_symbols)
-
-                branch_start = len(derived)
-                _translate_selfies_derive(branch_gen, branch_init_state,
-                                          derived, prev_idx, branches, rings)
-                branch_end = len(derived) - 1
-
-                # resolve C((C)Cl)C --> C(C)(Cl)C
-                while branch_start in branches:
-                    branch_start = branches[branch_start] + 1
-
-                # finally, register the branch in branches
-                if branch_start <= branch_end:
-                    branches[branch_start] = branch_end
+                n_derived += _derive_main_tree(
+                    mol, selfies, selfies_iter, (Q + 1),
+                    init_state=br_init_state, root_atom=prev_atom, rings=rings
+                )
 
         # Case 2: Ring symbol (e.g. [Ring2])
-        elif 'Ring' in curr_symbol:
+        elif 'ng' in symbol[-4:-2]:
 
+            output = parse_ring_selfies(symbol)
+            if output is None:
+                _raise_decoder_error(selfies, symbol)
+            bond_info, n = output
             new_state = state
 
-            if state == 0:
-                pass  # ignore no symbols
+            if state > 0:
+                Q = _read_index_from_selfies(selfies_iter, n_symbols=n)
+                n_derived += n
 
-            else:
-                L = int(curr_symbol[-2])  # corresponds to [RingL]
-                L_symbols = []
-                for _ in range(L):
-                    L_symbols.append(next(selfies_gen))
-
-                N = get_n_from_symbols(*L_symbols)
-
-                left_idx = max(0, prev_idx - (N + 1))
-                right_idx = prev_idx
-
-                bond_symbol = ''
-                if curr_symbol[1:5] == 'Expl':
-                    bond_symbol = curr_symbol[5]
-
-                rings.append((left_idx, right_idx, bond_symbol))
+                lidx = max(0, prev_atom.index - (Q + 1))
+                rings.append((mol.get_atom(lidx), prev_atom, bond_info))
 
         # Case 3: regular symbol (e.g. [N], [=C], [F])
         else:
-            new_symbol, new_state = get_next_state(curr_symbol, state)
 
-            if new_symbol != '':  # in case of [epsilon]
-                derived.append([new_symbol, new_state, prev_idx])
+            output = parse_atom_selfies(symbol)
+            if output is None:
+                _raise_decoder_error(selfies, symbol)
+            (bond_order, stereo), atom = output
+            cap = atom.bonding_capacity
 
-                if prev_idx >= 0:
-                    bond_num = get_num_from_bond(new_symbol[0])
-                    derived[prev_idx][1] -= bond_num
+            if (cap == 0) and (prev_atom is not None):
+                _raise_decoder_error(selfies, symbol)
+            bond_order, new_state = next_atom_state(bond_order, cap, state)
 
-                prev_idx = len(derived) - 1
+            mol.add_atom(atom)
+            if prev_atom is not None:
+                src, dst = prev_atom.index, atom.index
+                mol.add_bond(src=src, dst=dst, order=bond_order, stereo=stereo)
+            prev_atom = atom
 
-        curr_symbol = next(selfies_gen)  # update symbol and state
         state = new_state
 
+    while n_derived < max_derive:  # consume remaining tokens
+        try:
+            next(selfies_iter)
+            n_derived += 1
+        except StopIteration:
+            break
 
-def _form_rings_bilocally(derived: List[List[Union[str, int]]],
-                          rings: List[Tuple[int, int, str]]) -> None:
-    """Forms all the rings specified by the rings list, in first-to-last order,
-    by updating derived.
+    return n_derived
 
-    :param derived: see ``derived`` in ``_translate_selfies``.
-    :param rings: see ``rings`` in ``_translate_selfies``.
-    :return: ``None``.
-    """
 
-    # due to the behaviour of allowing multiple rings between the same atom
-    # pair, or rings between already bonded atoms, we first resolve all rings
-    # so that only valid rings are left and placed into <ring_locs>.
-    ring_locs = OrderedDict()
+def _raise_decoder_error(selfies, invalid_symbol):
+    err_msg = "invalid symbol '{}'\n\tSELFIES: {}".format(
+        invalid_symbol, selfies
+    )
+    raise DecoderError(err_msg)
 
-    for left_idx, right_idx, bond_symbol in rings:
 
-        if left_idx == right_idx:  # ring to the same atom forbidden
+def _read_index_from_selfies(selfies_iter, n_symbols):
+    index_symbols = []
+    for _ in range(n_symbols):
+        try:
+            index_symbols.append(next(selfies_iter))
+        except StopIteration:
+            index_symbols.append(None)
+    return get_index_from_selfies(*index_symbols)
+
+
+def _form_rings_bilocally(mol, rings):
+    rings_made = [0] * len(mol)
+
+    for latom, ratom, bond_info in rings:
+        lidx, ridx = latom.index, ratom.index
+
+        if lidx == ridx:  # ring to the same atom forbidden
             continue
 
-        left_end = derived[left_idx]
-        right_end = derived[right_idx]
-        bond_num = get_num_from_bond(bond_symbol)
+        (lorder, lstereo), (rorder, rstereo) = bond_info
+        lfree = latom.bonding_capacity - mol.get_bond_count(lidx)
+        rfree = ratom.bonding_capacity - mol.get_bond_count(ridx)
 
-        if left_end[1] <= 0 or right_end[1] <= 0:
-            continue  # no room for bond
+        if lfree <= 0 or rfree <= 0:
+            continue  # no room for ring bond
+        order = min(lorder, rorder, lfree, rfree)
 
-        if bond_num > min(left_end[1], right_end[1]):
-            bond_num = min(left_end[1], right_end[1])
-            bond_symbol = get_bond_from_num(bond_num)
+        if mol.has_bond(a=lidx, b=ridx):
+            bond = mol.get_dirbond(src=lidx, dst=ridx)
+            new_order = min(order + bond.order, 3)
+            mol.update_bond_order(a=lidx, b=ridx, new_order=new_order)
 
-        # ring is formed between two atoms that are already bonded
-        # e.g. CC1C1C --> CC=CC
-        if left_idx == right_end[2]:
-
-            right_symbol = right_end[0]
-
-            if right_symbol[0] in {'-', '/', '\\', '=', '#'}:
-                old_bond = right_symbol[0]
-            else:
-                old_bond = ''
-
-            # update bond multiplicity and symbol
-            new_bond_num = min(bond_num + get_num_from_bond(old_bond), 3)
-            new_bond_symbol = get_bond_from_num(new_bond_num)
-
-            right_end[0] = new_bond_symbol + right_end[0][len(old_bond):]
-
-        # ring is formed between two atoms that are not bonded, e.g. C1CC1C
         else:
-            loc = (left_idx, right_idx)
-
-            if loc in ring_locs:
-                # a ring is formed between two atoms that are have previously
-                # been bonded by a ring, so ring bond multiplicity is updated
-
-                new_bond_num = min(bond_num
-                                   + get_num_from_bond(ring_locs[loc]), 3)
-                new_bond_symbol = get_bond_from_num(new_bond_num)
-                ring_locs[loc] = new_bond_symbol
-
-            else:
-                ring_locs[loc] = bond_symbol
-
-        left_end[1] -= bond_num
-        right_end[1] -= bond_num
-
-    # finally, use <ring_locs> to add all the rings into <derived>
-
-    ring_counter = 1
-    for (left_idx, right_idx), bond_symbol in ring_locs.items():
-
-        ring_id = str(ring_counter)
-        if len(ring_id) == 2:
-            ring_id = "%" + ring_id
-        ring_counter += 1  # increment
-
-        derived[left_idx][0] += bond_symbol + ring_id
-        derived[right_idx][0] += bond_symbol + ring_id
+            mol.add_ring_bond(
+                a=lidx, a_stereo=lstereo, a_pos=rings_made[lidx],
+                b=ridx, b_stereo=rstereo, b_pos=rings_made[ridx],
+                order=order
+            )
+            rings_made[lidx] += 1
+            rings_made[ridx] += 1
