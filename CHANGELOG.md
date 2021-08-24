@@ -1,4 +1,9 @@
 # Changelog
+
+## v2.0.0 - TBD
+
+---
+
 ## v1.0.4 - 23.04.2021
 ### Added: 
  * decoder option for relaxed hypervalence rules, `decoder(...,constraints='hypervalent')`

@@ -1,265 +1,158 @@
-from typing import Dict, Iterable, List, Optional, Tuple
+from selfies.exceptions import EncoderError, SMILESParserError
+from selfies.grammar_rules import get_selfies_from_index
+from selfies.utils.linked_list import SinglyLinkedList
+from selfies.utils.smiles_utils import (
+    atom_to_smiles,
+    bond_to_smiles,
+    parse_smiles
+)
 
-from selfies.grammar_rules import get_num_from_bond, get_symbols_from_n
-from selfies.kekulize import kekulize_parser
 
-
-def encoder(smiles: str, print_error: bool = False) -> Optional[str]:
-    """Translates a SMILES into a SELFIES.
-
-    The SMILES to SELFIES translation occurs independently of the SELFIES
-    alphabet and grammar. Thus, :func:`selfies.encoder` will work regardless of
-    the alphabet and grammar rules that :py:mod:`selfies` is operating on,
-    assuming the input is a valid SMILES. Additionally, :func:`selfies.encoder`
-    preserves the atom and branch order of the input SMILES; thus, one
-    could generate random SELFIES corresponding to the same molecule by
-    generating random SMILES, and then translating them.
-
-    However, encoding and then decoding a SMILES may not necessarily yield
-    the original SMILES. Reasons include:
-
-        1.  SMILES with aromatic symbols are automatically
-            Kekulized before being translated.
-        2.  SMILES that violate the bond constraints specified by
-            :mod:`selfies` will be successfully encoded by
-            :func:`selfies.encoder`, but then decoded into a new molecule
-            that satisfies the constraints.
-        3.  The exact ring numbering order is lost in :func:`selfies.encoder`,
-            and cannot be reconstructed by :func:`selfies.decoder`.
-
-    Finally, note that :func:`selfies.encoder` does **not** check if the input
-    SMILES is valid, and should not be expected to reject invalid inputs.
-    It is recommended to use RDKit to first verify that the SMILES are
-    valid.
-
-    :param smiles: the SMILES to be translated.
-    :param print_error: if True, error messages will be printed to console.
-        Defaults to False.
-    :return: the SELFIES translation of ``smiles``. If an error occurs,
-        and ``smiles`` cannot be translated, :code:`None` is returned instead.
-
-    :Example:
-
-    >>> import selfies
-    >>> selfies.encoder('C=CF')
-    '[C][=C][F]'
-
-    .. note:: Currently, :func:`selfies.encoder` does not support the
-        following types of SMILES:
-
-        *   SMILES using ring numbering across a dot-bond symbol
-            to specify bonds, e.g. ``C1.C2.C12`` (propane) or
-            ``c1cc([O-].[Na+])ccc1`` (sodium phenoxide).
-        *   SMILES with ring numbering between atoms that are over
-            ``16 ** 3 = 4096`` atoms apart.
-        *   SMILES using the wildcard symbol ``*``.
-        *   SMILES using chiral specifications other than ``@`` and ``@@``.
-
-    """
-
+def encoder(smiles: str, strict: bool = False) -> str:
     try:
-        if '*' in smiles:
-            raise ValueError("wildcard atom '*' not supported")
+        mol_fragments = parse_smiles(smiles)
+    except SMILESParserError as err:
+        err_msg = "failed to parse input\n\tSMILES: {}".format(smiles)
+        raise EncoderError(err_msg) from err
 
-        all_selfies = []  # process dot-separated fragments separately
-        for s in smiles.split("."):
-            all_selfies.append(_translate_smiles(s))
-        return '.'.join(all_selfies)
+    selfies_fragments = []
 
-    except ValueError as err:
-        if print_error:
-            print("Encoding error '{}': {}.".format(smiles, err))
-        return None
+    for mol in mol_fragments:
+        if not mol.kekulize():
+            err_msg = "kekulization failed\n\tSMILES: {}".format(smiles)
+            raise EncoderError(err_msg)
+
+        if strict:
+            _check_bond_constraints(mol, smiles)
+
+        # invert chirality of atoms where necessary,
+        # such that they are restored when the SELFIES is decoded
+        for atom in mol.get_atoms():
+            if ((atom.chirality is not None)
+                    and mol.has_out_ring_bond(atom.index)
+                    and _should_invert_chirality(mol, atom)):
+                atom.invert_chirality()
+
+        derived_symbols = _mol_to_selfies(mol, None, 0).tolist()
+        selfies_fragments.append("".join(derived_symbols))
+
+    return ".".join(selfies_fragments)
 
 
-ATOM_TYPE = 1
-BRANCH_TYPE = 2
-RING_TYPE = 3
+def _check_bond_constraints(mol, smiles):
+    errors = []
+
+    for atom in mol.get_atoms():
+        bond_cap = atom.bonding_capacity
+        bond_count = mol.get_bond_count(atom.index)
+        if bond_count > bond_cap:
+            bond_cap = max(bond_cap, 0)
+            errors.append((atom_to_smiles(atom), bond_count, bond_cap))
+
+    if errors:
+        err_msg = "input violates the currently-set semantic constraints\n" \
+                  "\tSMILES: {}\n" \
+                  "\tErrors:\n".format(smiles)
+        for e in errors:
+            err_msg += "\t[{:} with {} bond(s) - " \
+                       "a max. of {} bond(s) was specified]\n".format(*e)
+        raise EncoderError(err_msg)
 
 
-def _parse_smiles(smiles: str) -> Iterable[Tuple[str, str, int]]:
-    """Parses a SMILES into its symbols.
+def _should_invert_chirality(mol, atom):
+    out_bonds = mol.get_out_dirbonds(atom.index)
 
-    A generator, which parses a SMILES string and returns its symbol(s)
-    one-by-one as a tuple of:
-        (1) the bond symbol connecting the current atom/ring/branch symbol
-            to the previous atom/ring/branch symbol (e.g. '=', '', '#')
-        (2) the atom/ring/branch symbol as a string (e.g. 'C', '12', '(')
-        (3) the type of the symbol in (2), represented as an integer that is
-            either ``ATOM_TYPE``, ``BRANCH_TYPE``, and ``RING_TYPE``.
-    As a precondition, we also assume ``smiles`` has no dots in it.
-
-    :param smiles: the SMILES to be parsed.
-    :return: an iterable of the symbol(s) of the SELFIES along with
-        their types.
-    """
-
-    i = 0
-
-    while 0 <= i < len(smiles):
-
-        bond = ''
-
-        if smiles[i] in {'-', '/', '\\', '=', '#', ":"}:
-            bond = smiles[i]
-            i += 1
-
-        if smiles[i].isalpha():  # organic subset elements
-            if smiles[i: i + 2] in ('Br', 'Cl'):  # two letter elements
-                symbol = smiles[i: i + 2]
-                symbol_type = ATOM_TYPE
-                i += 2
-            else:
-                symbol = smiles[i]  # one letter elements (e.g. C, N, ...)
-                symbol_type = ATOM_TYPE
-                i += 1
-
-        elif smiles[i] in ('(', ')'):  # open and closed branch brackets
-            bond = smiles[i + 1: i + 2]
-            symbol = smiles[i]
-            symbol_type = BRANCH_TYPE
-            i += 1
-
-        elif smiles[i] == '[':  # atoms encased in brackets (e.g. [NH])
-            r_idx = smiles.find(']', i + 1)
-            symbol = smiles[i: r_idx + 1]
-            symbol_type = ATOM_TYPE
-            i = r_idx + 1
-
-            if r_idx == -1:
-                raise ValueError("malformed SMILES, missing ']'")
-
-            # quick chirality specification check
-            chiral_i = symbol.find('@')
-            if symbol[chiral_i + 1].isalpha() and symbol[chiral_i + 1] != 'H':
-                raise ValueError("chiral specification '{}' not supported"
-                                 .format(symbol))
-
-        elif smiles[i].isdigit():  # one-digit ring number
-            symbol = smiles[i]
-            symbol_type = RING_TYPE
-            i += 1
-
-        elif smiles[i] == '%':  # two-digit ring number (e.g. %12)
-            symbol = smiles[i + 1: i + 3]
-            symbol_type = RING_TYPE
-            i += 3
-
+    # 1. rings whose right number are bonded to this atom (e.g. ...1...X1)
+    # 2. rings whose left number are bonded to this atom (e.g. X1...1...)
+    # 3. branches and other (e.g. X(...)...)
+    partition = [[], [], []]
+    for i, bond in enumerate(out_bonds):
+        if not bond.ring_bond:
+            partition[2].append(i)
+        elif bond.src < bond.dst:
+            partition[1].append(i)
         else:
-            raise ValueError("unrecognized symbol '{}'".format(smiles[i]))
+            partition[0].append(i)
+    partition[1].sort(key=lambda x: out_bonds[x].dst)
 
-        yield bond, symbol, symbol_type
-
-
-def _translate_smiles(smiles: str) -> str:
-    """A helper for ``selfies.encoder``, which translates a SMILES into a
-    SELFIES (assuming the input SMILES contains no dots).
-
-    :param smiles: the SMILES to be translated.
-    :return: the SELFIES translation of SMILES.
-    """
-
-    smiles_gen = _parse_smiles(smiles)
-
-    char_set = set(smiles)
-    if any(c in char_set for c in ['c', 'n', 'o', 'p', 'a', 's']):
-        smiles_gen = kekulize_parser(smiles_gen)
-
-    # a simple mutable counter to track which atom was the i-th derived atom
-    derive_counter = [0]
-
-    # a dictionary to keep track of the rings to be made. If a ring with id
-    # X is connected to the i-th and j-th derived atoms (i < j) with bond
-    # symbol s, then after the i-th atom is derived, rings[X] = (s, i).
-    # As soon as the j-th atom is derived, rings[X] is removed from <rings>,
-    # and the ring is made.
-    rings = {}
-
-    selfies, _ = _translate_smiles_derive(smiles_gen, rings, derive_counter)
-
-    if rings:
-        raise ValueError("malformed ring numbering or ring numbering "
-                         "across a dot symbol")
-
-    return selfies
+    # construct permutation
+    perm = partition[0] + partition[1] + partition[2]
+    count = 0
+    for i in range(len(perm)):
+        for j in range(i + 1, len(perm)):
+            if perm[i] > perm[j]:
+                count += 1
+    return count % 2 != 0  # if odd permutation, should invert chirality
 
 
-def _translate_smiles_derive(smiles_gen: Iterable[Tuple[str, str, int]],
-                             rings: Dict[int, Tuple[str, int]],
-                             counter: List[int]) -> Tuple[str, int]:
-    """Recursive helper for _translate_smiles.
+def _mol_to_selfies(mol, bond_into_root, root):
+    derived = SinglyLinkedList()
 
-    Derives the SELFIES from a SMILES, and returns a tuple of (1) the
-    translated SELFIES and (2) the symbol length of the translated SELFIES.
+    bond_into_curr, curr = bond_into_root, root
+    while True:
+        curr_atom = mol.get_atom(curr)
+        derived.append(_atom_to_selfies(bond_into_curr, curr_atom))
 
-    :param smiles_gen: an iterable of the symbols (and their types)
-        of the SMILES to be translated, created by ``_parse_smiles``.
-    :param rings: See ``rings`` in ``_translate_smiles``.
-    :param counter: a one-element list that serves as a mutable counter.
-        See ``derived_counter`` in ``_translate_smiles``.
-    :return: A tuple of the translated SELFIES and its symbol length.
-    """
+        out_bonds = mol.get_out_dirbonds(curr)
+        for i, bond in enumerate(out_bonds):
 
-    selfies = ""
-    selfies_len = 0
-    prev_idx = -1
+            if bond.ring_bond:
+                if bond.src < bond.dst:
+                    continue
 
-    for bond, symbol, symbol_type in smiles_gen:
+                rev_bond = mol.get_dirbond(src=bond.dst, dst=bond.src)
+                ring_len = bond.src - bond.dst
+                Q_as_symbols = get_selfies_from_index(ring_len - 1)
+                ring_symbol = "[{}Ring{}]".format(
+                    _ring_bonds_to_selfies(rev_bond, bond),
+                    len(Q_as_symbols)
+                )
 
-        if bond == '-':  # ignore explicit single bonds
-            bond = ''
+                derived.append(ring_symbol)
+                for symbol in Q_as_symbols:
+                    derived.append(symbol)
 
-        if symbol_type == ATOM_TYPE:
-            if symbol[0] == '[':
-                selfies += "[{}{}expl]".format(bond, symbol[1:-1])
-            else:
-                selfies += "[{}{}]".format(bond, symbol)
-            prev_idx = counter[0]
-            counter[0] += 1
-            selfies_len += 1
-
-        elif symbol_type == BRANCH_TYPE:
-            if symbol == '(':
-
-                # NOTE: looping inside a loop on a generator will produce
-                # expected behaviour in this case.
-
-                branch, branch_len = \
-                    _translate_smiles_derive(smiles_gen, rings, counter)
-
-                N_as_symbols = get_symbols_from_n(branch_len - 1)
-                bond_num = get_num_from_bond(bond)
-
-                selfies += "[Branch{}_{}]".format(len(N_as_symbols), bond_num)
-                selfies += ''.join(N_as_symbols) + branch
-                selfies_len += 1 + len(N_as_symbols) + branch_len
-
-            else:  # symbol == ')'
-                break
-
-        else:  # symbol_type == RING_TYPE
-            ring_id = int(symbol)
-
-            if ring_id in rings:
-                left_bond, left_end = rings.pop(ring_id)
-                right_bond, right_end = bond, prev_idx
-
-                ring_len = right_end - left_end
-                N_as_symbols = get_symbols_from_n(ring_len - 1)
-
-                if left_bond != '':
-                    selfies += "[Expl{}Ring{}]".format(left_bond,
-                                                       len(N_as_symbols))
-                elif right_bond != '':
-                    selfies += "[Expl{}Ring{}]".format(right_bond,
-                                                       len(N_as_symbols))
-                else:
-                    selfies += "[Ring{}]".format(len(N_as_symbols))
-
-                selfies += ''.join(N_as_symbols)
-                selfies_len += 1 + len(N_as_symbols)
+            elif i == len(out_bonds) - 1:
+                bond_into_curr, curr = bond, bond.dst
 
             else:
-                rings[ring_id] = (bond, prev_idx)
+                branch = _mol_to_selfies(mol, bond, bond.dst)
+                Q_as_symbols = get_selfies_from_index(len(branch) - 1)
+                branch_symbol = "[{}Branch{}]".format(
+                    _bond_to_selfies(bond, show_stereo=False),
+                    len(Q_as_symbols)
+                )
 
-    return selfies, selfies_len
+                derived.append(branch_symbol)
+                for symbol in Q_as_symbols:
+                    derived.append(symbol)
+                derived.extend(branch)
+
+        # end of chain
+        if (not out_bonds) or out_bonds[-1].ring_bond:
+            break
+
+    return derived
+
+
+def _bond_to_selfies(bond, show_stereo=True):
+    if not show_stereo and (bond.order == 1):
+        return ""
+    return bond_to_smiles(bond)
+
+
+def _ring_bonds_to_selfies(lbond, rbond):
+    assert lbond.order == rbond.order
+
+    if (lbond.order != 1) or all(b.stereo is None for b in (lbond, rbond)):
+        return _bond_to_selfies(lbond, show_stereo=False)
+    else:
+        bond_char = "-" if (lbond.stereo is None) else lbond.stereo
+        bond_char += "-" if (rbond.stereo is None) else rbond.stereo
+        return bond_char
+
+
+def _atom_to_selfies(bond, atom):
+    assert not atom.is_aromatic
+    bond_char = "" if (bond is None) else _bond_to_selfies(bond)
+    return "[{}{}]".format(bond_char, atom_to_smiles(atom, brackets=False))
