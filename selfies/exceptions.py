@@ -6,11 +6,13 @@ class SMILESParserError(ValueError):
         self.reason = reason
 
     def __str__(self):
-        return "\n" \
-               "\tSMILES: {smiles}\n" \
-               "\t        {pointer}\n" \
-               "\tIndex:  {index}\n" \
-               "\tReason: {reason}".format(
+        err_msg = "\n" \
+                  "\tSMILES: {smiles}\n" \
+                  "\t        {pointer}\n" \
+                  "\tIndex:  {index}\n" \
+                  "\tReason: {reason}"
+
+        return err_msg.format(
             smiles=self.smiles,
             pointer=(" " * self.idx + "^"),
             index=self.idx,

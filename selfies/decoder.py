@@ -57,8 +57,8 @@ def _parse_selfies(selfies):
 
 
 def _derive_main_tree(
-    mol, selfies, selfies_iter, max_derive,
-    init_state, root_atom, rings
+        mol, selfies, selfies_iter, max_derive,
+        init_state, root_atom, rings
 ):
     n_derived = 0
     state = init_state

@@ -29,8 +29,8 @@ def encoder(smiles: str, strict: bool = False) -> str:
         # such that they are restored when the SELFIES is decoded
         for atom in mol.get_atoms():
             if ((atom.chirality is not None)
-                and mol.has_out_ring_bond(atom.index)
-                and _should_invert_chirality(mol, atom)):
+                    and mol.has_out_ring_bond(atom.index)
+                    and _should_invert_chirality(mol, atom)):
                 atom.invert_chirality()
 
         derived_symbols = _mol_to_selfies(mol, None, 0).tolist()

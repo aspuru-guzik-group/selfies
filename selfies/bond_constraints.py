@@ -41,7 +41,7 @@ def get_semantic_constraints() -> Dict[str, int]:
 
 
 def set_semantic_constraints(
-    bond_constraints: Union[str, Dict[str, int]] = "default"
+        bond_constraints: Union[str, Dict[str, int]] = "default"
 ) -> None:
     global _current_constraints
 

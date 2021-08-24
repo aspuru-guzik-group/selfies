@@ -9,10 +9,10 @@ from selfies.mol_graph import Atom, DirectedBond, MolecularDFSTree
 
 SMILES_BRACKETED_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
-    r"(\d*)"  # isotope number (optional, e.g. 123, 26) 
-    r"([A-Za-z][a-z]?)"  # element symbol 
-    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported) 
-    r"((?:[H]\d?)?)"  # H count (optional, e.g. H, H0, H3) 
+    r"(\d*)"  # isotope number (optional, e.g. 123, 26)
+    r"([A-Za-z][a-z]?)"  # element symbol
+    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
+    r"((?:[H]\d?)?)"  # H count (optional, e.g. H, H0, H3)
     r"((?:[+]+|[-]+|[+-]\d+)?)"  # charge (optional, e.g. ---, +1, ++)
     r"((?:[:]\d+)?)"  # atom class (optional, e.g. :12, :1)
     r"[]]$"  # closing square bracket ]
@@ -32,9 +32,9 @@ class SMILESTokenTypes(enum.Enum):
 class SMILESToken:
 
     def __init__(
-        self,
-        bond_idx: Optional[int],
-        start_idx: int, end_idx: int, token_type: SMILESTokenTypes
+            self,
+            bond_idx: Optional[int],
+            start_idx: int, end_idx: int, token_type: SMILESTokenTypes
     ):
         self.bond_idx = bond_idx
         self.start_idx = start_idx
@@ -154,7 +154,7 @@ def parse_atom_smiles(atom_symbol: str) -> Optional[Atom]:
 
 
 def parse_bond_smiles(
-    bond_char: Optional[str]
+        bond_char: Optional[str]
 ) -> Tuple[Union[int, float], Optional[str]]:
     order = SMILES_BOND_ORDERS.get(bond_char, 1)
     stereo = bond_char if (bond_char in SMILES_STEREO_BONDS) else None
@@ -277,8 +277,8 @@ def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
         bonds = (bonds[1], bonds[0])
 
     if ((bonds[0] == bonds[1])
-        or (bonds[1] is None)
-        or all(x in SMILES_STEREO_BONDS for x in bonds)):
+            or (bonds[1] is None)
+            or all(x in SMILES_STEREO_BONDS for x in bonds)):
         pass
     else:
         err_msg = "mismatched ring bonds"

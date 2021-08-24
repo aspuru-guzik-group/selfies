@@ -4,10 +4,10 @@ from selfies.utils.selfies_utils import len_selfies, split_selfies
 
 
 def selfies_to_encoding(
-    selfies: str,
-    vocab_stoi: Dict[str, int],
-    pad_to_len: int = -1,
-    enc_type: str = 'both'
+        selfies: str,
+        vocab_stoi: Dict[str, int],
+        pad_to_len: int = -1,
+        enc_type: str = 'both'
 ) -> Union[List[int], List[List[int]], Tuple[List[int], List[List[int]]]]:
     """Converts a SELFIES into its label (integer) and/or one-hot encoding.
 
@@ -64,9 +64,9 @@ def selfies_to_encoding(
 
 
 def encoding_to_selfies(
-    encoded: Union[List[int], List[List[int]]],
-    vocab_itos: Dict[int, str],
-    enc_type: str,
+        encoded: Union[List[int], List[List[int]]],
+        vocab_itos: Dict[int, str],
+        enc_type: str,
 ) -> str:
     """Converts a label (integer) or one-hot encoded list into
     a SELFIES string.
@@ -111,9 +111,9 @@ def encoding_to_selfies(
 
 
 def batch_selfies_to_flat_hot(
-    selfies_batch: List[str],
-    vocab_stoi: Dict[str, int],
-    pad_to_len: int = -1,
+        selfies_batch: List[str],
+        vocab_stoi: Dict[str, int],
+        pad_to_len: int = -1,
 ) -> List[List[int]]:
     """Converts a list of SELFIES into a list of
     flattened one-hot encodings.
@@ -155,8 +155,8 @@ def batch_selfies_to_flat_hot(
 
 
 def batch_flat_hot_to_selfies(
-    one_hot_batch: List[List[int]],
-    vocab_itos: Dict[int, str],
+        one_hot_batch: List[List[int]],
+        vocab_itos: Dict[int, str],
 ) -> List[str]:
     """Converts a batch of flattened one-hot encodings into
     a list of SELFIES.

@@ -41,7 +41,7 @@ def parse_ring_selfies(symbol: str) -> Optional[Tuple[Any, int]]:
 
 
 def next_atom_state(
-    bond_order: int, bond_cap: int, state: int
+        bond_order: int, bond_cap: int, state: int
 ) -> Tuple[int, int]:
     if state == -1:
         return 1, bond_cap
@@ -90,10 +90,10 @@ def get_selfies_from_index(index: int) -> List[str]:
 SELFIES_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
     r"([=#/\\]?)"  # bond char
-    r"(\d*)"  # isotope number (optional, e.g. 123, 26) 
-    r"([A-Z][a-z]?)"  # element symbol 
-    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported) 
-    r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3) 
+    r"(\d*)"  # isotope number (optional, e.g. 123, 26)
+    r"([A-Z][a-z]?)"  # element symbol
+    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
+    r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3)
     r"((?:[+-][1-9]+)?)"  # charge (optional, e.g. +1)
     r"[]]$"  # closing square bracket ]
 )

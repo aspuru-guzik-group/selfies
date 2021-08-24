@@ -29,9 +29,9 @@ def _in_pi_subgraph(atom, n_bonds) -> bool:
 
     h_count = 0 if (atom.h_count is None) else atom.h_count
     if ((atom.element == 'C')
-        and (atom.h_count in (None, 0))
-        and (atom.charge == 0)
-        and (n_bonds == 2)):
+            and (atom.h_count in (None, 0))
+            and (atom.charge == 0)
+            and (n_bonds == 2)):
         h_count = 1
     used_electrons += h_count
 

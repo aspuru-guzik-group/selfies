@@ -8,13 +8,13 @@ from selfies.kekulize import find_perfect_matching, prune_to_pi_subgraph
 class Atom:
 
     def __init__(
-        self,
-        element: str,
-        is_aromatic: bool,
-        isotope: Optional[int] = None,
-        chirality: Optional[str] = None,
-        h_count: Optional[int] = None,
-        charge: int = 0
+            self,
+            element: str,
+            is_aromatic: bool,
+            isotope: Optional[int] = None,
+            chirality: Optional[str] = None,
+            h_count: Optional[int] = None,
+            charge: int = 0
     ):
         self.index = None
         self.element = element
@@ -41,12 +41,12 @@ class Atom:
 class DirectedBond:
 
     def __init__(
-        self,
-        src: int,
-        dst: int,
-        order: Union[int, float],
-        stereo: Optional[str],
-        ring_bond: bool
+            self,
+            src: int,
+            dst: int,
+            order: Union[int, float],
+            stereo: Optional[str],
+            ring_bond: bool
     ):
         self.src = src
         self.dst = dst
@@ -102,8 +102,8 @@ class MolecularDFSTree:
             self._aro_subgraph[atom.index] = list()
 
     def add_bond(
-        self, src: int, dst: int,
-        order: Union[int, float], stereo: str
+            self, src: int, dst: int,
+            order: Union[int, float], stereo: str
     ) -> None:
         assert src < dst
 
@@ -122,10 +122,10 @@ class MolecularDFSTree:
         return len(out_edges) - 1
 
     def add_ring_bond(
-        self, a: int, b: int,
-        order: Union[int, float],
-        a_stereo: Optional[str], b_stereo: Optional[str],
-        a_pos: int = -1, b_pos: int = -1
+            self, a: int, b: int,
+            order: Union[int, float],
+            a_stereo: Optional[str], b_stereo: Optional[str],
+            a_pos: int = -1, b_pos: int = -1
     ) -> None:
         a_bond = DirectedBond(a, b, order, a_stereo, True)
         b_bond = DirectedBond(b, a, order, b_stereo, True)
@@ -141,8 +141,8 @@ class MolecularDFSTree:
             self._aro_subgraph.setdefault(b, []).append(a)
 
     def update_bond_order(
-        self, a: int, b: int,
-        new_order: Union[int, float]
+            self, a: int, b: int,
+            new_order: Union[int, float]
     ) -> None:
         assert 1 <= new_order <= 3
 
