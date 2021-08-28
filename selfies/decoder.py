@@ -117,7 +117,8 @@ def _derive_mol_from_symbols(
 
             bond_order, next_state = next_atom_state(bond_order, cap, state)
             if bond_order == 0:
-                mol.add_atom(atom, True)
+                if state == 0:
+                    mol.add_atom(atom, True)
             else:
                 mol.add_atom(atom)
                 src, dst = prev_atom.index, atom.index

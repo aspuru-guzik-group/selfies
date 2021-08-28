@@ -42,7 +42,7 @@ def process_ring_symbol(symbol: str) -> Optional[Tuple[int, int, Any]]:
 
 def next_atom_state(
         bond_order: int, bond_cap: int, state: int
-) -> Tuple[int, int]:
+) -> Tuple[int, Optional[int]]:
     if state == 0:
         bond_order = 0
 
@@ -52,7 +52,9 @@ def next_atom_state(
     return bond_order, next_state
 
 
-def next_branch_state(branch_type: int, state: int) -> Tuple[int, int]:
+def next_branch_state(
+        branch_type: int, state: int
+) -> Tuple[int, Optional[int]]:
     assert 1 <= branch_type <= 3
     assert state > 1
 
@@ -61,7 +63,9 @@ def next_branch_state(branch_type: int, state: int) -> Tuple[int, int]:
     return branch_init_state, next_state
 
 
-def next_ring_state(ring_type: int, state: int) -> Tuple[int, int]:
+def next_ring_state(
+        ring_type: int, state: int
+) -> Tuple[int, Optional[int]]:
     assert state > 0
 
     bond_order = min(ring_type, state)
