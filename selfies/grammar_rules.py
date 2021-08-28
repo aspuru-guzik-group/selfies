@@ -10,15 +10,15 @@ from selfies.constants import (
     ORGANIC_SUBSET
 )
 from selfies.mol_graph import Atom
-from selfies.utils.smiles_utils import parse_bond_smiles
+from selfies.utils.smiles_utils import smiles_to_bond
 
 
-def parse_atom_selfies(symbol: str) -> Optional[Tuple[Any, Atom]]:
+def process_atom_symbol(symbol: str) -> Optional[Tuple[Any, Atom]]:
     try:
-        bond_info, atom_fac = _PARSE_ATOM_CACHE[symbol]
+        bond_info, atom_fac = _PROCESS_ATOM_CACHE[symbol]
     except KeyError:
-        bond_info, atom_fac = _parse_atom_selfies_no_cache(symbol)
-        _PARSE_ATOM_CACHE[symbol] = (bond_info, atom_fac)
+        bond_info, atom_fac = _process_atom_selfies_no_cache(symbol)
+        _PROCESS_ATOM_CACHE[symbol] = (bond_info, atom_fac)
 
     atom = atom_fac()
     if atom.bonding_capacity < 0:
@@ -26,16 +26,16 @@ def parse_atom_selfies(symbol: str) -> Optional[Tuple[Any, Atom]]:
     return bond_info, atom
 
 
-def parse_branch_selfies(symbol: str) -> Optional[Tuple[int, int]]:
+def process_branch_symbol(symbol: str) -> Optional[Tuple[int, int]]:
     try:
-        return _PARSE_BRANCH_CACHE[symbol]
+        return _PROCESS_BRANCH_CACHE[symbol]
     except KeyError:
         return None
 
 
-def parse_ring_selfies(symbol: str) -> Optional[Tuple[int, int, Any]]:
+def process_ring_symbol(symbol: str) -> Optional[Tuple[int, int, Any]]:
     try:
-        return _PARSE_RING_CACHE[symbol]
+        return _PROCESS_RING_CACHE[symbol]
     except KeyError:
         return None
 
@@ -108,7 +108,7 @@ SELFIES_ATOM_PATTERN = re.compile(
 )
 
 
-def _parse_atom_selfies_no_cache(symbol):
+def _process_atom_selfies_no_cache(symbol):
     m = SELFIES_ATOM_PATTERN.match(symbol)
     if m is None:
         return None
@@ -116,7 +116,7 @@ def _parse_atom_selfies_no_cache(symbol):
 
     if symbol[1 + len(bond_char):-1] in ORGANIC_SUBSET:
         atom_fac = functools.partial(Atom, element=element, is_aromatic=False)
-        return parse_bond_smiles(bond_char), atom_fac
+        return smiles_to_bond(bond_char), atom_fac
 
     isotope = None if (isotope == "") else int(isotope)
     if element not in ELEMENTS:
@@ -146,7 +146,7 @@ def _parse_atom_selfies_no_cache(symbol):
         charge=charge
     )
 
-    return parse_bond_smiles(bond_char), atom_fac
+    return smiles_to_bond(bond_char), atom_fac
 
 
 def _build_atom_cache():
@@ -161,7 +161,7 @@ def _build_atom_cache():
     ]
 
     for symbol in common_symbols:
-        cache[symbol] = _parse_atom_selfies_no_cache(symbol)
+        cache[symbol] = _process_atom_selfies_no_cache(symbol)
     return cache
 
 
@@ -170,7 +170,7 @@ def _build_branch_cache():
     for L in range(1, 4):
         for bond_char in ["", "=", "#"]:
             symbol = "[{}Branch{}]".format(bond_char, L)
-            cache[symbol] = (parse_bond_smiles(bond_char)[0], L)
+            cache[symbol] = (smiles_to_bond(bond_char)[0], L)
     return cache
 
 
@@ -180,7 +180,7 @@ def _build_ring_cache():
         # [RingL], [=RingL], [#RingL]
         for bond_char in ["", "=", "#"]:
             symbol = "[{}Ring{}]".format(bond_char, L)
-            order, stereo = parse_bond_smiles(bond_char)
+            order, stereo = smiles_to_bond(bond_char)
             cache[symbol] = (order, L, (stereo, stereo))
 
         # [-/RingL], [\/RingL], [\-RingL], ...
@@ -188,14 +188,14 @@ def _build_ring_cache():
             if lchar == rchar == "-":
                 continue
             symbol = "[{}{}Ring{}]".format(lchar, rchar, L)
-            order, lstereo = parse_bond_smiles(lchar)
-            order, rstereo = parse_bond_smiles(rchar)
+            order, lstereo = smiles_to_bond(lchar)
+            order, rstereo = smiles_to_bond(rchar)
             cache[symbol] = (order, L, (lstereo, rstereo))
     return cache
 
 
-_PARSE_ATOM_CACHE = _build_atom_cache()
+_PROCESS_ATOM_CACHE = _build_atom_cache()
 
-_PARSE_BRANCH_CACHE = _build_branch_cache()
+_PROCESS_BRANCH_CACHE = _build_branch_cache()
 
-_PARSE_RING_CACHE = _build_ring_cache()
+_PROCESS_RING_CACHE = _build_ring_cache()

@@ -4,13 +4,13 @@ from selfies.utils.linked_list import SinglyLinkedList
 from selfies.utils.smiles_utils import (
     atom_to_smiles,
     bond_to_smiles,
-    parse_smiles
+    smiles_to_mol
 )
 
 
 def encoder(smiles: str, strict: bool = False) -> str:
     try:
-        mol = parse_smiles(smiles)
+        mol = smiles_to_mol(smiles)
     except SMILESParserError as err:
         err_msg = "failed to parse input\n\tSMILES: {}".format(smiles)
         raise EncoderError(err_msg) from err
@@ -32,8 +32,8 @@ def encoder(smiles: str, strict: bool = False) -> str:
 
     fragments = []
     for root in mol.get_roots():
-        derived_symbols = _mol_fragment_to_selfies(mol, None, root).tolist()
-        fragments.append("".join(derived_symbols))
+        derived = _fragment_to_selfies(mol, None, root).tolist()
+        fragments.append("".join(derived))
     return ".".join(fragments)
 
 
@@ -83,7 +83,7 @@ def _should_invert_chirality(mol, atom):
     return count % 2 != 0  # if odd permutation, should invert chirality
 
 
-def _mol_fragment_to_selfies(mol, bond_into_root, root):
+def _fragment_to_selfies(mol, bond_into_root, root):
     derived = SinglyLinkedList()
 
     bond_into_curr, curr = bond_into_root, root
@@ -114,7 +114,7 @@ def _mol_fragment_to_selfies(mol, bond_into_root, root):
                 bond_into_curr, curr = bond, bond.dst
 
             else:
-                branch = _mol_fragment_to_selfies(mol, bond, bond.dst)
+                branch = _fragment_to_selfies(mol, bond, bond.dst)
                 Q_as_symbols = get_selfies_from_index(len(branch) - 1)
                 branch_symbol = "[{}Branch{}]".format(
                     _bond_to_selfies(bond, show_stereo=False),

@@ -104,7 +104,7 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 # =============================================================================
 
 
-def parse_atom_smiles(atom_symbol: str) -> Optional[Atom]:
+def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
     if atom_symbol[0] == "[" and atom_symbol[-1] == "]":
         pass  # continue below
     elif atom_symbol in ORGANIC_SUBSET:
@@ -153,7 +153,7 @@ def parse_atom_smiles(atom_symbol: str) -> Optional[Atom]:
     )
 
 
-def parse_bond_smiles(
+def smiles_to_bond(
         bond_char: Optional[str]
 ) -> Tuple[Union[int, float], Optional[str]]:
     order = SMILES_BOND_ORDERS.get(bond_char, 1)
@@ -161,18 +161,18 @@ def parse_bond_smiles(
     return order, stereo
 
 
-def parse_smiles(smiles: str) -> MolecularDFSTree:
+def smiles_to_mol(smiles: str) -> MolecularDFSTree:
     if smiles == "":
         raise SMILESParserError(smiles, "empty SMILES", 0)
 
     mol = MolecularDFSTree()
     tokens = deque(tokenize_smiles(smiles))
     while tokens:
-        _parse_smiles_fragment(mol, smiles, tokens)
+        _derive_mol_from_tokens(mol, smiles, tokens)
     return mol
 
 
-def _parse_smiles_fragment(mol, smiles, tokens):
+def _derive_mol_from_tokens(mol, smiles, tokens):
     tok = None
     prev_stack = deque()
     branch_stack = deque()
@@ -190,7 +190,7 @@ def _parse_smiles_fragment(mol, smiles, tokens):
             break
 
         elif symbol_type == SMILESTokenTypes.ATOM:
-            curr = parse_atom_smiles(symbol)
+            curr = smiles_to_atom(symbol)
             if curr is None:
                 err_msg = "invalid atom symbol '{}'".format(symbol)
                 raise SMILESParserError(smiles, err_msg, tok.start_idx)
@@ -252,7 +252,7 @@ def _attach_atom(mol, bond_char, atom, prev_atom):
 
     if not is_root:
         src, dst = prev_atom.index, atom.index
-        order, stereo = parse_bond_smiles(bond_char)
+        order, stereo = smiles_to_bond(bond_char)
         if prev_atom.is_aromatic and atom.is_aromatic and (bond_char is None):
             order = 1.5
         mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
@@ -280,8 +280,8 @@ def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
         err_msg = "mismatched ring bonds"
         raise SMILESParserError(smiles, err_msg, ltoken.start_idx)
 
-    lorder, lstereo = parse_bond_smiles(lbond_char)
-    rorder, rstereo = parse_bond_smiles(rbond_char)
+    lorder, lstereo = smiles_to_bond(lbond_char)
+    rorder, rstereo = smiles_to_bond(rbond_char)
     if latom.is_aromatic and ratom.is_aromatic and (bonds == (None, None)):
         lorder = rorder = 1.5
 
@@ -339,15 +339,17 @@ def bond_to_smiles(bond: DirectedBond) -> str:
 def mol_to_smiles(mol: MolecularDFSTree) -> str:
     assert mol.is_kekulized()
 
-    derived = []
+    fragments = []
     ring_log = dict()
     for root in mol.get_roots():
-        _mol_to_smiles_recur(mol, root, derived, ring_log)
-    return "".join(derived)
+        derived = []
+        _derive_smiles_from_fragment(derived, mol, root, ring_log)
+        fragments.append("".join(derived))
+    return ".".join(fragments)
 
 
-def _mol_to_smiles_recur(mol, curr, derived, ring_log):
-    curr_atom = mol.get_atom(curr)
+def _derive_smiles_from_fragment(derived, mol, root, ring_log):
+    curr_atom, curr = mol.get_atom(root), root
     derived.append(atom_to_smiles(curr_atom))
 
     out_bonds = mol.get_out_dirbonds(curr)
@@ -365,7 +367,7 @@ def _mol_to_smiles_recur(mol, curr, derived, ring_log):
                 derived.append("(")
 
             derived.append(bond_to_smiles(bond))
-            _mol_to_smiles_recur(mol, bond.dst, derived, ring_log)
+            _derive_smiles_from_fragment(derived, mol, bond.dst, ring_log)
 
             if i < len(out_bonds) - 1:
                 derived.append(")")

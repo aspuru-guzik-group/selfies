@@ -4,9 +4,9 @@ from selfies.grammar_rules import (
     next_atom_state,
     next_branch_state,
     next_ring_state,
-    parse_atom_selfies,
-    parse_branch_selfies,
-    parse_ring_selfies
+    process_atom_symbol,
+    process_branch_symbol,
+    process_ring_symbol
 )
 from selfies.mol_graph import MolecularDFSTree
 from selfies.utils.selfies_utils import split_selfies
@@ -14,27 +14,33 @@ from selfies.utils.smiles_utils import mol_to_smiles
 
 
 def decoder(selfies: str) -> str:
-    smiles_fragments = []
+    mol = MolecularDFSTree()
 
+    rings = []
     for s in selfies.split("."):
-        mol = _parse_selfies(s)
-        if len(mol) == 0:  # prevent malformed dots (e.g. [C]..[C], .[C][C])
-            continue
-        smiles_fragments.append(mol_to_smiles(mol))
-
-    return ".".join(smiles_fragments)
+        _derive_mol_from_symbols(
+            symbol_iter=_tokenize_selfies(s),
+            mol=mol,
+            selfies=selfies,
+            max_derive=float("inf"),
+            init_state=0,
+            root_atom=None,
+            rings=rings
+        )
+    _form_rings_bilocally(mol, rings)
+    return mol_to_smiles(mol)
 
 
 def _tokenize_selfies(selfies):
     if isinstance(selfies, str):
-        selfies_iter = split_selfies(selfies)
+        symbol_iter = split_selfies(selfies)
     elif isinstance(selfies, list):
-        selfies_iter = selfies
+        symbol_iter = selfies
     else:
         raise ValueError()  # should not happen
 
     try:
-        for symbol in selfies_iter:
+        for symbol in symbol_iter:
             if symbol == "[nop]":
                 continue
             yield symbol
@@ -42,23 +48,8 @@ def _tokenize_selfies(selfies):
         raise DecoderError(str(err)) from None
 
 
-def _parse_selfies(selfies):
-    selfies_iter = _tokenize_selfies(selfies)
-    mol = MolecularDFSTree()
-    rings = []
-
-    _derive_main_tree(
-        mol, selfies, selfies_iter, float("inf"),
-        init_state=0, root_atom=None, rings=rings
-    )
-
-    _form_rings_bilocally(mol, rings)
-
-    return mol
-
-
-def _derive_main_tree(
-        mol, selfies, selfies_iter, max_derive,
+def _derive_mol_from_symbols(
+        symbol_iter, mol, selfies, max_derive,
         init_state, root_atom, rings
 ):
     n_derived = 0
@@ -68,7 +59,7 @@ def _derive_main_tree(
     while (state is not None) and (n_derived < max_derive):
 
         try:  # retrieve next symbol
-            symbol = next(selfies_iter)
+            symbol = next(symbol_iter)
             n_derived += 1
         except StopIteration:
             break
@@ -76,7 +67,7 @@ def _derive_main_tree(
         # Case 1: Branch symbol (e.g. [Branch1])
         if "ch" == symbol[-4:-2]:
 
-            output = parse_branch_selfies(symbol)
+            output = process_branch_symbol(symbol)
             if output is None:
                 _raise_decoder_error(selfies, symbol)
             btype, n = output
@@ -86,16 +77,16 @@ def _derive_main_tree(
             else:
                 binit_state, next_state = next_branch_state(btype, state)
 
-                Q = _read_index_from_selfies(selfies_iter, n_symbols=n)
-                n_derived += n + _derive_main_tree(
-                    mol, selfies, selfies_iter, (Q + 1),
+                Q = _read_index_from_selfies(symbol_iter, n_symbols=n)
+                n_derived += n + _derive_mol_from_symbols(
+                    symbol_iter, mol, selfies, (Q + 1),
                     init_state=binit_state, root_atom=prev_atom, rings=rings
                 )
 
         # Case 2: Ring symbol (e.g. [Ring2])
         elif "ng" == symbol[-4:-2]:
 
-            output = parse_ring_selfies(symbol)
+            output = process_ring_symbol(symbol)
             if output is None:
                 _raise_decoder_error(selfies, symbol)
             ring_type, n, stereo = output
@@ -106,7 +97,7 @@ def _derive_main_tree(
                 ring_order, next_state = next_ring_state(ring_type, state)
                 bond_info = (ring_order, stereo)
 
-                Q = _read_index_from_selfies(selfies_iter, n_symbols=n)
+                Q = _read_index_from_selfies(symbol_iter, n_symbols=n)
                 n_derived += n
                 lidx = max(0, prev_atom.index - (Q + 1))
                 rings.append((mol.get_atom(lidx), prev_atom, bond_info))
@@ -118,7 +109,7 @@ def _derive_main_tree(
         # Case 4: regular symbol (e.g. [N], [=C], [F])
         else:
 
-            output = parse_atom_selfies(symbol)
+            output = process_atom_symbol(symbol)
             if output is None:
                 _raise_decoder_error(selfies, symbol)
             (bond_order, stereo), atom = output
@@ -139,7 +130,7 @@ def _derive_main_tree(
 
     while n_derived < max_derive:  # consume remaining tokens
         try:
-            next(selfies_iter)
+            next(symbol_iter)
             n_derived += 1
         except StopIteration:
             break
@@ -154,11 +145,11 @@ def _raise_decoder_error(selfies, invalid_symbol):
     raise DecoderError(err_msg)
 
 
-def _read_index_from_selfies(selfies_iter, n_symbols):
+def _read_index_from_selfies(symbol_iter, n_symbols):
     index_symbols = []
     for _ in range(n_symbols):
         try:
-            index_symbols.append(next(selfies_iter))
+            index_symbols.append(next(symbol_iter))
         except StopIteration:
             index_symbols.append(None)
     return get_index_from_selfies(*index_symbols)
