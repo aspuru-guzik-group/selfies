@@ -4,39 +4,37 @@ from selfies.utils.linked_list import SinglyLinkedList
 from selfies.utils.smiles_utils import (
     atom_to_smiles,
     bond_to_smiles,
-    parse_smiles
+    smiles_to_mol
 )
 
 
 def encoder(smiles: str, strict: bool = False) -> str:
     try:
-        mol_fragments = parse_smiles(smiles)
+        mol = smiles_to_mol(smiles)
     except SMILESParserError as err:
         err_msg = "failed to parse input\n\tSMILES: {}".format(smiles)
         raise EncoderError(err_msg) from err
 
-    selfies_fragments = []
+    if not mol.kekulize():
+        err_msg = "kekulization failed\n\tSMILES: {}".format(smiles)
+        raise EncoderError(err_msg)
 
-    for mol in mol_fragments:
-        if not mol.kekulize():
-            err_msg = "kekulization failed\n\tSMILES: {}".format(smiles)
-            raise EncoderError(err_msg)
+    if strict:
+        _check_bond_constraints(mol, smiles)
 
-        if strict:
-            _check_bond_constraints(mol, smiles)
+    # invert chirality of atoms where necessary,
+    # such that they are restored when the SELFIES is decoded
+    for atom in mol.get_atoms():
+        if ((atom.chirality is not None)
+                and mol.has_out_ring_bond(atom.index)
+                and _should_invert_chirality(mol, atom)):
+            atom.invert_chirality()
 
-        # invert chirality of atoms where necessary,
-        # such that they are restored when the SELFIES is decoded
-        for atom in mol.get_atoms():
-            if ((atom.chirality is not None)
-                    and mol.has_out_ring_bond(atom.index)
-                    and _should_invert_chirality(mol, atom)):
-                atom.invert_chirality()
-
-        derived_symbols = _mol_to_selfies(mol, None, 0).tolist()
-        selfies_fragments.append("".join(derived_symbols))
-
-    return ".".join(selfies_fragments)
+    fragments = []
+    for root in mol.get_roots():
+        derived = _fragment_to_selfies(mol, None, root).tolist()
+        fragments.append("".join(derived))
+    return ".".join(fragments)
 
 
 def _check_bond_constraints(mol, smiles):
@@ -85,7 +83,7 @@ def _should_invert_chirality(mol, atom):
     return count % 2 != 0  # if odd permutation, should invert chirality
 
 
-def _mol_to_selfies(mol, bond_into_root, root):
+def _fragment_to_selfies(mol, bond_into_root, root):
     derived = SinglyLinkedList()
 
     bond_into_curr, curr = bond_into_root, root
@@ -116,7 +114,7 @@ def _mol_to_selfies(mol, bond_into_root, root):
                 bond_into_curr, curr = bond, bond.dst
 
             else:
-                branch = _mol_to_selfies(mol, bond, bond.dst)
+                branch = _fragment_to_selfies(mol, bond, bond.dst)
                 Q_as_symbols = get_selfies_from_index(len(branch) - 1)
                 branch_symbol = "[{}Branch{}]".format(
                     _bond_to_selfies(bond, show_stereo=False),

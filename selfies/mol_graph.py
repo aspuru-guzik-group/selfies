@@ -58,6 +58,7 @@ class DirectedBond:
 class MolecularDFSTree:
 
     def __init__(self):
+        self._roots = list()
         self._atoms = list()
         self._bond_dict = dict()
         self._adj_list = list()
@@ -74,6 +75,9 @@ class MolecularDFSTree:
     def has_out_ring_bond(self, src: int) -> bool:
         return self._ring_bond_flags[src]
 
+    def get_roots(self) -> List[int]:
+        return self._roots
+
     def get_atom(self, idx: int) -> Atom:
         return self._atoms[idx]
 
@@ -83,17 +87,20 @@ class MolecularDFSTree:
     def get_dirbond(self, src, dst) -> DirectedBond:
         return self._bond_dict[(src, dst)]
 
-    def get_bond_count(self, idx: int) -> int:
-        return self._bond_counts[idx]
-
     def get_out_dirbonds(self, src: int) -> List[DirectedBond]:
         return self._adj_list[src]
+
+    def get_bond_count(self, idx: int) -> int:
+        return self._bond_counts[idx]
 
     def get_aromatic_subgraph(self) -> Dict[int, List[int]]:
         return self._aro_subgraph
 
-    def add_atom(self, atom: Atom) -> None:
+    def add_atom(self, atom: Atom, mark_root: bool = False) -> None:
         atom.index = len(self)
+
+        if mark_root:
+            self._roots.append(atom.index)
         self._atoms.append(atom)
         self._adj_list.append(list())
         self._bond_counts.append(0)
