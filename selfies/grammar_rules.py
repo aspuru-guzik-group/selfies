@@ -33,7 +33,7 @@ def parse_branch_selfies(symbol: str) -> Optional[Tuple[int, int]]:
         return None
 
 
-def parse_ring_selfies(symbol: str) -> Optional[Tuple[Any, int]]:
+def parse_ring_selfies(symbol: str) -> Optional[Tuple[int, int, Any]]:
     try:
         return _PARSE_RING_CACHE[symbol]
     except KeyError:
@@ -43,22 +43,31 @@ def parse_ring_selfies(symbol: str) -> Optional[Tuple[Any, int]]:
 def next_atom_state(
         bond_order: int, bond_cap: int, state: int
 ) -> Tuple[int, int]:
-    if state == -1:
-        return 1, bond_cap
+    if state == 0:
+        bond_order = 0
+
     bond_order = min(bond_order, state, bond_cap)
-    next_state = bond_cap - bond_order
+    bonds_left = bond_cap - bond_order
+    next_state = None if (bonds_left == 0) else bonds_left
     return bond_order, next_state
 
 
 def next_branch_state(branch_type: int, state: int) -> Tuple[int, int]:
     assert 1 <= branch_type <= 3
+    assert state > 1
 
-    if 2 <= state:
-        branch_init_state = min(state - 1, branch_type)
-        next_state = state - branch_init_state
-        return branch_init_state, next_state
-    else:
-        return -1, state
+    branch_init_state = min(state - 1, branch_type)
+    next_state = state - branch_init_state
+    return branch_init_state, next_state
+
+
+def next_ring_state(ring_type: int, state: int) -> Tuple[int, int]:
+    assert state > 0
+
+    bond_order = min(ring_type, state)
+    bonds_left = state - bond_order
+    next_state = None if (bonds_left == 0) else bonds_left
+    return bond_order, next_state
 
 
 def get_index_from_selfies(*symbols: List[str]) -> int:
@@ -171,17 +180,17 @@ def _build_ring_cache():
         # [RingL], [=RingL], [#RingL]
         for bond_char in ["", "=", "#"]:
             symbol = "[{}Ring{}]".format(bond_char, L)
-            bond_info = parse_bond_smiles(bond_char)
-            cache[symbol] = ((bond_info, bond_info), L)
+            order, stereo = parse_bond_smiles(bond_char)
+            cache[symbol] = (order, L, (stereo, stereo))
 
         # [-/RingL], [\/RingL], [\-RingL], ...
         for lchar, rchar in itertools.product(["-", "/", "\\"], repeat=2):
             if lchar == rchar == "-":
                 continue
             symbol = "[{}{}Ring{}]".format(lchar, rchar, L)
-            lbond_info = parse_bond_smiles(lchar)
-            rbond_info = parse_bond_smiles(rchar)
-            cache[symbol] = ((lbond_info, rbond_info), L)
+            order, lstereo = parse_bond_smiles(lchar)
+            order, rstereo = parse_bond_smiles(rchar)
+            cache[symbol] = (order, L, (lstereo, rstereo))
     return cache
 
 

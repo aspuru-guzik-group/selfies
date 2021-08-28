@@ -104,12 +104,12 @@ def test_ring_at_beginning_of_branch():
     """
 
     # CC1CCC(1CCl)F
-    s = "[C][C][C][C][C][Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
+    s = "[C][C][C][C][C][=Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
     assert is_eq(sf.decoder(s), "CC1CCC1(CCl)F")
 
     # CC1CCS(Br)(1CCl)F
     s = "[C][C][C][C][S][Branch1][C][Br]" \
-        "[Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
+        "[=Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
     assert is_eq(sf.decoder(s), "CC1CCS1(Br)(CCl)F")
 
 
@@ -119,19 +119,14 @@ def test_branch_and_ring_at_beginning_of_branch():
     """
 
     # CC1CCCS((Br)1Cl)F
-    s = "[C][C][C][C][C][S][=Branch1][#Branch1][Branch1][C][Br]" \
+    s = "[C][C][C][C][C][S][#Branch1][#Branch1][Branch1][C][Br]" \
         "[Ring1][Branch1][Cl][F]"
     assert is_eq(sf.decoder(s), "CC1CCCS1(Br)(Cl)F")
 
     # CC1CCCS(1(Br)Cl)F
-    s = "[C][C][C][C][C][S][=Branch1][#Branch1][Ring1][Branch1]" \
+    s = "[C][C][C][C][C][S][#Branch1][#Branch1][Ring1][Branch1]" \
         "[Branch1][C][Br][Cl][F]"
     assert is_eq(sf.decoder(s), "CC1CCCS1(Br)(Cl)F")
-
-    # CC1CCCS(((1Br)Cl)I)F
-    s = "[C][C][C][C][C][S][#Branch1][#Branch2][=Branch1][#Branch1]" \
-        "[Branch1][Ring2][Ring1][Branch1][Br][Cl][I][F]"
-    assert is_eq(sf.decoder(s), "CC1CCCS1(Br)(Cl)(I)F")
 
 
 def test_ring_immediately_following_branch():
