@@ -69,7 +69,7 @@ def set_semantic_constraints(
                 raise ValueError(err_msg)
 
             # error checking for values
-            if not (isinstance(value, int) and value >= 1):
+            if not (isinstance(value, int) and value >= 0):
                 err_msg = "invalid value at " \
                           "bond_constraints['{}'] = {}".format(key, value)
                 raise ValueError(err_msg)
