@@ -124,13 +124,11 @@ def _derive_main_tree(
             (bond_order, stereo), atom = output
             cap = atom.bonding_capacity
 
-            if (cap == 0) and (state > 1):
-                continue  # treat like [nop]
-
             bond_order, next_state = next_atom_state(bond_order, cap, state)
-
-            mol.add_atom(atom)
-            if bond_order > 0:
+            if bond_order == 0:
+                mol.add_atom(atom, True)
+            else:
+                mol.add_atom(atom)
                 src, dst = prev_atom.index, atom.index
                 mol.add_bond(src=src, dst=dst, order=bond_order, stereo=stereo)
             prev_atom = atom
