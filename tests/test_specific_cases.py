@@ -8,9 +8,9 @@ def test_branch_and_ring_at_state_X0():
     very beginning of a SELFIES). These symbols should be skipped.
     """
 
-    assert is_eq(sf.decoder("[Branch3][C][S][C][O]"), "CSCO")
-    assert is_eq(sf.decoder("[Ring3][C][S][C][O]"), "CSCO")
-    assert is_eq(sf.decoder("[Branch1][Ring1][Ring3][C][S][C][O]"), "CSCO")
+    assert decode_eq("[Branch3][C][S][C][O]", "CSCO")
+    assert decode_eq("[Ring3][C][S][C][O]", "CSCO")
+    assert decode_eq("[Branch1][Ring1][Ring3][C][S][C][O]", "CSCO")
 
 
 def test_branch_at_state_X1():
@@ -18,24 +18,24 @@ def test_branch_at_state_X1():
     can only make one bond. In this case, the branch symbol should be skipped.
     """
 
-    assert is_eq(sf.decoder("[C][C][O][Branch1][C][I]"), "CCOCI")
-    assert is_eq(sf.decoder("[C][C][C][O][#Branch3][C][I]"), "CCCOCI")
+    assert decode_eq("[C][C][O][Branch1][C][I]", "CCOCI")
+    assert decode_eq("[C][C][C][O][#Branch3][C][I]", "CCCOCI")
 
 
 def test_branch_at_end_of_selfies():
     """Test SELFIES that have a branch symbol as its very last symbol.
     """
 
-    assert is_eq(sf.decoder("[C][C][C][C][Branch1]"), "CCCC")
-    assert is_eq(sf.decoder("[C][C][C][C][#Branch3]"), "CCCC")
+    assert decode_eq("[C][C][C][C][Branch1]", "CCCC")
+    assert decode_eq("[C][C][C][C][#Branch3]", "CCCC")
 
 
 def test_ring_at_end_of_selfies():
     """Test SELFIES that have a ring symbol as its very last symbol.
     """
 
-    assert is_eq(sf.decoder("[C][C][C][C][C][Ring1]"), "CCCC=C")
-    assert is_eq(sf.decoder("[C][C][C][C][C][Ring3]"), "CCCC=C")
+    assert decode_eq("[C][C][C][C][C][Ring1]", "CCCC=C")
+    assert decode_eq("[C][C][C][C][C][Ring3]", "CCCC=C")
 
 
 def test_branch_with_no_atoms():
@@ -44,17 +44,17 @@ def test_branch_with_no_atoms():
     """
 
     s = "[C][Branch1][Ring2][Branch1][Branch1][Branch1][F]"
-    assert is_eq(sf.decoder(s), "CF")
+    assert decode_eq(s, "CF")
 
     s = "[C][Branch1][Ring2][Ring1][Ring1][Branch1][F]"
-    assert is_eq(sf.decoder(s), "CF")
+    assert decode_eq(s, "CF")
 
     s = "[C][=Branch1][Ring2][Branch1][C][Cl][F]"
-    assert is_eq(sf.decoder(s), "C(Cl)F")
+    assert decode_eq(s, "C(Cl)F")
 
     # special case: #Branch3 takes Q_1, Q_2 = [O] and Q_3 = ''. However,
     # there are no more symbols in the branch.
-    assert is_eq(sf.decoder("[C][C][C][C][#Branch3][O][O]"), "CCCC")
+    assert decode_eq("[C][C][C][C][#Branch3][O][O]", "CCCC")
 
 
 def test_oversized_branch():
@@ -62,8 +62,8 @@ def test_oversized_branch():
     of the SELFIES
     """
 
-    assert is_eq(sf.decoder("[C][Branch2][O][O][C][C][S][F][C]"), "C(CCSF)")
-    assert is_eq(sf.decoder("[C][#Branch2][O][O][#C][C][S][F]"), "C(#CCSF)")
+    assert decode_eq("[C][Branch2][O][O][C][C][S][F][C]", "C(CCSF)")
+    assert decode_eq("[C][#Branch2][O][O][#C][C][S][F]", "C(#CCSF)")
 
 
 def test_oversized_ring():
@@ -71,15 +71,15 @@ def test_oversized_ring():
     previously derived atom does not exist.
     """
 
-    assert is_eq(sf.decoder("[C][C][C][C][Ring1][O]"), "C1CCC1")
-    assert is_eq(sf.decoder("[C][C][C][C][Ring2][O][C]"), "C1CCC1")
+    assert decode_eq("[C][C][C][C][Ring1][O]", "C1CCC1")
+    assert decode_eq("[C][C][C][C][Ring2][O][C]", "C1CCC1")
 
     # special case: Ring2 takes Q_1 = [O] and Q_2 = '', leading to
     # Q = 9 * 16 + 0 (i.e. an oversized ring)
-    assert is_eq(sf.decoder("[C][C][C][C][Ring2][O]"), "C1CCC1")
+    assert decode_eq("[C][C][C][C][Ring2][O]", "C1CCC1")
 
     # special case: ring between 1st atom and 1st atom should not be formed
-    assert is_eq(sf.decoder("[C][Ring1][O]"), "C")
+    assert decode_eq("[C][Ring1][O]", "C")
 
 
 def test_branch_at_beginning_of_branch():
@@ -88,15 +88,15 @@ def test_branch_at_beginning_of_branch():
 
     # [C@]((Br)Cl)F
     s = "[C@][=Branch1][Branch1][Branch1][C][Br][Cl][F]"
-    assert is_eq(sf.decoder(s), "[C@](Br)(Cl)F")
+    assert decode_eq(s, "[C@](Br)(Cl)F")
 
     # [C@](((Br)Cl)I)F
     s = "[C@][#Branch1][Branch2][=Branch1][Branch1][Branch1][C][Br][Cl][I][F]"
-    assert is_eq(sf.decoder(s), "[C@](Br)(Cl)(I)F")
+    assert decode_eq(s, "[C@](Br)(Cl)(I)F")
 
     # [C@]((Br)(Cl)I)F
     s = "[C@][#Branch1][Branch2][Branch1][C][Br][Branch1][C][Cl][I][F]"
-    assert is_eq(sf.decoder(s), "[C@](Br)(Cl)(I)F")
+    assert decode_eq(s, "[C@](Br)(Cl)(I)F")
 
 
 def test_ring_at_beginning_of_branch():
@@ -105,12 +105,12 @@ def test_ring_at_beginning_of_branch():
 
     # CC1CCC(1CCl)F
     s = "[C][C][C][C][C][=Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
-    assert is_eq(sf.decoder(s), "CC1CCC1(CCl)F")
+    assert decode_eq(s, "CC1CCC1(CCl)F")
 
     # CC1CCS(Br)(1CCl)F
     s = "[C][C][C][C][S][Branch1][C][Br]" \
         "[=Branch1][Branch1][Ring1][Ring2][C][Cl][F]"
-    assert is_eq(sf.decoder(s), "CC1CCS1(Br)(CCl)F")
+    assert decode_eq(s, "CC1CCS1(Br)(CCl)F")
 
 
 def test_branch_and_ring_at_beginning_of_branch():
@@ -121,12 +121,12 @@ def test_branch_and_ring_at_beginning_of_branch():
     # CC1CCCS((Br)1Cl)F
     s = "[C][C][C][C][C][S][#Branch1][#Branch1][Branch1][C][Br]" \
         "[Ring1][Branch1][Cl][F]"
-    assert is_eq(sf.decoder(s), "CC1CCCS1(Br)(Cl)F")
+    assert decode_eq(s, "CC1CCCS1(Br)(Cl)F")
 
     # CC1CCCS(1(Br)Cl)F
     s = "[C][C][C][C][C][S][#Branch1][#Branch1][Ring1][Branch1]" \
         "[Branch1][C][Br][Cl][F]"
-    assert is_eq(sf.decoder(s), "CC1CCCS1(Br)(Cl)F")
+    assert decode_eq(s, "CC1CCCS1(Br)(Cl)F")
 
 
 def test_ring_immediately_following_branch():
@@ -135,12 +135,12 @@ def test_ring_immediately_following_branch():
 
     # CCC1CCCC(OCO)1
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O][Ring1][Branch1]"
-    assert is_eq(sf.decoder(s), "CCC1CCCC1(OCO)")
+    assert decode_eq(s, "CCC1CCCC1(OCO)")
 
     # CCC1CCCC(OCO)(F)1
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O]" \
         "[Branch1][C][F][Ring1][Branch1]"
-    assert is_eq(sf.decoder(s), "CCC1CCCC1(OCO)(F)")
+    assert decode_eq(s, "CCC1CCCC1(OCO)(F)")
 
 
 def test_ring_after_branch():
@@ -150,11 +150,11 @@ def test_ring_after_branch():
 
     # CCCCCCC1(OCO)1
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O][C][Ring1][Branch1]"
-    assert is_eq(sf.decoder(s), "CCCCCCC(OCO)=C")
+    assert decode_eq(s, "CCCCCCC(OCO)=C")
 
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O]" \
         "[Branch1][C][F][C][C][Ring1][=Branch2]"
-    assert is_eq(sf.decoder(s), "CCCCC1CC(OCO)(F)CC1")
+    assert decode_eq(s, "CCCCC1CC(OCO)(F)CC1")
 
 
 def test_ring_on_top_of_existing_bond():
@@ -163,10 +163,10 @@ def test_ring_on_top_of_existing_bond():
     """
 
     # C1C1, C1C=1, C1C#1, ...
-    assert is_eq(sf.decoder("[C][C][Ring1][C]"), "C=C")
-    assert is_eq(sf.decoder("[C][/C][Ring1][C]"), "C=C")
-    assert is_eq(sf.decoder("[C][C][=Ring1][C]"), "C#C")
-    assert is_eq(sf.decoder("[C][C][#Ring1][C]"), "C#C")
+    assert decode_eq("[C][C][Ring1][C]", "C=C")
+    assert decode_eq("[C][/C][Ring1][C]", "C=C")
+    assert decode_eq("[C][C][=Ring1][C]", "C#C")
+    assert decode_eq("[C][C][#Ring1][C]", "C#C")
 
 
 def test_consecutive_rings():
@@ -174,26 +174,26 @@ def test_consecutive_rings():
     """
 
     s = "[C][C][C][C][Ring1][Ring2][Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C=1CCC=1")  # 1 + 1
+    assert decode_eq(s, "C=1CCC=1")  # 1 + 1
 
     s = "[C][C][C][C][Ring1][Ring2][Ring1][Ring2][Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 1 + 1 + 1
+    assert decode_eq(s, "C#1CCC#1")  # 1 + 1 + 1
 
     s = "[C][C][C][C][=Ring1][Ring2][Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 2 + 1
+    assert decode_eq(s, "C#1CCC#1")  # 2 + 1
 
     s = "[C][C][C][C][Ring1][Ring2][=Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 1 + 2
+    assert decode_eq(s, "C#1CCC#1")  # 1 + 2
 
     # consecutive rings that exceed bond constraints
     s = "[C][C][C][C][#Ring1][Ring2][=Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 3 + 2
+    assert decode_eq(s, "C#1CCC#1")  # 3 + 2
 
     s = "[C][C][C][C][=Ring1][Ring2][#Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 2 + 3
+    assert decode_eq(s, "C#1CCC#1")  # 2 + 3
 
     s = "[C][C][C][C][=Ring1][Ring2][=Ring1][Ring2]"
-    assert is_eq(sf.decoder(s), "C#1CCC#1")  # 2 + 2
+    assert decode_eq(s, "C#1CCC#1")  # 2 + 2
 
     # consecutive rings with stereochemical single bond
     s = "[C][C][C][C][\\/Ring1][Ring2]"
@@ -274,5 +274,6 @@ def test_charged_symbols():
     sf.set_semantic_constraints()
 
 
-def is_eq(smiles1, smiles2):
-    return Chem.CanonSmiles(smiles1) == Chem.CanonSmiles(smiles2)
+def decode_eq(selfies, smiles):
+    s = sf.decoder(selfies)
+    return Chem.CanonSmiles(s) == Chem.CanonSmiles(smiles)
