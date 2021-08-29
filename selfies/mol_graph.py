@@ -1,8 +1,11 @@
 import functools
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from selfies.bond_constraints import get_bonding_capacity
-from selfies.kekulize import find_perfect_matching, prune_to_pi_subgraph
+from selfies.utils.kekulize_utils import (
+    find_perfect_matching,
+    has_unpaired_electron
+)
 
 
 class Atom:
@@ -64,13 +67,15 @@ class MolecularDFSTree:
         self._adj_list = list()
         self._bond_counts = list()
         self._ring_bond_flags = list()
-        self._aro_subgraph = dict()
+        self._delocal_subgraph = dict()
 
     def __len__(self):
         return len(self._atoms)
 
     def has_bond(self, a: int, b: int) -> bool:
-        return ((a, b) in self._bond_dict) or ((b, a) in self._bond_dict)
+        if a > b:
+            a, b = b, a
+        return (a, b) in self._bond_dict
 
     def has_out_ring_bond(self, src: int) -> bool:
         return self._ring_bond_flags[src]
@@ -93,9 +98,6 @@ class MolecularDFSTree:
     def get_bond_count(self, idx: int) -> int:
         return self._bond_counts[idx]
 
-    def get_aromatic_subgraph(self) -> Dict[int, List[int]]:
-        return self._aro_subgraph
-
     def add_atom(self, atom: Atom, mark_root: bool = False) -> None:
         atom.index = len(self)
 
@@ -106,7 +108,7 @@ class MolecularDFSTree:
         self._bond_counts.append(0)
         self._ring_bond_flags.append(False)
         if atom.is_aromatic:
-            self._aro_subgraph[atom.index] = list()
+            self._delocal_subgraph[atom.index] = list()
 
     def add_bond(
             self, src: int, dst: int,
@@ -120,8 +122,8 @@ class MolecularDFSTree:
         self._bond_counts[dst] += order
 
         if order == 1.5:
-            self._aro_subgraph.setdefault(src, []).append(dst)
-            self._aro_subgraph.setdefault(dst, []).append(src)
+            self._delocal_subgraph.setdefault(src, []).append(dst)
+            self._delocal_subgraph.setdefault(dst, []).append(src)
 
     def add_placeholder(self, src: int) -> int:
         out_edges = self._adj_list[src]
@@ -144,8 +146,8 @@ class MolecularDFSTree:
         self._ring_bond_flags[b] = True
 
         if order == 1.5:
-            self._aro_subgraph.setdefault(a, []).append(b)
-            self._aro_subgraph.setdefault(b, []).append(a)
+            self._delocal_subgraph.setdefault(a, []).append(b)
+            self._delocal_subgraph.setdefault(b, []).append(a)
 
     def update_bond_order(
             self, a: int, b: int,
@@ -171,27 +173,38 @@ class MolecularDFSTree:
         self._bond_counts[b] += (new_order - old_order)
 
     def is_kekulized(self) -> bool:
-        return not bool(self._aro_subgraph)
+        return not bool(self._delocal_subgraph)
 
     def kekulize(self) -> bool:
         if self.is_kekulized():
             return True
 
-        # prune to pi subgraph
-        pi_subgraph = prune_to_pi_subgraph(self)
-        self._aro_subgraph = dict()
+        subgraph = self._delocal_subgraph
 
-        # cleaning up bond counts
-        for i in range(len(self)):
-            self._bond_counts[i] = int(self._bond_counts[i])
+        # prune delocalization subgraph
+        for src in list(subgraph.keys()):
+            atom = self._atoms[src]
+            atom.is_aromatic = False
+
+            for dst in subgraph[src]:
+                self.update_bond_order(src, dst, 1)
+            self._bond_counts[src] = int(self._bond_counts[src])
+
+            n_bonds = self._bond_counts[src]
+            if not (subgraph[src] and has_unpaired_electron(atom, n_bonds)):
+                subgraph.pop(src)
+
+        for src, bonds in subgraph.items():
+            subgraph[src] = list(filter(lambda d: d in subgraph, bonds))
 
         # find matching and make double bonds
-        matching = find_perfect_matching(pi_subgraph)
+        matching = find_perfect_matching(subgraph)
         if matching is None:
             return False
 
         for (a, b) in matching:
             self.update_bond_order(a, b, 2)
+        self._delocal_subgraph = dict()
         return True
 
     def _add_bond_at_loc(self, bond, pos):

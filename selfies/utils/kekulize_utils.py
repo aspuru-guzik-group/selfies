@@ -1,30 +1,9 @@
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional, Set, Tuple
 
 from selfies.constants import AROMATIC_VALENCES
 
 
-def prune_to_pi_subgraph(mol) -> Dict[int, List[int]]:
-    pi_subgraph = mol.get_aromatic_subgraph()
-
-    for src in list(pi_subgraph.keys()):
-        atom = mol.get_atom(src)
-        atom.is_aromatic = False
-
-        aro_neighbors = pi_subgraph[src]
-        for dst in aro_neighbors:
-            mol.update_bond_order(src, dst, 1)
-
-        in_pi = _in_pi_subgraph(atom, mol.get_bond_count(src))
-        if not (aro_neighbors and in_pi):
-            pi_subgraph.pop(src)
-
-    for src, bonds in pi_subgraph.items():
-        pi_subgraph[src] = list(filter(lambda d: d in pi_subgraph, bonds))
-
-    return pi_subgraph
-
-
-def _in_pi_subgraph(atom, n_bonds) -> bool:
+def has_unpaired_electron(atom, n_bonds) -> bool:
     used_electrons = n_bonds
 
     h_count = 0 if (atom.h_count is None) else atom.h_count
