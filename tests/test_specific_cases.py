@@ -1,3 +1,4 @@
+import pytest
 from rdkit import Chem
 
 import selfies as sf
@@ -250,8 +251,16 @@ def test_explicit_hydrogen_symbols():
      """
 
     assert sf.decoder("[CH1][Branch1][C][Cl][#C]") == "[CH1](Cl)=C"
-
     assert sf.decoder("[CH3][=C]") == "[CH3]C"
+
+    assert sf.decoder("[CH4][C][C]") == "[CH4]"
+    assert sf.decoder("[C][C][C][CH4]") == "CCC"
+    assert sf.decoder("[C][Branch1][Ring2][C][=CH4][C][=C]") == "C(C)=C"
+
+    with pytest.raises(sf.DecoderError):
+        sf.decoder("[C][C][CH5]")
+    with pytest.raises(sf.DecoderError):
+        sf.decoder("[C][C][C][OH9]")
 
 
 def test_charged_symbols():
