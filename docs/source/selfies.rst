@@ -8,18 +8,7 @@ Core Functions
 .. autofunction:: encoder
 .. autofunction:: decoder
 
-Utility Functions
-------------------------
-.. autofunction:: len_selfies
-.. autofunction:: split_selfies
-.. autofunction:: get_alphabet_from_selfies
-.. autofunction:: get_semantic_robust_alphabet
-.. autofunction:: selfies_to_encoding
-.. autofunction:: encoding_to_selfies
-.. autofunction:: batch_selfies_to_flat_hot
-.. autofunction:: batch_flat_hot_to_selfies
-
-Advanced Functions
+Customization Functions
 ------------------------
 
 By default, :mod:`selfies` operates under the following semantic constraints
@@ -65,8 +54,18 @@ of :mod:`selfies`.
     Therefore, if custom semantic constraints are used, it is recommended to report
     them for reproducibility reasons.
 
-.. autofunction:: get_default_constraints
-.. autofunction:: get_octet_rule_constraints
-.. autofunction:: get_hypervalent_constraints
+.. autofunction:: get_preset_constraints
 .. autofunction:: get_semantic_constraints
 .. autofunction:: set_semantic_constraints
+.. autofunction:: get_semantic_robust_alphabet
+
+
+Utility Functions
+------------------------
+.. autofunction:: len_selfies
+.. autofunction:: split_selfies
+.. autofunction:: get_alphabet_from_selfies
+.. autofunction:: selfies_to_encoding
+.. autofunction:: encoding_to_selfies
+.. autofunction:: batch_selfies_to_flat_hot
+.. autofunction:: batch_flat_hot_to_selfies

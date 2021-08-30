@@ -35,8 +35,8 @@ Install SELFIES in the command line using pip:
    :maxdepth: 2
    :caption: Contents:
 
-   tutorial
-   selfies_examples.ipynb
+   derivation
+   tutorial.ipynb
    selfies
 
 Indices and tables
