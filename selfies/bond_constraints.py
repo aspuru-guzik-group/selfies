@@ -30,12 +30,50 @@ _current_constraints = _PRESET_CONSTRAINTS["default"]
 
 
 def get_preset_constraints(name: str) -> Dict[str, int]:
+    """Returns the preset semantic constraints with the given name.
+
+    Besides the aforementioned default constraints, :mod:`selfies` offers
+    other preset constraints for convenience; namely, constraints that
+    enforce the `octet rule <https://en.wikipedia.org/wiki/Octet_rule>`_
+    and constraints that accommodate `hypervalent molecules
+    <https://en.wikipedia.org/wiki/Hypervalent_molecule>`_.
+
+    The differences between these constraints can be summarized as follows:
+
+    .. table::
+        :align: center
+        :widths: auto
+
+        +-----------------+-----------+---+---+-----+-----+---+-----+-----+
+        |                 | Cl, Br, I | N | P | P+1 | P-1 | S | S+1 | S-1 |
+        +-----------------+-----------+---+---+-----+-----+---+-----+-----+
+        | ``default``     |     1     | 3 | 5 |  6  |  4  | 6 |  7  |  5  |
+        +-----------------+-----------+---+---+-----+-----+---+-----+-----+
+        | ``octet_rule``  |     1     | 3 | 3 |  4  |  2  | 2 |  3  |  1  |
+        +-----------------+-----------+---+---+-----+-----+---+-----+-----+
+        | ``hypervalent`` |     7     | 5 | 5 |  6  |  4  | 6 |  7  |  5  |
+        +-----------------+-----------+---+---+-----+-----+---+-----+-----+
+
+    :param name: the preset name: ``default`` or ``octet_rule`` or
+        ``hypervalent``.
+    :return: the preset constraints with the specified name, represented
+        as a dictionary which maps atoms (the keys) to their bonding capacities
+        (the values).
+    """
+
     if name not in _PRESET_CONSTRAINTS:
         raise ValueError("unrecognized preset name '{}'".format(name))
     return dict(_PRESET_CONSTRAINTS[name])
 
 
 def get_semantic_constraints() -> Dict[str, int]:
+    """Returns the semantic constraints that :mod:`selfies` is currently
+    operating on.
+
+    :return: the current semantic constraints, represented as a dictionary
+        which maps atoms (the keys) to their bonding capacities (the values).
+    """
+
     global _current_constraints
     return dict(_current_constraints)
 
@@ -43,6 +81,31 @@ def get_semantic_constraints() -> Dict[str, int]:
 def set_semantic_constraints(
         bond_constraints: Union[str, Dict[str, int]] = "default"
 ) -> None:
+    """Updates the semantic constraints that :mod:`selfies` operates on.
+
+    If the input is a string, the new constraints are taken to be
+    the preset named ``bond_constraints``
+    (see :func:`selfies.get_preset_constraints`).
+
+    Otherwise, the input is a dictionary representing the new constraints.
+    This dictionary maps atoms (the keys) to non-negative bonding
+    capacities (the values); the atoms are specified by strings
+    of the form ``E`` or ``E+C`` or ``E-C``,
+    where ``E`` is an element symbol and ``C`` is a positive integer.
+    For example, one may have:
+
+       * ``bond_constraints["I-1"] = 0``
+       * ``bond_constraints["C"] = 4``
+
+    This dictionary must also contain the special ``?`` key, which indicates
+    the bond capacities of all atoms that are not explicitly listed
+    in the dictionary.
+
+    :param bond_constraints: the name of a preset, or a dictionary
+        representing the new semantic constraints.
+    :return: ``None``.
+    """
+
     global _current_constraints
 
     if isinstance(bond_constraints, str):
@@ -86,6 +149,12 @@ def set_semantic_constraints(
 
 @functools.lru_cache()
 def get_semantic_robust_alphabet() -> Set[str]:
+    """Returns a subset of all SELFIES symbols that are constrained
+    by :mod:`selfies` under the current semantic constraints.
+
+    :return: a subset of all SELFIES symbols that are semantically constrained.
+    """
+
     alphabet_subset = set()
     bonds = {"": 1, "=": 2, "#": 3}
 

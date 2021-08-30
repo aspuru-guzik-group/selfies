@@ -14,6 +14,24 @@ from selfies.utils.smiles_utils import mol_to_smiles
 
 
 def decoder(selfies: str) -> str:
+    """Translates a SELFIES string into its corresponding SMILES string.
+
+    This translation is deterministic but depends on the current semantic
+    constraints. The output SMILES string is guaranteed to be syntatically
+    correct and guaranteed to represent a molecule that obeys the
+    semantic constraints.
+
+    :param selfies: the SELFIES string to be translated.
+    :return: a SMILES string derived from the input SELFIES string.
+    :raises DecoderError:  if the input SELFIES string is malformed.
+
+    :Example:
+
+    >>> import selfies
+    >>> selfies.decoder('[C][=C][F]')
+    'C=CF'
+    """
+
     mol = MolecularDFSTree()
 
     rings = []

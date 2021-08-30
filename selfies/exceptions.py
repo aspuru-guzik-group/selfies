@@ -21,8 +21,14 @@ class SMILESParserError(ValueError):
 
 
 class EncoderError(Exception):
+    """Exception raised by :func:`selfies.encoder`.
+    """
+
     pass
 
 
 class DecoderError(Exception):
+    """Exception raised by :func:`selfies.decoder`.
+    """
+
     pass

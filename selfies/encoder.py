@@ -8,7 +8,55 @@ from selfies.utils.smiles_utils import (
 )
 
 
-def encoder(smiles: str, strict: bool = False) -> str:
+def encoder(smiles: str, strict: bool = True) -> str:
+    """Translates a SMILES string into its corresponding SELFIES string.
+
+    This translation is deterministic and does not depend on the
+    current semantic constraints. Additionally, it preserves the atom order
+    of the input SMILES string; thus, one could generate randomized SELFIES
+    strings by generating randomized SMILES strings, and then translating them.
+
+    By nature of SELFIES, it is impossible to represent molecules that
+    violate the current semantic constraints as SELFIES strings.
+    Thus, we provide the ``strict`` flag to guard against such cases. If
+    ``strict=True``, then this function will raise a
+    :class:`selfies.EncoderError` if the input SMILES string represents
+    a molecule that violates the semantic constraints. If
+    ``strict=False``, then this function will not raise any error; however,
+    calling :func:`selfies.decoder` on a SELFIES string generated this
+    way will *not* be guaranteed to recover a SMILES string representing
+    the original molecule.
+
+    :param smiles: the SMILES string to be translated. It is recommended to
+        use RDKit to check that the strings passed into this function
+        are valid SMILES strings.
+    :param strict: if ``True``, this function will check that the
+        input SMILES string obeys the semantic constraints.
+        Defaults to ``True``.
+    :return: a SELFIES string translated from the input SMILES string.
+    :raises EncoderError:  if the input SMILES string is invalid,
+        cannot be kekulized, or violates the semantic constraints with
+        ``strict=True``.
+
+    :Example:
+
+    >>> import selfies
+    >>> selfies.encoder("C=CF")
+    '[C][=C][F]'
+
+    .. note:: This function does not currently support SMILES with:
+
+        *   The wildcard symbol ``*``.
+        *   The quadruple bond symbol ``$``.
+        *   Chirality specifications other than ``@`` and ``@@``.
+        *   Ring bonds across a dot symbol (e.g. ``c1cc([O-].[Na+])ccc1``) or
+            ring bonds between atoms that are over 4000 atoms apart.
+
+        Although SELFIES does not have aromatic symbols, this function
+        *does* support aromatic SMILES strings by internally kekulizing them
+        before translation.
+    """
+
     try:
         mol = smiles_to_mol(smiles)
     except SMILESParserError as err:

@@ -19,7 +19,7 @@ please see the `original paper`_.
 For comments, bug reports or feature ideas, please use github issues
 or send an email to mario.krenn@utoronto.ca and alan@aspuru.com.
 
-.. _original paper: https://arxiv.org/abs/1905.13741
+.. _original paper: https://doi.org/10.1088/2632-2153/aba947
 
 Installation
 ############
@@ -33,9 +33,8 @@ Install SELFIES in the command line using pip:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
-   derivation
    tutorial.ipynb
    selfies
 
