@@ -25,7 +25,7 @@ For comments, bug reports or feature ideas, please send an email to
 mario.krenn@utoronto.ca and alan@aspuru.com.
 """
 
-__version__ = "1.0.3"
+__version__ = "2.0.0"
 
 __all__ = [
     "encoder",
