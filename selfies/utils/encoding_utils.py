@@ -54,15 +54,15 @@ def selfies_to_encoding(
         return integer_encoded
 
     # one-hot encode
-    onehot_encoded = list()
+    one_hot_encoded = list()
     for index in integer_encoded:
         letter = [0] * len(vocab_stoi)
         letter[index] = 1
-        onehot_encoded.append(letter)
+        one_hot_encoded.append(letter)
 
     if enc_type == "one_hot":
-        return onehot_encoded
-    return integer_encoded, onehot_encoded
+        return one_hot_encoded
+    return integer_encoded, one_hot_encoded
 
 
 def encoding_to_selfies(
@@ -177,7 +177,7 @@ def batch_flat_hot_to_selfies(
 
     for flat_one_hot in one_hot_batch:
 
-        # Reshape to an N x M array where each column represents an alphabet
+        # Reshape to an L x M array where each column represents an alphabet
         # entry and each row is a position in the selfies
         one_hot = []
 
@@ -185,9 +185,9 @@ def batch_flat_hot_to_selfies(
         if len(flat_one_hot) % M != 0:
             raise ValueError("size of vector in one_hot_batch not divisible "
                              "by the length of the vocabulary.")
-        N = len(flat_one_hot) // M
+        L = len(flat_one_hot) // M
 
-        for i in range(N):
+        for i in range(L):
             one_hot.append(flat_one_hot[M * i: M * (i + 1)])
 
         selfies = encoding_to_selfies(one_hot, vocab_itos, enc_type="one_hot")
