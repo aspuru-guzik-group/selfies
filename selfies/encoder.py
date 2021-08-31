@@ -44,7 +44,6 @@ def _check_bond_constraints(mol, smiles):
         bond_cap = atom.bonding_capacity
         bond_count = mol.get_bond_count(atom.index)
         if bond_count > bond_cap:
-            bond_cap = max(bond_cap, 0)
             errors.append((atom_to_smiles(atom), bond_count, bond_cap))
 
     if errors:
