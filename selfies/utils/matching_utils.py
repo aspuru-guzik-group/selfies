@@ -1,23 +1,5 @@
 from typing import Optional, Set, Tuple
 
-from selfies.constants import AROMATIC_VALENCES
-
-
-def has_unpaired_electron(atom, n_bonds) -> bool:
-    used_electrons = n_bonds
-
-    h_count = 0 if (atom.h_count is None) else atom.h_count
-    if ((atom.element == 'C')
-            and (atom.h_count in (None, 0))
-            and (atom.charge == 0)
-            and (n_bonds == 2)):
-        h_count = 1
-    used_electrons += h_count
-
-    valence = AROMATIC_VALENCES[atom.element] - atom.charge
-    free_electrons = valence - used_electrons
-    return free_electrons % 2 != 0
-
 
 def find_perfect_matching(graph) -> Optional[Set[Tuple[int, int]]]:
     # sort nodes in graph

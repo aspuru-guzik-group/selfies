@@ -15,8 +15,10 @@ ELEMENTS = {
 ORGANIC_SUBSET = {"B", "C", "N", "O", "S", "P", "F", "Cl", "Br", "I"}
 
 AROMATIC_VALENCES = {
-    "B": 3, "Al": 3, "C": 4, "Si": 4, "N": 5, "P": 5,
-    "As": 5, "O": 6, "S": 6, "Se": 6, "Te": 6
+    "B": (3,), "Al": (3,),
+    "C": (4,), "Si": (4,),
+    "N": (3, 5), "P": (3, 5), "As": (3, 5),
+    "O": (2, 4), "S": (2, 4), "Se": (2, 4), "Te": (2, 4)
 }
 
 AROMATIC_SUBSET = set(e.lower() for e in AROMATIC_VALENCES)

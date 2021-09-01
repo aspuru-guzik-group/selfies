@@ -22,10 +22,6 @@ OC(=O)c1[te]ccc1
 CCc1nc#cn1CC1CC(c2ccccc2)(c2ccccc2)C(=O)O1
 c1cc2cccc3c4cccc5cccc(c(c1)c23)c45
 c1cc2c3c(c4cccc(c1)c24)c1c2cccc4cccc(c1c1c5cccc6cccc(c31)c56)c24
-[C]O[C](O[C])c1[c][c][c]nc1C(=O)O[C]
-[Bi++].CC([O-])=O.CC([O-])=O.[c]1ccccc1.[c]1ccccc1.[c]1ccccc1
-CC(C)(C)OC(=O)[13c]1[13c][13c][13c](Br)[13c][13c]1F
-C[Si](C)(C)Oc1cccc(F)[si]1[Si](C)(C)C
 c1ccc(Sc2cccc3c2-c2nc-3nc3c4c(Sc5ccccc5)cccc4c4nc5nc(nc6c7c(Sc8ccccc8)cccc7c(n2)n6[al+]n43)-c2cccc(Sc3ccccc3)c2-5)cc1
 C/1=C/C=C\C=C/C=C\1
 F/C=C/1CNCCC\1=C\F

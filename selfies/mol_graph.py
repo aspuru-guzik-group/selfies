@@ -2,9 +2,9 @@ import functools
 from typing import List, Optional, Union
 
 from selfies.bond_constraints import get_bonding_capacity
-from selfies.utils.kekulize_utils import (
-    find_perfect_matching,
-    has_unpaired_electron
+from selfies.constants import AROMATIC_VALENCES
+from selfies.utils.matching_utils import (
+    find_perfect_matching
 )
 
 
@@ -172,10 +172,26 @@ class MolecularDFSTree:
         self._bond_counts[a] += (new_order - old_order)
         self._bond_counts[b] += (new_order - old_order)
 
+    def _add_bond_at_loc(self, bond, pos):
+        self._bond_dict[(bond.src, bond.dst)] = bond
+
+        out_edges = self._adj_list[bond.src]
+        if (pos == -1) or (pos == len(out_edges)):
+            out_edges.append(bond)
+        elif out_edges[pos] is None:
+            out_edges[pos] = bond
+        else:
+            out_edges.insert(pos, bond)
+
     def is_kekulized(self) -> bool:
         return not bool(self._delocal_subgraph)
 
     def kekulize(self) -> bool:
+        # WARNING: this method may mutate this object, even if kekulize()
+        # fails. This is done for performance reasons, and the fact that the
+        # only function using this method throws an error immediately after
+        # kekulize() fails anyways.
+
         if self.is_kekulized():
             return True
 
@@ -184,14 +200,15 @@ class MolecularDFSTree:
         # prune delocalization subgraph
         for src in list(subgraph.keys()):
             atom = self._atoms[src]
-            atom.is_aromatic = False
+            adj_bonds = subgraph[src]
 
-            for dst in subgraph[src]:
+            # de-aromatize atom and all adjacent bonds
+            atom.is_aromatic = False
+            for dst in adj_bonds:
                 self.update_bond_order(src, dst, 1)
             self._bond_counts[src] = int(self._bond_counts[src])
 
-            n_bonds = self._bond_counts[src]
-            if not (subgraph[src] and has_unpaired_electron(atom, n_bonds)):
+            if (not adj_bonds) or self._prune_from_delocal_subgraph(src):
                 subgraph.pop(src)
 
         for src, bonds in subgraph.items():
@@ -207,13 +224,16 @@ class MolecularDFSTree:
         self._delocal_subgraph = dict()
         return True
 
-    def _add_bond_at_loc(self, bond, pos):
-        self._bond_dict[(bond.src, bond.dst)] = bond
+    def _prune_from_delocal_subgraph(self, idx):
+        atom = self._atoms[idx]
+        valences = AROMATIC_VALENCES[atom.element]
+        used_electrons = self._bond_counts[idx]
 
-        out_edges = self._adj_list[bond.src]
-        if (pos == -1) or (pos == len(out_edges)):
-            out_edges.append(bond)
-        elif out_edges[pos] is None:
-            out_edges[pos] = bond
+        if atom.h_count is None:  # account for implicit Hs
+            assert atom.charge == 0
+            return any(used_electrons == v for v in valences)
         else:
-            out_edges.insert(pos, bond)
+            valence = valences[-1] - atom.charge
+            used_electrons += atom.h_count
+            free_electrons = valence - used_electrons
+            return not ((free_electrons >= 0) and (free_electrons % 2 != 0))
