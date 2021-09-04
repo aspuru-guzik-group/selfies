@@ -40,8 +40,8 @@ def encoder(smiles: str, strict: bool = True) -> str:
 
     :Example:
 
-    >>> import selfies
-    >>> selfies.encoder("C=CF")
+    >>> import selfies as sf
+    >>> sf.encoder("C=CF")
     '[C][=C][F]'
 
     .. note:: This function does not currently support SMILES with:

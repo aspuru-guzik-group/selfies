@@ -27,8 +27,8 @@ def decoder(selfies: str) -> str:
 
     :Example:
 
-    >>> import selfies
-    >>> selfies.decoder('[C][=C][F]')
+    >>> import selfies as sf
+    >>> sf.decoder('[C][=C][F]')
     'C=CF'
     """
 
