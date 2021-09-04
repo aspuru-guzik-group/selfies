@@ -80,7 +80,7 @@ def encoder(smiles: str, strict: bool = True) -> str:
 
     fragments = []
     for root in mol.get_roots():
-        derived = _fragment_to_selfies(mol, None, root).tolist()
+        derived = list(_fragment_to_selfies(mol, None, root))
         fragments.append("".join(derived))
     return ".".join(fragments)
 

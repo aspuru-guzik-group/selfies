@@ -1,21 +1,28 @@
-from typing import Any, List
+from typing import Any
 
 
 class SinglyLinkedList:
 
     def __init__(self):
-        self._root = None
+        self._head = None
         self._tail = None
         self._count = 0
 
     def __len__(self):
         return self._count
 
+    def __iter__(self):
+        return SinglyLinkedListIterator(self)
+
+    @property
+    def head(self):
+        return self._head
+
     def append(self, item: Any) -> None:
         node = [item, None]
 
-        if self._root is None:
-            self._root = node
+        if self._head is None:
+            self._head = node
             self._tail = node
         else:
             self._tail[1] = node
@@ -23,21 +30,32 @@ class SinglyLinkedList:
         self._count += 1
 
     def extend(self, other) -> None:
-        if other._root is None:
+        assert isinstance(other, SinglyLinkedList)
+
+        if other._head is None:
             return
 
-        if self._root is None:
-            self._root = other._root
+        if self._head is None:
+            self._head = other._head
             self._tail = other._tail
         else:
-            self._tail[1] = other._root
+            self._tail[1] = other._head
             self._tail = other._tail
         self._count += len(other)
 
-    def tolist(self) -> List[Any]:
-        result = []
-        curr = self._root
-        while curr is not None:
-            result.append(curr[0])
-            curr = curr[1]
-        return result
+
+class SinglyLinkedListIterator:
+
+    def __init__(self, linked_list):
+        self._curr = linked_list.head
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._curr is None:
+            raise StopIteration
+        else:
+            item = self._curr[0]
+            self._curr = self._curr[1]
+            return item
