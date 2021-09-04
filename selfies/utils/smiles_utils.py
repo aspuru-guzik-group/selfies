@@ -218,7 +218,7 @@ def _derive_mol_from_tokens(mol, smiles, tokens):
 
         elif symbol_type == SMILESTokenTypes.RING:
             if symbol not in ring_log:
-                lpos = mol.add_placeholder(src=prev_atom.index)
+                lpos = mol.add_placeholder_bond(src=prev_atom.index)
                 ring_log[symbol] = (tok, prev_atom, lpos)
             else:
                 ltoken, latom, lpos = ring_log.pop(symbol)

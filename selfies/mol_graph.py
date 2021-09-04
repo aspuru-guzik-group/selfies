@@ -125,7 +125,7 @@ class MolecularDFSTree:
             self._delocal_subgraph.setdefault(src, []).append(dst)
             self._delocal_subgraph.setdefault(dst, []).append(src)
 
-    def add_placeholder(self, src: int) -> int:
+    def add_placeholder_bond(self, src: int) -> int:
         out_edges = self._adj_list[src]
         out_edges.append(None)
         return len(out_edges) - 1
