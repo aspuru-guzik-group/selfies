@@ -1,11 +1,10 @@
 import functools
+import itertools
 from typing import List, Optional, Union
 
 from selfies.bond_constraints import get_bonding_capacity
 from selfies.constants import AROMATIC_VALENCES
-from selfies.utils.matching_utils import (
-    find_perfect_matching
-)
+from selfies.utils.matching_utils import find_perfect_matching
 
 
 class Atom:
@@ -184,50 +183,54 @@ class MolecularDFSTree:
             out_edges.insert(pos, bond)
 
     def is_kekulized(self) -> bool:
-        return not bool(self._delocal_subgraph)
+        return not self._delocal_subgraph
 
     def kekulize(self) -> bool:
-        # WARNING: this method may mutate this object, even if kekulize()
-        # fails. This is done for performance reasons, and the fact that the
-        # only function using this method throws an error immediately after
-        # kekulize() fails anyways.
-
         if self.is_kekulized():
             return True
 
-        subgraph = self._delocal_subgraph
+        ds = self._delocal_subgraph
+        kept_nodes = set(itertools.filterfalse(self._prune_from_ds, ds))
 
-        # prune delocalization subgraph
-        for src in list(subgraph.keys()):
-            atom = self._atoms[src]
-            adj_bonds = subgraph[src]
+        # relabel kept DS nodes to be 0,1,2,...
+        label_to_node = list(sorted(kept_nodes))
+        node_to_label = {v: i for i, v in enumerate(label_to_node)}
 
-            # de-aromatize atom and all adjacent bonds
-            atom.is_aromatic = False
-            for dst in adj_bonds:
-                self.update_bond_order(src, dst, 1)
-            self._bond_counts[src] = int(self._bond_counts[src])
+        # pruned and relabelled DS
+        pruned_ds = [list() for _ in range(len(kept_nodes))]
+        for node in kept_nodes:
+            label = node_to_label[node]
+            for adj in filter(lambda v: v in kept_nodes, ds[node]):
+                pruned_ds[label].append(node_to_label[adj])
 
-            if (not adj_bonds) or self._prune_from_delocal_subgraph(src):
-                subgraph.pop(src)
-
-        for src, bonds in subgraph.items():
-            subgraph[src] = list(filter(lambda d: d in subgraph, bonds))
-
-        # find matching and make double bonds
-        matching = find_perfect_matching(subgraph)
+        matching = find_perfect_matching(pruned_ds)
         if matching is None:
             return False
 
-        for (a, b) in matching:
-            self.update_bond_order(a, b, 2)
-        self._delocal_subgraph = dict()
+        # de-aromatize and then make double bonds
+        for node in ds:
+            for adj in ds[node]:
+                self.update_bond_order(node, adj, new_order=1)
+            self._atoms[node].is_aromatic = False
+            self._bond_counts[node] = int(self._bond_counts[node])
+
+        for matched_labels in enumerate(matching):
+            matched_nodes = tuple(label_to_node[i] for i in matched_labels)
+            self.update_bond_order(*matched_nodes, new_order=2)
+
+        self._delocal_subgraph = dict()  # clear DS
         return True
 
-    def _prune_from_delocal_subgraph(self, idx):
-        atom = self._atoms[idx]
+    def _prune_from_ds(self, node):
+        adj_nodes = self._delocal_subgraph[node]
+        if not adj_nodes:
+            return True  # aromatic atom with no aromatic bonds
+
+        atom = self._atoms[node]
         valences = AROMATIC_VALENCES[atom.element]
-        used_electrons = self._bond_counts[idx]
+
+        # each bond in DS has order 1.5 - we treat them as single bonds
+        used_electrons = int(self._bond_counts[node] - 0.5 * len(adj_nodes))
 
         if atom.h_count is None:  # account for implicit Hs
             assert atom.charge == 0
