@@ -1,4 +1,6 @@
 class SMILESParserError(ValueError):
+    """Exception raised when a SMILES fails to be parsed.
+    """
 
     def __init__(self, smiles, reason="N/A", idx=-1):
         self.smiles = smiles

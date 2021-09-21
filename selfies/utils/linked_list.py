@@ -2,6 +2,8 @@ from typing import Any
 
 
 class SinglyLinkedList:
+    """A simple singly linked list that supports O(1) append and O(1) extend.
+    """
 
     def __init__(self):
         self._head = None
