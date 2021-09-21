@@ -5,13 +5,12 @@ from typing import List, Optional
 
 
 def find_perfect_matching(graph: List[List[int]]) -> Optional[List[int]]:
-    """Finds the perfect matching of a graph.
+    """Finds a perfect matching for an undirected graph (without self-loops).
 
-    :param graph: an adjacency list representing an undirected graph,
-        without self-loops.
+    :param graph: an adjacency list representing the input graph.
     :return: a list representing a perfect matching, where j is the i-th
-        element if nodes i and j are matched. If no perfect matching
-        exists for the input graph, None is returned.
+        element if nodes i and j are matched. Returns None, if the graph cannot
+        be perfectly matched.
     """
 
     # start with a maximal matching for efficiency
@@ -26,9 +25,10 @@ def find_perfect_matching(graph: List[List[int]]) -> Optional[List[int]]:
 
         if path is None:
             return None
-        _flip_augmented_path(matching, path)
-        unmatched.discard(path[0])
-        unmatched.discard(path[-1])
+        else:
+            _flip_augmenting_path(matching, path)
+            unmatched.discard(path[0])
+            unmatched.discard(path[-1])
 
     return matching
 
@@ -101,7 +101,7 @@ def _find_augmenting_path(graph, root, matching):
         return path
 
 
-def _flip_augmented_path(matching, path):
+def _flip_augmenting_path(matching, path):
     for i in range(0, len(path), 2):
         a, b = path[i], path[i + 1]
         matching[a] = b

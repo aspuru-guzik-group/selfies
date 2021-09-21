@@ -30,6 +30,8 @@ class SMILESTokenTypes(enum.Enum):
 
 
 class SMILESToken:
+    """A token in a SMILES string
+    """
 
     def __init__(
             self,
@@ -67,9 +69,9 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
             raise SMILESParserError(smiles, "hanging bond", i)
 
         elif smiles[i].isalpha():  # organic subset elements
-            if smiles[i: i + 2] in ("Br", "Cl"):  # two letter elements
+            if smiles[i: i + 2] in ("Br", "Cl"):  # two-letter elements
                 token = SMILESToken(bond_idx, i, i + 2, SMILESTokenTypes.ATOM)
-            else:  # one letter elements (e.g. C, N, ...)
+            else:  # one-letter elements (e.g. C, N, ...)
                 token = SMILESToken(bond_idx, i, i + 1, SMILESTokenTypes.ATOM)
 
         elif smiles[i] == "[":  # atoms encased in brackets (e.g. [NH])
@@ -107,13 +109,14 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
     if atom_symbol[0] == "[" and atom_symbol[-1] == "]":
         pass  # continue below
-    elif atom_symbol in ORGANIC_SUBSET:
+    elif atom_symbol in ORGANIC_SUBSET:  # e.g. C, N, O, ...
         return Atom(atom_symbol, False)
-    elif atom_symbol in AROMATIC_SUBSET:
+    elif atom_symbol in AROMATIC_SUBSET:  # e.g. c, n, o, ...
         return Atom(atom_symbol.capitalize(), True)
     else:
         return None
 
+    # e.g. [C], [C@@H], [O-], ...
     m = SMILES_BRACKETED_ATOM_PATTERN.match(atom_symbol)
     if m is None:
         return None
@@ -298,6 +301,13 @@ def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
 
 
 def atom_to_smiles(atom: Atom, brackets: bool = True) -> str:
+    """Converts an atom into its SMILES representation.
+
+    :param atom: the input atom.
+    :param brackets: True, if brackets should be added around the returned
+        symbol (e.g. in the case of [C] or [C@@H]). Defaults to True.
+    :return: a SMILES symbol representing the input atom.
+    """
     assert not atom.is_aromatic
 
     specs = (atom.isotope, atom.chirality, atom.h_count, atom.charge)
@@ -326,6 +336,12 @@ def atom_to_smiles(atom: Atom, brackets: bool = True) -> str:
 
 
 def bond_to_smiles(bond: DirectedBond) -> str:
+    """Converts a bond into its SMILES representation.
+
+    :param bond: the input bond.
+    :return: a SMILES symbol representing the input bond.
+    """
+
     if bond.order == 1:
         return bond.stereo if (bond.stereo in SMILES_STEREO_BONDS) else ""
     elif bond.order == 2:
@@ -337,6 +353,12 @@ def bond_to_smiles(bond: DirectedBond) -> str:
 
 
 def mol_to_smiles(mol: MolecularGraph) -> str:
+    """Converts a molecular graph into its SMILES representation, maintaining
+    the traversal order indicated by the input graph.
+
+    :param mol: the input molecule.
+    :return: a SMILES string representing the input molecule.
+    """
     assert mol.is_kekulized()
 
     fragments = []

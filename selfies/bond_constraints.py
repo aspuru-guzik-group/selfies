@@ -180,6 +180,14 @@ def get_semantic_robust_alphabet() -> Set[str]:
 
 @functools.lru_cache()
 def get_bonding_capacity(element: str, charge: int) -> int:
+    """Returns the bonding capacity of a given atom, under the current
+    semantic constraints.
+
+    :param element: the element of the input atom.
+    :param charge: the charge of the input atom.
+    :return: the bonding capacity of the input atom.
+    """
+
     key = element
     if charge != 0:
         key += "{:+}".format(charge)
