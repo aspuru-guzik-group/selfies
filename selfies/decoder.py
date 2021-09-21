@@ -8,7 +8,7 @@ from selfies.grammar_rules import (
     process_branch_symbol,
     process_ring_symbol
 )
-from selfies.mol_graph import MolecularDFSTree
+from selfies.mol_graph import MolecularGraph
 from selfies.utils.selfies_utils import split_selfies
 from selfies.utils.smiles_utils import mol_to_smiles
 
@@ -32,7 +32,7 @@ def decoder(selfies: str) -> str:
     'C=CF'
     """
 
-    mol = MolecularDFSTree()
+    mol = MolecularGraph()
 
     rings = []
     for s in selfies.split("."):

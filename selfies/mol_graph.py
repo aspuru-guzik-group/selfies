@@ -57,7 +57,7 @@ class DirectedBond:
         self.ring_bond = ring_bond
 
 
-class MolecularDFSTree:
+class MolecularGraph:
 
     def __init__(self):
         self._roots = list()

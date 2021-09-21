@@ -5,7 +5,7 @@ from typing import Iterator, Optional, Tuple, Union
 
 from selfies.constants import AROMATIC_SUBSET, ELEMENTS, ORGANIC_SUBSET
 from selfies.exceptions import SMILESParserError
-from selfies.mol_graph import Atom, DirectedBond, MolecularDFSTree
+from selfies.mol_graph import Atom, DirectedBond, MolecularGraph
 
 SMILES_BRACKETED_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
@@ -161,11 +161,11 @@ def smiles_to_bond(
     return order, stereo
 
 
-def smiles_to_mol(smiles: str) -> MolecularDFSTree:
+def smiles_to_mol(smiles: str) -> MolecularGraph:
     if smiles == "":
         raise SMILESParserError(smiles, "empty SMILES", 0)
 
-    mol = MolecularDFSTree()
+    mol = MolecularGraph()
     tokens = deque(tokenize_smiles(smiles))
     while tokens:
         _derive_mol_from_tokens(mol, smiles, tokens)
@@ -336,7 +336,7 @@ def bond_to_smiles(bond: DirectedBond) -> str:
         raise ValueError()
 
 
-def mol_to_smiles(mol: MolecularDFSTree) -> str:
+def mol_to_smiles(mol: MolecularGraph) -> str:
     assert mol.is_kekulized()
 
     fragments = []
