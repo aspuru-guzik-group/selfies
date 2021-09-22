@@ -30,7 +30,8 @@ class SMILESTokenTypes(enum.Enum):
 
 
 class SMILESToken:
-    """A token in a SMILES string
+    """A token in a SMILES string, containing a symbol (atom, branch bracket,
+    ring number, dot) and its preceding bond, if it exists (e.g. =C, %12, #N).
     """
 
     def __init__(
@@ -51,6 +52,12 @@ class SMILESToken:
 
 
 def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
+    """Splits a SMILES string into its tokens.
+
+    :param smiles: the input SMILES string.
+    :return: the tokens of the input SMILES one-by-one with order preserved.
+    """
+
     i = 0
     while i < len(smiles):
 
@@ -107,6 +114,12 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 
 
 def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
+    """Reads an atom from its SMILES representation.
+
+    :param atom_symbol: a SMILES atom symbol.
+    :return: the atom that the input symbol represents.
+    """
+
     if atom_symbol[0] == "[" and atom_symbol[-1] == "]":
         pass  # continue below
     elif atom_symbol in ORGANIC_SUBSET:  # e.g. C, N, O, ...
@@ -159,12 +172,26 @@ def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
 def smiles_to_bond(
         bond_char: Optional[str]
 ) -> Tuple[Union[int, float], Optional[str]]:
+    """Reads a bond from its SMILES representation.
+
+    :param bond_char: a SMILES bond symbol.
+    :return: the order and stereochemical specification of the bond
+        that the input symbol represents.
+    """
+
     order = SMILES_BOND_ORDERS.get(bond_char, 1)
     stereo = bond_char if (bond_char in SMILES_STEREO_BONDS) else None
     return order, stereo
 
 
 def smiles_to_mol(smiles: str) -> MolecularGraph:
+    """Reads a molecular graph from a SMILES string.
+
+    :param smiles: the input SMILES string.
+    :return: a molecular graph that the input SMILES string represents.
+    :raises SMILESParserError: if the input SMILES is invalid.
+    """
+
     if smiles == "":
         raise SMILESParserError(smiles, "empty SMILES", 0)
 
@@ -177,9 +204,9 @@ def smiles_to_mol(smiles: str) -> MolecularGraph:
 
 def _derive_mol_from_tokens(mol, smiles, tokens):
     tok = None
-    prev_stack = deque()
-    branch_stack = deque()
-    ring_log = dict()
+    prev_stack = deque()  # keep track of previous atom on the current chain
+    branch_stack = deque()  # keep track of open branches
+    ring_log = dict()  # keep track of hanging ring numbers
     chain_start = True
 
     prev_stack.append(tok)
@@ -257,7 +284,7 @@ def _attach_atom(mol, bond_char, atom, prev_atom):
         src, dst = prev_atom.index, atom.index
         order, stereo = smiles_to_bond(bond_char)
         if prev_atom.is_aromatic and atom.is_aromatic and (bond_char is None):
-            order = 1.5
+            order = 1.5  # handle implicit aromatic bonds, e.g. cc
         mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
     return atom
 
@@ -272,8 +299,9 @@ def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
 
     # checking that ring bonds match
     bonds = (lbond_char, rbond_char)
-    if bonds[0] is None:  # swap tuple elements
+    if bonds[0] is None:
         bonds = (bonds[1], bonds[0])
+    # swap bonds so that if bonds[0] is None, then bonds[1] is None
 
     if ((bonds[0] == bonds[1])
             or (bonds[1] is None)
@@ -286,7 +314,7 @@ def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
     lorder, lstereo = smiles_to_bond(lbond_char)
     rorder, rstereo = smiles_to_bond(rbond_char)
     if latom.is_aromatic and ratom.is_aromatic and (bonds == (None, None)):
-        lorder = rorder = 1.5
+        lorder = rorder = 1.5  # handle implicit aromatic bonds, e.g. c1ccccc1
 
     mol.add_ring_bond(
         a=latom.index, a_stereo=lstereo, a_pos=lpos,
