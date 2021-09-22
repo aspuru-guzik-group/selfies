@@ -10,11 +10,11 @@ import selfies as sf
 
 faulthandler.enable()
 
-TEST_SET_PATH = pathlib.Path(__file__).parent / "test_sets"
-ERROR_LOG_PATH = pathlib.Path(__file__).parent / "error_logs"
-ERROR_LOG_PATH.mkdir(exist_ok=True, parents=True)
+TEST_SET_DIR = pathlib.Path(__file__).parent / "test_sets"
+ERROR_LOG_DIR = pathlib.Path(__file__).parent / "error_logs"
+ERROR_LOG_DIR.mkdir(exist_ok=True, parents=True)
 
-datasets = list(TEST_SET_PATH.glob("**/*.csv"))
+datasets = list(TEST_SET_DIR.glob("**/*.csv"))
 
 
 @pytest.mark.parametrize("test_path", datasets)
@@ -27,7 +27,7 @@ def test_roundtrip_translation(test_path, dataset_samples):
     constraints.update({"P": 7, "P-1": 8, "P+1": 6, "?": 12})
     sf.set_semantic_constraints(constraints)
 
-    error_path = ERROR_LOG_PATH / "{}.csv".format(test_path.stem)
+    error_path = ERROR_LOG_DIR / "{}.csv".format(test_path.stem)
     with open(error_path, "w+") as error_log:
         error_log.write("In, Out\n")
 
