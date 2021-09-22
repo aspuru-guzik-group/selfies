@@ -8,6 +8,8 @@ from selfies.utils.matching_utils import find_perfect_matching
 
 
 class Atom:
+    """An atom with associated specifications (e.g. charge, chirality).
+    """
 
     def __init__(
             self,
@@ -41,6 +43,8 @@ class Atom:
 
 
 class DirectedBond:
+    """A bond that contains directional information.
+    """
 
     def __init__(
             self,
@@ -58,15 +62,22 @@ class DirectedBond:
 
 
 class MolecularGraph:
+    """A molecular graph.
+
+    Molecules can be viewed as weighted undirected graphs. However, SMILES
+    and SELFIES strings are more naturally represented as weighted directed
+    graphs, where the direction of the edges specifies the order of atoms
+    and bonds in the string.
+    """
 
     def __init__(self):
-        self._roots = list()
-        self._atoms = list()
-        self._bond_dict = dict()
-        self._adj_list = list()
-        self._bond_counts = list()
-        self._ring_bond_flags = list()
-        self._delocal_subgraph = dict()
+        self._roots = list()  # stores root atoms, where traversal begins
+        self._atoms = list()  # stores atoms in this graph
+        self._bond_dict = dict()  # stores all bonds in this graph
+        self._adj_list = list()  # adjacency list, representing this graph
+        self._bond_counts = list()  # stores number of bonds an atom has made
+        self._ring_bond_flags = list()  # stores if an atom makes a ring bond
+        self._delocal_subgraph = dict()  # delocalization subgraph
 
     def __len__(self):
         return len(self._atoms)
@@ -186,13 +197,18 @@ class MolecularGraph:
         return not self._delocal_subgraph
 
     def kekulize(self) -> bool:
+        # Algorithm based on Depth-First article by Richard L. Apodaca
+        # Reference:
+        #   https://depth-first.com/articles/2020/02/10/
+        #   a-comprehensive-treatment-of-aromaticity-in-the-smiles-language/
+
         if self.is_kekulized():
             return True
 
         ds = self._delocal_subgraph
         kept_nodes = set(itertools.filterfalse(self._prune_from_ds, ds))
 
-        # relabel kept DS nodes to be 0,1,2,...
+        # relabel kept DS nodes to be 0, 1, 2, ...
         label_to_node = list(sorted(kept_nodes))
         node_to_label = {v: i for i, v in enumerate(label_to_node)}
 
