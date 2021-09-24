@@ -76,15 +76,16 @@ def _find_augmenting_path(graph, root, matching):
         node = node_queue.popleft()
 
         for adj in graph[node]:
-            if matching[adj] is None:  # augmenting path found!
-                parents[adj] = [node, adj]
-                other_end = adj
-                break
-
-            adj_mate = matching[adj]
-            if parents[adj_mate] is None:
-                parents[adj_mate] = [node, adj]
-                node_queue.append(adj_mate)
+            if matching[adj] is None:  # unmatched node
+                if adj != root:  # augmenting path found!
+                    parents[adj] = [node, adj]
+                    other_end = adj
+                    break
+            else:
+                adj_mate = matching[adj]
+                if parents[adj_mate] is None:  # adj_mate not visited
+                    parents[adj_mate] = [node, adj]
+                    node_queue.append(adj_mate)
 
         if other_end is not None:
             break  # augmenting path found!
