@@ -9,20 +9,23 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/graphs/contributors/)
 
 
-**Self-Referencing Embedded Strings (SELFIES): A 100% robust molecular string representation**<br>
-_Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_<br>
-[*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).<br>
-[Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).<br>
-[Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)<br>
-Major contributors since v1.0.0: _[Alston Lo](https://github.com/aspuru-guzik-group/selfies/commits?author=alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_<br>
+**Self-Referencing Embedded Strings (SELFIES): A 100% robust molecular string representation**\
+_Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_\
+[*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).\
+[Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).\
+[Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)\
+Major contributors since v1.0.0: _[Alston Lo](https://github.com/alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_\
 Chemistry Advisor: [Robert Pollice](https://scholar.google.at/citations?user=JR2N3JIAAAAJ)
 
-A main objective is to use SELFIES as direct input into machine learning models,<br>
-in particular in generative models, for the generation of molecular graphs<br>
+---
+
+A main objective is to use SELFIES as direct input into machine learning models,
+in particular in generative models, for the generation of molecular graphs
 which are syntactically and semantically valid.
 
-<center><img src="https://github.com/aspuru-guzik-group/selfies/blob/master/examples/VAE_LS_Validity.png" alt="SELFIES validity in a VAE latent space" width="666px"></center>
-
+<p align="center">
+   <img src="https://github.com/aspuru-guzik-group/selfies/blob/master/examples/VAE_LS_Validity.png" alt="SELFIES validity in a VAE latent space" width="666px">
+</p>
 
 ## Installation
 Use pip to install ``selfies``.
@@ -41,7 +44,7 @@ pip show selfies
 To upgrade to the latest release of ``selfies`` if you are using an 
 older version, use the following pip command. Please see the 
 [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md) 
-to review the changes between versions of `selfies`:
+to review the changes between versions of `selfies`, before upgrading: 
 
 ```bash
 pip install selfies --upgrade 
@@ -83,31 +86,23 @@ import selfies as sf
 
 benzene = "c1ccccc1"
 
-# SMILES --> SELFIES translation
-encoded_selfies = sf.encoder(benzene)  # '[C][=C][C][=C][C][=C][Ring1][Branch1_2]'
+# SMILES -> SELFIES -> SMILES translation
+try:
+    benzene_sf = sf.encoder(benzene)  # [C][=C][C][=C][C][=C][Ring1][=Branch1]
+    benzene_smi = sf.decoder(benzene_sf)  # C1=CC=CC=C1
+except sf.EncoderError:
+    pass  # sf.encoder error!
+except sf.DecoderError:
+    pass  # sf.decoder error!
 
-# SELFIES --> SMILES translation
-decoded_smiles = sf.decoder(encoded_selfies)  # 'C1=CC=CC=C1'
+len_benzene = sf.len_selfies(benzene_sf)  # 8
 
-len_benzene = sf.len_selfies(encoded_selfies)  # 8
-
-symbols_benzene = list(sf.split_selfies(encoded_selfies))
-# ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[Branch1_2]']
-
-
-# More relaxed derivations to allow for hypervalences
-# (Caution: Hypervalence rules are much less understood than octet rules.
-# Some molecules containing hypervalences are important, generally it is not
-# known which molecules are stable/reasonable).
-
-hypervalence_selfies=sf.encoder('O=I(O)(O)(O)(O)O') #  orthoperiodic acid
-standard_derived_smiles=sf.decoder(hypervalence_selfies)
-# standard_derived_smiles -> 'OI', because octet rule for iodine allows for only one bond
-
-relaxed_derived_smiles=sf.decoder(hypervalence_selfies,constraints='hypervalent')
-# relaxed_derived_smiles -> 'O=I(O)(O)(O)(O)O', hypervalences for iodine allow for 7 bonds 
-
+symbols_benzene = list(sf.split_selfies(benzene_sf))
+# ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[=Branch1]']
 ```
+
+#### Customizing SELFIES
+
 
 #### Integer and one-hot encoding SELFIES:
 In this example we first build an alphabet
