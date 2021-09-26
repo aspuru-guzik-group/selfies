@@ -141,10 +141,7 @@ cython_debug/
 .idea/
 
 # Project-specific files
-*.smi
-error_sets/
+error_logs/
 *.dat
 sandbox
-
-checkpoints/
 version.smi.gz
