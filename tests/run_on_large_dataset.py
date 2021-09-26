@@ -13,7 +13,7 @@ import selfies as sf
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path", type=str, default="version.smi.gz")
 parser.add_argument("--col_name", type=str, default="isosmiles")
-parser.add_argument("--sep", type=str, default="\s+")
+parser.add_argument("--sep", type=str, default=r"\s+")
 parser.add_argument("--start_from", type=int, default=0)
 args = parser.parse_args()
 
@@ -47,7 +47,6 @@ def roundtrip_translation():
                 continue
 
             in_smiles = in_smiles.strip()
-            print(in_smiles)
 
             mol = Chem.MolFromSmiles(in_smiles, sanitize=True)
             if (mol is None) or ("*" in in_smiles):
