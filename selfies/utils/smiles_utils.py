@@ -73,7 +73,7 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
             bond_idx = None
 
         if i == len(smiles):
-            raise SMILESParserError(smiles, "hanging bond", i)
+            raise SMILESParserError(smiles, "hanging bond", i - 1)
 
         elif smiles[i].isalpha():  # organic subset elements
             if smiles[i: i + 2] in ("Br", "Cl"):  # two-letter elements
@@ -88,6 +88,8 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
             token = SMILESToken(bond_idx, i, r_idx + 1, SMILESTokenTypes.ATOM)
 
         elif smiles[i] in ("(", ")"):  # open and closed branch brackets
+            if bond_idx is not None:
+                raise SMILESParserError(smiles, "hanging_bond", bond_idx)
             token = SMILESToken(None, i, i + 1, SMILESTokenTypes.BRANCH)
 
         elif smiles[i].isdigit():  # one-digit ring number

@@ -103,9 +103,27 @@ def test_change_constraints_cache_clear():
     sf.set_semantic_constraints()  # re-set alphabet
 
 
-def test_malformed_smiles_encoder():
-    with pytest.raises(sf.EncoderError):
-        sf.encoder("C(Cl)(Cl)CC[13C")
+def test_invalid_or_unsupported_smiles_encoder():
+    malformed_smiles = [
+        "",
+        "(",
+        "C(Cl)(Cl)CC[13C",
+        "C(CCCOC",
+        "C=(CCOC",
+        "CCCC)",
+        "C1CCCCC",
+        "C(F)(F)(F)(F)(F)F",  # violates bond constraints
+        "C=C1=CCCCCC1",  # violates bond constraints
+        "CC*CC",  # uses wildcard
+        "C$C",  # uses $ bond
+        "S[As@TB1](F)(Cl)(Br)N",  # unrecognized chirality,
+        "SOMETHINGWRONGHERE",
+        "1243124124",
+    ]
+
+    for smiles in malformed_smiles:
+        with pytest.raises(sf.EncoderError):
+            sf.encoder(smiles)
 
 
 def test_malformed_selfies_decoder():
