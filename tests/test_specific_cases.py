@@ -1,7 +1,11 @@
 import pytest
-from rdkit import Chem
 
 import selfies as sf
+
+
+def decode_eq(selfies, smiles):
+    s = sf.decoder(selfies)
+    return s == smiles
 
 
 def test_branch_and_ring_at_state_X0():
@@ -21,6 +25,18 @@ def test_branch_at_state_X1():
 
     assert decode_eq("[C][C][O][Branch1][C][I]", "CCOCI")
     assert decode_eq("[C][C][C][O][#Branch3][C][I]", "CCCOCI")
+
+
+def test_branch_and_ring_decrement_state():
+    """Tests that the branch and ring symbols properly decrement the
+    derivation state.
+    """
+
+    assert decode_eq("[C][C][C][Ring1][Ring1][#C]", "C1CC1=C")
+    assert decode_eq("[C][=C][C][C][#Ring1][Ring1][#C]", "C=C1CC1")
+    assert decode_eq("[C][O][C][C][=Ring1][Ring1][#C]", "COCCC")
+
+    assert decode_eq("[C][=C][Branch1][C][=C][#C]", "C=C(C)C")
 
 
 def test_branch_at_end_of_selfies():
@@ -63,8 +79,8 @@ def test_oversized_branch():
     of the SELFIES
     """
 
-    assert decode_eq("[C][Branch2][O][O][C][C][S][F][C]", "C(CCSF)")
-    assert decode_eq("[C][#Branch2][O][O][#C][C][S][F]", "C(#CCSF)")
+    assert decode_eq("[C][Branch2][O][O][C][C][S][F][C]", "CCCSF")
+    assert decode_eq("[C][#Branch2][O][O][#C][C][S][F]", "C#CCSF")
 
 
 def test_oversized_ring():
@@ -136,12 +152,12 @@ def test_ring_immediately_following_branch():
 
     # CCC1CCCC(OCO)1
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O][Ring1][Branch1]"
-    assert decode_eq(s, "CCC1CCCC1(OCO)")
+    assert decode_eq(s, "CCC1CCCC1OCO")
 
     # CCC1CCCC(OCO)(F)1
     s = "[C][C][C][C][C][C][C][Branch1][Ring2][O][C][O]" \
         "[Branch1][C][F][Ring1][Branch1]"
-    assert decode_eq(s, "CCC1CCCC1(OCO)(F)")
+    assert decode_eq(s, "CCC1CCCC1(OCO)F")
 
 
 def test_ring_after_branch():
@@ -198,10 +214,10 @@ def test_consecutive_rings():
 
     # consecutive rings with stereochemical single bond
     s = "[C][C][C][C][\\/Ring1][Ring2]"
-    assert sf.decoder(s) == "C\\1CCC/1"
+    assert decode_eq(s, "C\\1CCC/1")
 
     s = "[C][C][C][C][\\/Ring1][Ring2][Ring1][Ring2]"
-    assert sf.decoder(s) == "C=1CCC=1"
+    assert decode_eq(s, "C=1CCC=1")
 
 
 def test_unconstrained_symbols():
@@ -210,14 +226,14 @@ def test_unconstrained_symbols():
 
     f_branch = "[Branch1][C][F]"
     s = "[Xe-2]" + (f_branch * 8)
-    assert sf.decoder(s) == "[Xe-2](F)(F)(F)(F)(F)(F)(F)CF"
+    assert decode_eq(s, "[Xe-2](F)(F)(F)(F)(F)(F)(F)CF")
 
     # change default semantic constraints
     constraints = sf.get_semantic_constraints()
     constraints["?"] = 2
     sf.set_semantic_constraints(constraints)
 
-    assert sf.decoder(s) == "[Xe-2](F)CF"
+    assert decode_eq(s, "[Xe-2](F)CF")
 
     sf.set_semantic_constraints()
 
@@ -228,9 +244,9 @@ def test_isotope_symbols():
     """
 
     s = "[13C][Branch1][C][Cl][Branch1][C][F][Branch1][C][Br][Branch1][C][I]"
-    assert sf.decoder(s) == "[13C](Cl)(F)(Br)CI"
+    assert decode_eq(s, "[13C](Cl)(F)(Br)CI")
 
-    assert sf.decoder("[C][36Cl][C]") == "C[36Cl]"
+    assert decode_eq("[C][36Cl][C]", "C[36Cl]")
 
 
 def test_chiral_symbols():
@@ -239,10 +255,10 @@ def test_chiral_symbols():
     """
 
     s = "[C@@][Branch1][C][Cl][Branch1][C][F][Branch1][C][Br][Branch1][C][I]"
-    assert sf.decoder(s) == "[C@@](Cl)(F)(Br)CI"
+    assert decode_eq(s, "[C@@](Cl)(F)(Br)CI")
 
     s = "[C@H1][Branch1][C][Cl][Branch1][C][F][Branch1][C][Br]"
-    assert sf.decoder(s) == "[C@H1](Cl)(F)CBr"
+    assert decode_eq(s, "[C@H1](Cl)(F)CBr")
 
 
 def test_explicit_hydrogen_symbols():
@@ -250,12 +266,12 @@ def test_explicit_hydrogen_symbols():
      are constrained properly.
      """
 
-    assert sf.decoder("[CH1][Branch1][C][Cl][#C]") == "[CH1](Cl)=C"
-    assert sf.decoder("[CH3][=C]") == "[CH3]C"
+    assert decode_eq("[CH1][Branch1][C][Cl][#C]", "[CH1](Cl)=C")
+    assert decode_eq("[CH3][=C]", "[CH3]C")
 
-    assert sf.decoder("[CH4][C][C]") == "[CH4]"
-    assert sf.decoder("[C][C][C][CH4]") == "CCC"
-    assert sf.decoder("[C][Branch1][Ring2][C][=CH4][C][=C]") == "C(C)=C"
+    assert decode_eq("[CH4][C][C]", "[CH4]")
+    assert decode_eq("[C][C][C][CH4]", "CCC")
+    assert decode_eq("[C][Branch1][Ring2][C][=CH4][C][=C]", "C(C)=C")
 
     with pytest.raises(sf.DecoderError):
         sf.decoder("[C][C][CH5]")
@@ -274,15 +290,21 @@ def test_charged_symbols():
 
     # the following molecules don't make sense, but we use them to test
     # selfies. Hence, we can't verify them with RDKit
-    assert sf.decoder("[Sn+4][=C]") == "[Sn+4]C"
-    assert sf.decoder("[O-2][#C]") == "[O-2]=C"
+    assert decode_eq("[Sn+4][=C]", "[Sn+4]C")
+    assert decode_eq("[O-2][#C]", "[O-2]=C")
 
     # mixing many symbol types
-    assert sf.decoder("[17O@@H1-2][#C]") == "[17O@@H1-2]C"
+    assert decode_eq("[17O@@H1-2][#C]", "[17O@@H1-2]C")
 
     sf.set_semantic_constraints()
 
 
-def decode_eq(selfies, smiles):
-    s = sf.decoder(selfies)
-    return Chem.CanonSmiles(s) == Chem.CanonSmiles(smiles)
+def test_standardized_alphabet():
+    """Tests that equivalent SMILES atom symbols are translated into the
+    same SELFIES atom symbol.
+    """
+
+    assert sf.encoder("[C][O][N][P][F]") == "[CH0][OH0][NH0][PH0][FH0]"
+    assert sf.encoder("[Fe][Si]") == "[Fe][Si]"
+    assert sf.encoder("[Fe++][Fe+2]") == "[Fe+2][Fe+2]"
+    assert sf.encoder("[CH][CH1]") == "[CH1][CH1]"
