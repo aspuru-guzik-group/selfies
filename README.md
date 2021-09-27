@@ -108,7 +108,7 @@ symbols_benzene = list(sf.split_selfies(benzene_sf))
 In this example we first build an alphabet
 from a dataset of SELFIES, and then convert a SELFIES into a
 padded, label-encoded representation. Note that we use the
-``'[nop]'`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
+``[nop]`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
 ignored and skipped over by ``selfies.decoder``, making it a useful
 padding character.
@@ -153,20 +153,6 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 * Kohulan Rajan, Achim Zielesny, Christoph Steinbeck show in two papers that SELFIES outperforms other representations in [img2string](https://link.springer.com/article/10.1186/s13321-020-00469-w) and [string2string](https://chemrxiv.org/articles/preprint/STOUT_SMILES_to_IUPAC_Names_Using_Neural_Machine_Translation/13469202/1) translation tasks, see the codes of [DECIMER](https://github.com/Kohulan/DECIMER-Image-to-SMILES) and [STOUT](https://github.com/Kohulan/Smiles-TO-iUpac-Translator). 
 * An improvement to the old genetic algorithm, the authors have also released [JANUS](https://arxiv.org/abs/2106.04011), which allows for more efficient optimization in the chemical space. JANUS makes use of [STONED-SELFIES](https://pubs.rsc.org/en/content/articlepdf/2021/sc/d1sc00231g) and a neural network for efficient sampling. 
 
-
-## Handling invalid inputs
-If an invalid input is presented to the encoder or decoder, the return value is `None`.
-The error can be analysed by using the `encoder(...,print_error=True)` option.
-```python
-import selfies as sf
-invalid_smiles="C[C@H](O)[C@@(*)C1=CC=CC=C1"
-selfies_string=sf.encoder(invalid_smiles) 
-
-if selfies_string==None:
-    selfies_string=sf.encoder(invalid_smiles,print_error=True) 
-    # 'Encoding error 'C[C@H](O)[C@@(*)C1=CC=CC=C1': wildcard atom '*' not supported.'
-```
-
 ## Tests
 SELFIES uses `pytest` with `tox` as its testing framework.
 All tests can be found in  the `tests/` directory. To run the test suite for
@@ -182,12 +168,11 @@ By default, SELFIES is tested against a random subset
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database)
  * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
- * 8K molecules from [Tox21](http://moleculenet.ai/datasets-1) in MoleculeNet
- * 93K molecules from PubChem [MUV](http://moleculenet.ai/datasets-1) in MoleculeNet
- * 27M molecules from the [eMolecules Plus Database](https://www.emolecules.com/info/plus/download-database).
+ * 160K+ molecules from various [MoleculeNet](http://moleculenet.ai/datasets-1) datasets
+ * 36M+ molecules from the [eMolecules Database](https://www.emolecules.com/info/products-data-downloads.html).
    Due to its large size, this dataset is not included on the repository. To run tests 
    on it, please download the dataset in the ``tests/test_sets`` directory 
-   and enable its pytest at ``tests/test_on_emolecules.py``. 
+   and run the ``tests/run_on_large_dataset.py`` script. 
 
 Other tests are random and repeated ``trials`` number of times.
 These can be specified as arguments
