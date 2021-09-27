@@ -50,32 +50,27 @@ to review the changes between versions of `selfies`, before upgrading:
 pip install selfies --upgrade 
 ```
 
-## Documentation
-
-The documentation can be found on
-[ReadTheDocs](https://selfies.readthedocs.io/en/latest/).
-Alternatively, it can be built from the ``docs/`` directory.
 
 ## Usage
 
-### Standard Functions
+### Overview
 
-The ``selfies`` library has eight standard functions:
+Please refer to the [documentation](https://selfies.readthedocs.io/en/latest/),
+which contains a thorough tutorial  for getting started with ``selfies`` 
+and detailed descriptions of the functions
+that ``selfies`` provides. We summarize some key functions below.
 
 | Function | Description |
 | -------- | ----------- |
-| ``selfies.encoder`` | Translates a SMILES into an equivalent SELFIES. |
-| ``selfies.decoder`` | Translates a SELFIES into an equivalent SMILES. |
-| ``selfies.len_selfies`` | Returns the (symbol) length of a SELFIES.  |
-| ``selfies.split_selfies`` | Splits a SELFIES into its symbols. |
-| ``selfies.get_alphabet_from_selfies`` | Builds an alphabet of SELFIES symbols from an iterable of SELFIES. |
-| ``selfies.get_semantic_robust_alphabet`` | Returns a subset of all SELFIES symbols that are semantically constrained. |
-| ``selfies.selfies_to_encoding`` | Converts a SELFIES into a label and/or one-hot encoding. |
-| ``selfies.encoding_to_selfies`` | Converts a label or one-hot encoding into a SELFIES. |
+| ``selfies.encoder`` | Translates a SMILES string into its corresponding SELFIES string. |
+| ``selfies.decoder`` | Translates a SELFIES string into its corresponding SMILES string. |
+| ``selfies.set_semantic_constraints`` | Configures the semantic constraints that ``selfies`` operates on. |
+| ``selfies.len_selfies`` | Returns the number of symbols in a SELFIES string. |
+| ``selfies.split_selfies`` | Tokenizes a SELFIES string into its individual symbols. |
+| ``selfies.get_alphabet_from_selfies`` | Constructs an alphabet from an iterable of SELFIES strings. |
+| ``selfies.selfies_to_encoding`` | Converts a SELFIES string into its label and/or one-hot encoding. |
+| ``selfies.encoding_to_selfies`` | Converts a label or one-hot encoding into a SELFIES string. |
 
-Please read the documentation for more detailed descriptions of these
-functions, and to view the advanced functions, which allow users to
-customize the SELFIES language.
 
 ### Examples
 
@@ -101,13 +96,29 @@ symbols_benzene = list(sf.split_selfies(benzene_sf))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[=Branch1]']
 ```
 
-#### Customizing SELFIES
+#### Customizing SELFIES:
 
+In this example, we relax the semantic constraints of ``selfies`` to allow
+for hypervalences (caution: hypervalence rules are much less understood
+than octet rules. Some molecules containing hypervalences are important, 
+but generally, it is not known which molecules are stable and reasonable).
+
+```python
+import selfies as sf
+
+hypervalent_sf = sf.encoder('O=I(O)(O)(O)(O)O', strict=False)  # orthoperiodic acid
+standard_derived_smi = sf.decoder(hypervalent_sf)
+# OI (the default constraints for I allows for only 1 bond)
+
+sf.set_semantic_constraints("hypervalent")
+relaxed_derived_smi = sf.decoder(hypervalent_sf)
+# O=I(O)(O)(O)(O)O (the hypervalent constraints for I allows for 7 bonds)
+```
 
 #### Integer and one-hot encoding SELFIES:
-In this example we first build an alphabet
-from a dataset of SELFIES, and then convert a SELFIES into a
-padded, label-encoded representation. Note that we use the
+
+In this example, we first build an alphabet from a dataset of SELFIES strings, 
+and then convert a SELFIES string into its padded encoding. Note that we use the
 ``[nop]`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
 ignored and skipped over by ``selfies.decoder``, making it a useful
@@ -116,32 +127,27 @@ padding character.
 ```python
 import selfies as sf
 
-dataset = ['[C][O][C]', '[F][C][F]', '[O][=O]', '[C][C][O][C][C]']
+dataset = ["[C][O][C]", "[F][C][F]", "[O][=O]", "[C][C][O][C][C]"]
 alphabet = sf.get_alphabet_from_selfies(dataset)
-alphabet.add('[nop]')  # '[nop]' is a special padding symbol
-alphabet = list(sorted(alphabet))
-print(alphabet)  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
+alphabet.add("[nop]")  # [nop] is a special padding symbol
+alphabet = list(sorted(alphabet))  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
 
 pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5
 symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
 
-# SELFIES to label encode
-dimethyl_ether = dataset[0]  # '[C][O][C]'
+dimethyl_ether = dataset[0]  # [C][O][C]
 
-# [1, 3, 1, 4, 4]
-print(sf.selfies_to_encoding(dimethyl_ether,
-                             vocab_stoi=symbol_to_idx,
-                             pad_to_len=pad_to_len,
-                             enc_type='label'))
-                             
-# [[0, 1, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 0, 0, 0, 1]]
-print(sf.selfies_to_encoding(dimethyl_ether,
-                             vocab_stoi=symbol_to_idx,
-                             pad_to_len=pad_to_len,
-                             enc_type='one_hot'))
+label, one_hot = sf.selfies_to_encoding(
+   selfies=dimethyl_ether,
+   vocab_stoi=symbol_to_idx,
+   pad_to_len=pad_to_len,
+   enc_type="both"
+)
+# label = [1, 3, 1, 4, 4]
+# one_hot = [[0, 1, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 0, 0, 0, 1]]
 ```
 
-### More Examples
+### More Usages and Examples
 
 * More examples can be found in the ``examples/`` directory, including a
 [variational autoencoder that runs on the SELFIES](https://github.com/aspuru-guzik-group/selfies/tree/master/examples/vae_example) language.
@@ -154,36 +160,25 @@ with the [code here](https://github.com/aspuru-guzik-group/GA).
 * An improvement to the old genetic algorithm, the authors have also released [JANUS](https://arxiv.org/abs/2106.04011), which allows for more efficient optimization in the chemical space. JANUS makes use of [STONED-SELFIES](https://pubs.rsc.org/en/content/articlepdf/2021/sc/d1sc00231g) and a neural network for efficient sampling. 
 
 ## Tests
-SELFIES uses `pytest` with `tox` as its testing framework.
+`selfies` uses `pytest` with `tox` as its testing framework.
 All tests can be found in  the `tests/` directory. To run the test suite for
 SELFIES, install ``tox`` and run:  
 
 ```bash
-tox
+tox -- --trials=10000 --dataset_samples=10000
 ```
 
-By default, SELFIES is tested against a random subset
-(of size ``dataset_samples=100000``) on various datasets:
+By default, `selfies` is tested against a random subset
+(of size ``dataset_samples=10000``) on various datasets:
 
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database)
- * 50K molecules from [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
+ * 50K molecules from a dataset of [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 160K+ molecules from various [MoleculeNet](http://moleculenet.ai/datasets-1) datasets
  * 36M+ molecules from the [eMolecules Database](https://www.emolecules.com/info/products-data-downloads.html).
    Due to its large size, this dataset is not included on the repository. To run tests 
-   on it, please download the dataset in the ``tests/test_sets`` directory 
+   on it, please download the dataset into the ``tests/test_sets`` directory 
    and run the ``tests/run_on_large_dataset.py`` script. 
-
-Other tests are random and repeated ``trials`` number of times.
-These can be specified as arguments
-
-```bash
-tox -- --trials 100 --dataset_samples 100
-```
-
-where ``--trials=100000`` and ``--dataset_samples=100000`` by default. Note that
-if ``dataset_samples`` is negative or exceeds the length of the dataset,
-the whole dataset is used.
 
 ## Version History
 See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md).
