@@ -5,7 +5,7 @@ from typing import Dict, Set, Union
 from selfies.constants import ELEMENTS, INDEX_ALPHABET
 
 _DEFAULT_CONSTRAINTS = {
-    "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
+    "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1, "B": 3,
     "O": 2, "O+1": 3, "O-1": 1,
     "N": 3, "N+1": 4, "N-1": 2,
     "C": 4, "C+1": 5, "C-1": 3,
