@@ -40,7 +40,8 @@ The +1 and -1 charged versions of O, N, C, S, and P are also constrained,
 where a +1 increases the bonding capacity of the neutral atom by 1,
 and a -1 decreases the bonding capacity of the neutral atom by 1.
 For example, N+1 has a bonding capacity of :math:`3 + 1 = 4`,
-and N-1 has a bonding capacity of :math:`3 - 1 = 2`.
+and N-1 has a bonding capacity of :math:`3 - 1 = 2`. The charged versions
+B+1 and B-1 are constrained to a capacity of 2 and 4 bonds, respectively.
 
 However, the default constraints are inadequate for SMILES strings that violate them. For
 example, nitrobenzene ``O=N(=O)C1=CC=CC=C1`` has a nitrogen with 6 bonds and
