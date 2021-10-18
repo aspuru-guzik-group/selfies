@@ -3,7 +3,8 @@
 ## v2.0.0-rc.1 - 18.10.2021
 
 ### Added:
-- Improved SMILES parsing (by using adjacencey lists), with tighter error handling (e.g. issues #62 and #60).
+- Improved SMILES parsing (by using adjacencey lists internally), with tighter error handling
+  (e.g. issues #62 and #60).
 - Faster and improved kekulization algorithm (issue #55 fixed).
 - Support for symbols that are constrained to 0 bonds (e.g., `[CH4]`) or >8 bonds 
   (users can now specify custon bond constraints with over 8 bonds).
