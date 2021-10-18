@@ -1,4 +1,40 @@
 # Changelog
+
+## v2.0.0-rc.1 - 18.10.2021
+
+### Added:
+- Support for symbols that are constrained to 0 bonds (e.g., `[CH4]`) or >8 bonds 
+  (users can now specify custon bond constraints with over 8 bonds).
+- New `strict=True` flag to `selfies.encoder`, which raises an error if the input 
+  SMILES violates the current bond constraints.
+- Improved SMILES parsing, with tighter error handling (e.g. issues #62 and #60).
+- Faster and improved kekulization algorithm (issue #55 fixed).
+- Added bond constraints for B (max. 3 bonds) to the default and preset constraints.
+
+### Changed:
+- Updated the syntax of SELFIES symbols to be cleaner and more human-interpretable.
+    - Removing `expl` from atomic symbols, e.g., `[C@@Hexpl]` becommes `[C@@H]`
+    - Cleaner branch symbols, e.g., `[BranchL_2]` becomes `[=BranchL]`
+    - Cleaner ring symbols, e.g., `[Expl=RingL]` becomes `[=RingL]`
+- Updated behaviour of `[Ring]` symbols, which now decrement the derivation state accordingly.
+- Standardized SELFIES alphabet, i.e., no two symbols are semantically equivalent (issue #58).
+- Indexing symbols are now included in the alphabet returned by `selfies.get_semantic_robust_alphabet`.
+
+### Removed
+- Removed `constraints` flag from `selfies.decoder`; please use `selfies.set_semantic_constraints()`
+  and pass in `"hypervalent"` or `"octet_rule"` instead.
+- Removed `print_error` flag in `selfies.encoder` and `selfies.decoder`, 
+  which now raise errors `selfies.EncoderError` and `selfies.DecoderError`, respectively.
+
+### Bug Fixes
+- Potential chirality inversion of atoms making ring bonds (e.g. ``[C@@H]12CCC2CCNC1``): 
+  fixed by inverting their chirality in ``selfies.encoder`` such that they are decoded with
+  the original chirality preserved.
+- Failure to represent mismatching stereochemical specifications at ring bonds 
+  (e.g. ``F/C=C/C/C=C\C``): fixed by adding new ring symbols (e.g. ``[-/RingL]``, ``[\/RingL]``, etc.).
+
+---
+
 ## v1.0.4 - 23.04.2021
 ### Added: 
  * decoder option for relaxed hypervalence rules, `decoder(...,constraints='hypervalent')`
