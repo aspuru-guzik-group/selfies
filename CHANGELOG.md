@@ -9,7 +9,8 @@
 - Support for symbols that are constrained to 0 bonds (e.g., `[CH4]`) or >8 bonds 
   (users can now specify custon bond constraints with over 8 bonds).
 - New `strict=True` flag to `selfies.encoder`, which raises an error if the input 
-  SMILES violates the current bond constraints.
+  SMILES violates the current bond constraints. `True` by default, can be `False` for speed-up (if
+  SMILES are guaranteed to be correct).
 - Added bond constraints for B (max. 3 bonds) to the default and preset constraints.
 - Updated the syntax of SELFIES symbols to be cleaner and more readable.
     - Removing `expl` from atomic symbols, e.g., `[C@@Hexpl]` becommes `[C@@H]`
