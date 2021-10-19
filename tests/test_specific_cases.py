@@ -308,3 +308,24 @@ def test_standardized_alphabet():
     assert sf.encoder("[Fe][Si]") == "[Fe][Si]"
     assert sf.encoder("[Fe++][Fe+2]") == "[Fe+2][Fe+2]"
     assert sf.encoder("[CH][CH1]") == "[CH1][CH1]"
+
+
+def test_old_symbols():
+    """Tests backward compatibility of SELFIES with old (<v2) symbols.
+    """
+
+    s = "[C@@Hexpl][Branch1_2][Branch1_1][Branch1_1][C][C][Cl][F]"
+    assert sf.decoder(s, compatible=True) == "[C@@H1](C)(Cl)F"
+
+    s = "[C][C][C][C][Expl=Ring1][Ring2][Expl#Ring1][Ring2]"
+    assert sf.decoder(s, compatible=True) == "C#1CCC#1"
+
+    long_s = "[C@@Hexpl][=C][C@@Hexpl][N+expl][=C][C+expl][N+expl][O+expl]" \
+             "[Fe++expl][C@@Hexpl][C][N+expl][Branch1_2][Fe++expl][S+expl]" \
+             "[=C][Expl=Ring1][Fe++expl][S+expl][Expl=Ring1][O+expl]" \
+             "[C@@Hexpl][Expl=Ring1][C@@Hexpl][C@@Hexpl][N+expl][Expl=Ring1]" \
+             "[Expl=Ring1][S+expl][=C]"
+    try:
+        sf.decoder(long_s, compatible=True)
+    except Exception:
+        assert False

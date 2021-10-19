@@ -1,3 +1,4 @@
+from selfies.compatibility import modernize_symbol
 from selfies.exceptions import DecoderError
 from selfies.grammar_rules import (
     get_index_from_selfies,
@@ -13,7 +14,7 @@ from selfies.utils.selfies_utils import split_selfies
 from selfies.utils.smiles_utils import mol_to_smiles
 
 
-def decoder(selfies: str) -> str:
+def decoder(selfies: str, compatible: bool = False) -> str:
     """Translates a SELFIES string into its corresponding SMILES string.
 
     This translation is deterministic but depends on the current semantic
@@ -22,8 +23,11 @@ def decoder(selfies: str) -> str:
     semantic constraints.
 
     :param selfies: the SELFIES string to be translated.
+    :param compatible: if ``True``, this function will be backward compatible
+        with SELFIES strings containing old symbols (from <v2).
+        Defaults to ``False``.
     :return: a SMILES string derived from the input SELFIES string.
-    :raises DecoderError:  if the input SELFIES string is malformed.
+    :raises DecoderError: if the input SELFIES string is malformed.
 
     :Example:
 
@@ -37,7 +41,7 @@ def decoder(selfies: str) -> str:
     rings = []
     for s in selfies.split("."):
         _derive_mol_from_symbols(
-            symbol_iter=_tokenize_selfies(s),
+            symbol_iter=_tokenize_selfies(s, compatible),
             mol=mol,
             selfies=selfies,
             max_derive=float("inf"),
@@ -49,7 +53,7 @@ def decoder(selfies: str) -> str:
     return mol_to_smiles(mol)
 
 
-def _tokenize_selfies(selfies):
+def _tokenize_selfies(selfies, compatible):
     if isinstance(selfies, str):
         symbol_iter = split_selfies(selfies)
     elif isinstance(selfies, list):
@@ -61,6 +65,8 @@ def _tokenize_selfies(selfies):
         for symbol in symbol_iter:
             if symbol == "[nop]":
                 continue
+            if compatible:
+                symbol = modernize_symbol(symbol)
             yield symbol
     except ValueError as err:
         raise DecoderError(str(err)) from None
