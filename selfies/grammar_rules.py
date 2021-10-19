@@ -15,11 +15,14 @@ from selfies.utils.smiles_utils import smiles_to_bond
 
 def process_atom_symbol(symbol: str) -> Optional[Tuple[Any, Atom]]:
     try:
-        bond_info, atom_fac = _PROCESS_ATOM_CACHE[symbol]
+        output = _PROCESS_ATOM_CACHE[symbol]
     except KeyError:
-        bond_info, atom_fac = _process_atom_selfies_no_cache(symbol)
-        _PROCESS_ATOM_CACHE[symbol] = (bond_info, atom_fac)
+        output = _process_atom_selfies_no_cache(symbol)
+        if output is None:
+            return None
+        _PROCESS_ATOM_CACHE[symbol] = output
 
+    bond_info, atom_fac = output
     atom = atom_fac()
     if atom.bonding_capacity < 0:
         return None  # too many Hs (e.g. [CH9]
