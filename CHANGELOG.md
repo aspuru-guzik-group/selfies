@@ -2,7 +2,7 @@
 
 ## v2.0.0-rc.1 - 18.10.2021
 
-### Added:
+### Changed:
 - Improved SMILES parsing (by using adjacencey lists internally), with tighter error handling
   (e.g. issues #62 and #60).
 - Faster and improved kekulization algorithm (issue #55 fixed).
@@ -11,12 +11,12 @@
 - New `strict=True` flag to `selfies.encoder`, which raises an error if the input 
   SMILES violates the current bond constraints.
 - Added bond constraints for B (max. 3 bonds) to the default and preset constraints.
-
-### Changed:
-- Updated the syntax of SELFIES symbols to be cleaner and more human-interpretable.
+- Updated the syntax of SELFIES symbols to be cleaner and more readable.
     - Removing `expl` from atomic symbols, e.g., `[C@@Hexpl]` becommes `[C@@H]`
     - Cleaner branch symbols, e.g., `[BranchL_2]` becomes `[=BranchL]`
     - Cleaner ring symbols, e.g., `[Expl=RingL]` becomes `[=RingL]`
+    - If you want to use the old symbols, use the `compatible=True` flag to `selfies.decoder`,
+      e.g., `sf.decoder('[C][C][Expl=Ring1]',compatible=True)` (not recommended!)
 - More logically consistent behaviour of `[Ring]` symbols.
 - Standardized SELFIES alphabet, i.e., no two symbols stand for the same atom/ion (issue #58), e.g.,
   `[N+1]` and `[N+]` are equivalent now.
