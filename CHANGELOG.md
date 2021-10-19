@@ -3,12 +3,13 @@
 ## v2.0.0-rc.1 - 18.10.2021
 
 ### Added:
+- Improved SMILES parsing (by using adjacencey lists internally), with tighter error handling
+  (e.g. issues #62 and #60).
+- Faster and improved kekulization algorithm (issue #55 fixed).
 - Support for symbols that are constrained to 0 bonds (e.g., `[CH4]`) or >8 bonds 
   (users can now specify custon bond constraints with over 8 bonds).
 - New `strict=True` flag to `selfies.encoder`, which raises an error if the input 
   SMILES violates the current bond constraints.
-- Improved SMILES parsing, with tighter error handling (e.g. issues #62 and #60).
-- Faster and improved kekulization algorithm (issue #55 fixed).
 - Added bond constraints for B (max. 3 bonds) to the default and preset constraints.
 
 ### Changed:
@@ -16,8 +17,9 @@
     - Removing `expl` from atomic symbols, e.g., `[C@@Hexpl]` becommes `[C@@H]`
     - Cleaner branch symbols, e.g., `[BranchL_2]` becomes `[=BranchL]`
     - Cleaner ring symbols, e.g., `[Expl=RingL]` becomes `[=RingL]`
-- Updated behaviour of `[Ring]` symbols, which now decrement the derivation state accordingly.
-- Standardized SELFIES alphabet, i.e., no two symbols are semantically equivalent (issue #58).
+- More logically consistent behaviour of `[Ring]` symbols.
+- Standardized SELFIES alphabet, i.e., no two symbols stand for the same atom/ion (issue #58), e.g.,
+  `[N+1]` and `[N+]` are equivalent now.
 - Indexing symbols are now included in the alphabet returned by `selfies.get_semantic_robust_alphabet`.
 
 ### Removed
