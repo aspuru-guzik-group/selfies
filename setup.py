@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="selfies",
     version="2.0.0",
-    author="Mario Krenn",
+    author="Mario Krenn, Alston Lo, and many other contributors",
     author_email="mario.krenn@utoronto.ca, alan@aspuru.com",
     description="SELFIES (SELF-referencIng Embedded Strings) is a "
                 "general-purpose, sequence-based, robust representation of "
