@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.0.0 - 18.10.2021
+## v2.0.0 - 21.10.2021
 
 ### Changed:
 - Improved SMILES parsing (by using adjacencey lists internally), with tighter error handling
