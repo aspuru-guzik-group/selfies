@@ -1,3 +1,5 @@
+import warnings
+
 from selfies.compatibility import modernize_symbol
 from selfies.exceptions import DecoderError
 from selfies.grammar_rules import (
@@ -23,8 +25,10 @@ def decoder(selfies: str, compatible: bool = False) -> str:
     semantic constraints.
 
     :param selfies: the SELFIES string to be translated.
-    :param compatible: if ``True``, this function will be backward compatible
-        with SELFIES strings containing old symbols (from <v2).
+    :param compatible: if ``True``, this function will accept SELFIES strings
+        containing depreciated symbols from previous releases. However, this
+        function may behave differently than in previous major relases,
+        and should not be treated as backard compatible.
         Defaults to ``False``.
     :return: a SMILES string derived from the input SELFIES string.
     :raises DecoderError: if the input SELFIES string is malformed.
@@ -35,6 +39,11 @@ def decoder(selfies: str, compatible: bool = False) -> str:
     >>> sf.decoder('[C][=C][F]')
     'C=CF'
     """
+
+    if compatible:
+        msg = "\nselfies.decoder() may behave differently than in previous " \
+              "major releases. We recommend using SELFIES that are up to date."
+        warnings.warn(msg, stacklevel=2)
 
     mol = MolecularGraph()
 

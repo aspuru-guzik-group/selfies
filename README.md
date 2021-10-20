@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-blue.svg)](https://GitHub.com/aspuru-guzik-group/selfies/graphs/commit-activity)
 [![GitHub issues](https://img.shields.io/github/issues/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/issues/)
-[![Documentation Status](https://readthedocs.org/projects/selfies/badge/?version=latest)](http://selfies.readthedocs.io/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/selfiesv2/badge/?version=latest)](http://selfiesv2.readthedocs.io/?badge=latest)
 [![GitHub contributors](https://img.shields.io/github/contributors/aspuru-guzik-group/selfies.svg)](https://GitHub.com/aspuru-guzik-group/selfies/graphs/contributors/)
 
 
@@ -55,7 +55,7 @@ pip install selfies --upgrade
 
 ### Overview
 
-Please refer to the [documentation](https://selfies.readthedocs.io/en/latest/),
+Please refer to the [documentation](https://selfiesv2.readthedocs.io/en/latest/),
 which contains a thorough tutorial  for getting started with ``selfies`` 
 and detailed descriptions of the functions
 that ``selfies`` provides. We summarize some key functions below.
