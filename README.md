@@ -14,7 +14,8 @@ _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-G
 [*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).\
 [Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).\
 [Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)\
-Major contributors since v1.0.0: _[Alston Lo](https://github.com/alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_\
+Major contributors of v1.0.n: _[Alston Lo](https://github.com/alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_\
+Main developer of v2.0.0: _[Alston Lo](https://github.com/alstonlo)_\
 Chemistry Advisor: [Robert Pollice](https://scholar.google.at/citations?user=JR2N3JIAAAAJ)
 
 ---
