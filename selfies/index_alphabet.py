@@ -32,12 +32,22 @@ INDEX_ALPHABET = tuple(_current_index_alphabet)
 INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
 def get_preset_index_alphabets(name: str) -> Dict[str, int]:
+    """the preset index alphabet with the given name.
+    :param name: the preset name: ``default``.
+    :return: the preset index alphabet with the specified name, represented as
+        a dictionary which maps tokens (the keys) to their index values (the values).
+    """
 
     if name not in _PRESET_INDEX_ALPHABETS:
         raise ValueError("unrecognized preset name '{}'".format(name))
     return dict(_PRESET_INDEX_ALPHABETS[name])
 
 def get_current_index_alphabet() -> Dict[str, int]:
+    """Returns the semantic constraints that :mod:`selfies` is currently
+    operating on.
+    :return: the current semantic constraints, represented as a dictionary
+        which maps tokens (the keys) to their index values (the values).
+    """
 
     global _current_index_alphabet
     return dict(_current_index_alphabet)
@@ -46,6 +56,17 @@ def get_current_index_alphabet() -> Dict[str, int]:
 def set_index_alphabet(
         index_alphabet: Union[str, Dict[str, int]] = "default"
 ) -> None:
+    """Updates the index alphabet that :mod:`selfies` operates on.
+    If the input is a string, the new index alphabet is taken to be
+    the preset named ``index_alphabet``
+    (see :func:`selfies.get_preset_index_alphabets`).
+    Otherwise, the input is a dictionary representing the new index alphabet.
+    This dictionary maps tokens (the keys) to index values 
+    (the values).
+    :param index_alphabet: the name of a preset, or a dictionary
+        representing the new index alphabet.
+    :return: ``None``.
+    """
 
     global _current_index_alphabet
 
