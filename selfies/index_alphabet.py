@@ -67,8 +67,6 @@ def set_index_alphabet(
     """
 
     global _current_index_alphabet
-    global INDEX_ALPHABET
-    global INDEX_CODE
     
     SELFIES_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
