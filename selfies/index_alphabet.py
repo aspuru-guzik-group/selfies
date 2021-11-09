@@ -29,9 +29,6 @@ _PRESET_INDEX_ALPHABETS = {
 
 _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
 
-INDEX_ALPHABET = tuple(_current_index_alphabet)
-INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
-
 def get_preset_index_alphabet(name: str) -> Dict[str, int]:
     """Returns the preset index alphabet with the given name.
     :param name: the preset name: ``default`` or XXX or XXX.
@@ -121,8 +118,6 @@ def set_index_alphabet(
                 raise ValueError(err_msg)
                 
         _current_index_alphabet = dict(index_alphabet)
-        INDEX_ALPHABET = tuple(_current_index_alphabet)
-        INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
