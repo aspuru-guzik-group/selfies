@@ -97,7 +97,7 @@ def set_index_alphabet(
             err_msg = "invalid length '{}' for index_alphabet".format(len(index_alphabet))
             raise ValueError(err_msg)
         
-        # error check for values
+        # error checking for values
         if not list(set(index_alphabet.values())) == [i for i in range(16)]:
             err_msg = "invalid index values in index_alphabet"
             raise ValueError(err_msg)
