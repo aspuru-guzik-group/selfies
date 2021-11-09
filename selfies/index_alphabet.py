@@ -88,7 +88,7 @@ def set_index_alphabet(
         SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
 
     if isinstance(index_alphabet, str):
-        _current_constraints = get_preset_index_alphabet(index_alphabet)
+        _current_index_alphabet = get_preset_index_alphabet(index_alphabet)
 
     elif isinstance(index_alphabet, dict):
         
