@@ -3,9 +3,9 @@ from itertools import product
 from typing import Dict, Set, Union
 
 from selfies.constants import ELEMENTS
-from selfies.index_alphabet import _current_index_alphabet 
+from selfies.index_alphabet import get_current_index_alphabet
 
-INDEX_ALPHABET = tuple(_current_index_alphabet)
+INDEX_ALPHABET = tuple(get_current_index_alphabet())
 
 _DEFAULT_CONSTRAINTS = {
     "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
