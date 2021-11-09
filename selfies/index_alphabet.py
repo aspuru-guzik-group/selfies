@@ -119,6 +119,3 @@ def set_index_alphabet(
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
-        
-    # clear cache since we changed index alphabet
-    get_current_index_alphabet.cache_clear()
