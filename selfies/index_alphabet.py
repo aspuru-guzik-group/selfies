@@ -1,4 +1,5 @@
 import functools
+import re
 from itertools import product
 from typing import Dict, Set, Union
 
@@ -53,6 +54,27 @@ def get_current_index_alphabet() -> Dict[str, int]:
     return dict(_current_index_alphabet)
 
 
+
+SELFIES_ATOM_PATTERN = re.compile(
+    r"^[\[]"  # opening square bracket [
+    r"([=#/\\]?)"  # bond char
+    r"(\d*)"  # isotope number (optional, e.g. 123, 26)
+    r"([A-Z][a-z]?)"  # element symbol
+    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
+    r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3)
+    r"((?:[+-][1-9]+)?)"  # charge (optional, e.g. +1)
+    r"[]]$"  # closing square bracket ]
+)
+
+SELFIES_SPECIAL_TOKENS = set()
+for i in range(1, 4):
+    SELFIES_SPECIAL_TOKENS.add("[Ring{}]".format(i))
+    SELFIES_SPECIAL_TOKENS.add("[=Ring{}]".format(i))
+    SELFIES_SPECIAL_TOKENS.add("[Branch{}]".format(i))
+    SELFIES_SPECIAL_TOKENS.add("[=Branch{}]".format(i))
+    SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
+
+
 def set_index_alphabet(
         index_alphabet: Union[str, Dict[str, int]] = "default"
 ) -> None:
@@ -61,8 +83,7 @@ def set_index_alphabet(
     the preset named ``index_alphabet``
     (see :func:`selfies.get_preset_index_alphabets`).
     Otherwise, the input is a dictionary representing the new index alphabet.
-    This dictionary maps tokens (the keys) to index values 
-    (the values).
+    This dictionary maps tokens (the keys) to index values (the values).
     :param index_alphabet: the name of a preset, or a dictionary
         representing the new index alphabet.
     :return: ``None``.
@@ -74,14 +95,28 @@ def set_index_alphabet(
         _current_constraints = get_preset_index_alphabets(index_alphabet)
 
     elif isinstance(index_alphabet, dict):
+        
+        # error check for dictionary length
+        if not len(index_alphabet) == 16:
+            err_msg = "invalid length '{}' for index_alphabet".format(len(index_alphabet))
+            raise ValueError(err_msg)
+        
+        # error check for values
+        if not list(set(index_alphabet.values())) == [i for i in range(16)]:
+            err_msg = "invalid index values in index_alphabet"
+            raise ValueError(err_msg)
 
         for key, value in index_alphabet.items():
             
-            #NEED CODE TO DETERMINE IF SYMBOL IS VALID SELFIES SYMBOL
-                
-            if not (isinstance(value, int) and value >= 0 and value <= 16):
-                err_msg = "invalid value at " \
-                          "index_alphabet['{}'] = {}".format(key, value)
+            # error checking for keys
+            valid = False
+            m = SELFIES_ATOM_PATTERN.match(key)
+            if m is not None:
+                valid = True
+            if key in SELFIES_SPECIAL_TOKENS:
+                valid = True
+            if not valid:
+                err_msg = "invalid key '{}' in index_alphabet".format(key)
                 raise ValueError(err_msg)
                 
 
