@@ -40,7 +40,7 @@ def get_preset_index_alphabet(name: str) -> Dict[str, int]:
         raise ValueError("unrecognized preset name '{}'".format(name))
     return dict(_PRESET_INDEX_ALPHABETS[name])
 
-
+@functools.lru_cache()
 def get_current_index_alphabet() -> Dict[str, int]:
     """Returns the semantic constraints that :mod:`selfies` is currently
     operating on.
@@ -119,3 +119,4 @@ def set_index_alphabet(
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
+    get_current_index_alphabet.cache_clear()
