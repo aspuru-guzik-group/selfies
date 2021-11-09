@@ -5,6 +5,8 @@ from typing import Dict, Set, Union
 from selfies.constants import ELEMENTS
 from selfies.index_alphabet import _current_index_alphabet 
 
+INDEX_ALPHABET = tuple(_current_index_alphabet)
+
 _DEFAULT_CONSTRAINTS = {
     "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
     "B": 3, "B+1": 2, "B-1": 4,
@@ -175,7 +177,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
         alphabet_subset.add("[=Branch{}]".format(i))
         alphabet_subset.add("[#Branch{}]".format(i))
 
-    alphabet_subset.update(tuple(_current_index_alphabet))
+    alphabet_subset.update(INDEX_ALPHABET)
 
     return alphabet_subset
 
