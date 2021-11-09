@@ -77,27 +77,27 @@ def next_ring_state(
 
 
 def get_index_from_selfies(*symbols: List[str]) -> int:
-    INDEX_ALPHABET = tuple(get_current_index_alphabet())
-    INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
+    index_alphabet = tuple(get_current_index_alphabet())
+    index_code = {c: i for i, c in enumerate(index_alphabet)}
     index = 0
     for i, c in enumerate(reversed(symbols)):
-        index += INDEX_CODE.get(c, 0) * (len(INDEX_CODE) ** i)
+        index += index_code.get(c, 0) * (len(index_code) ** i)
     return index
 
 
 def get_selfies_from_index(index: int) -> List[str]:
     
-    INDEX_ALPHABET = tuple(get_current_index_alphabet())
+    index_alphabet = tuple(get_current_index_alphabet())
     
     if index < 0:
         raise IndexError()
     elif index == 0:
-        return [INDEX_ALPHABET[0]]
+        return [index_alphabet[0]]
 
     symbols = []
-    base = len(INDEX_ALPHABET)
+    base = len(index_alphabet)
     while index:
-        symbols.append(INDEX_ALPHABET[index % base])
+        symbols.append(index_alphabet[index % base])
         index //= base
     return symbols[::-1]
 
