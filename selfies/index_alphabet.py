@@ -90,6 +90,8 @@ def set_index_alphabet(
     """
 
     global _current_index_alphabet
+    global INDEX_ALPHABET
+    global INDEX_CODE
 
     if isinstance(index_alphabet, str):
         _current_constraints = get_preset_index_alphabets(index_alphabet)
@@ -121,6 +123,8 @@ def set_index_alphabet(
                 
 
         _current_index_alphabet = dict(index_alphabet)
+        INDEX_ALPHABET = tuple(_current_index_alphabet)
+        INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
