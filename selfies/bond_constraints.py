@@ -2,7 +2,8 @@ import functools
 from itertools import product
 from typing import Dict, Set, Union
 
-from selfies.constants import ELEMENTS, INDEX_ALPHABET
+from selfies.constants import ELEMENTS
+from selfies.index_alphabet import INDEX_ALPHABET
 
 _DEFAULT_CONSTRAINTS = {
     "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
