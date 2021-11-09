@@ -9,9 +9,11 @@ from selfies.constants import (
 )
 
 from selfies.index_alphabet import (
-    INDEX_ALPHABET,
-    INDEX_CODE
+    _current_index_alphabet 
 )
+
+INDEX_ALPHABET = tuple(_current_index_alphabet)
+INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
