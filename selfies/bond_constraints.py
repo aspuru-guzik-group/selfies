@@ -3,7 +3,7 @@ from itertools import product
 from typing import Dict, Set, Union
 
 from selfies.constants import ELEMENTS
-from selfies.index_alphabet import INDEX_ALPHABET
+from selfies.index_alphabet import _current_index_alphabet 
 
 _DEFAULT_CONSTRAINTS = {
     "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
@@ -175,7 +175,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
         alphabet_subset.add("[=Branch{}]".format(i))
         alphabet_subset.add("[#Branch{}]".format(i))
 
-    alphabet_subset.update(INDEX_ALPHABET)
+    alphabet_subset.update(tuple(_current_index_alphabet))
 
     return alphabet_subset
 
