@@ -58,7 +58,7 @@ def set_index_alphabet(
     """Updates the index alphabet that :mod:`selfies` operates on.
     If the input is a string, the new index alphabet is taken to be
     the preset named ``index_alphabet``
-    (see :func:`selfies.get_preset_index_alphabets`).
+    (see :func:`selfies.get_preset_index_alphabet`).
     Otherwise, the input is a dictionary representing the new index alphabet.
     This dictionary maps tokens (the keys) to index values (the values).
     :param index_alphabet: the name of a preset, or a dictionary
@@ -88,7 +88,7 @@ def set_index_alphabet(
         SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
 
     if isinstance(index_alphabet, str):
-        _current_constraints = get_preset_index_alphabets(index_alphabet)
+        _current_constraints = get_preset_index_alphabet(index_alphabet)
 
     elif isinstance(index_alphabet, dict):
         
