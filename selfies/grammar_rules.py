@@ -13,8 +13,6 @@ from selfies.index_alphabet import get_current_index_alphabet
 INDEX_ALPHABET = tuple(get_current_index_alphabet())
 INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
-print(INDEX_ALPHABET)
-
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
 
