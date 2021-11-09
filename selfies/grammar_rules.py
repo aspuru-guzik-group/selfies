@@ -5,10 +5,14 @@ from typing import Any, List, Optional, Tuple
 
 from selfies.constants import (
     ELEMENTS,
-    INDEX_ALPHABET,
-    INDEX_CODE,
     ORGANIC_SUBSET
 )
+
+from selfies.index_alphabet import (
+    INDEX_ALPHABET,
+    INDEX_CODE
+)
+
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
 
