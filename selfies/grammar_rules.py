@@ -10,9 +10,6 @@ from selfies.constants import (
 
 from selfies.index_alphabet import get_current_index_alphabet
 
-INDEX_ALPHABET = tuple(get_current_index_alphabet())
-INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
-
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
 
@@ -82,6 +79,8 @@ def next_ring_state(
 
 
 def get_index_from_selfies(*symbols: List[str]) -> int:
+    INDEX_ALPHABET = tuple(get_current_index_alphabet())
+    INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
     index = 0
     for i, c in enumerate(reversed(symbols)):
         index += INDEX_CODE.get(c, 0) * (len(INDEX_CODE) ** i)
@@ -89,6 +88,9 @@ def get_index_from_selfies(*symbols: List[str]) -> int:
 
 
 def get_selfies_from_index(index: int) -> List[str]:
+    
+    INDEX_ALPHABET = tuple(get_current_index_alphabet())
+    
     if index < 0:
         raise IndexError()
     elif index == 0:
