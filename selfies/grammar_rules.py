@@ -8,11 +8,9 @@ from selfies.constants import (
     ORGANIC_SUBSET
 )
 
-from selfies.index_alphabet import (
-    _current_index_alphabet 
-)
+from selfies.index_alphabet import get_current_index_alphabet
 
-INDEX_ALPHABET = tuple(_current_index_alphabet)
+INDEX_ALPHABET = tuple(get_current_index_alphabet())
 INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
 from selfies.mol_graph import Atom
