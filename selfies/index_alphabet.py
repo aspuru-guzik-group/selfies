@@ -1,0 +1,70 @@
+import functools
+from itertools import product
+from typing import Dict, Set, Union
+
+
+_DEFAULT_INDEX_ALPHABET = {
+    "[C]": 0, 
+    "[Ring1]": 1, 
+    "[Ring2]": 2, 
+    "[Branch1]": 3, 
+    "[=Branch1]": 4, 
+    "[#Branch1]": 5, 
+    "[Branch2]": 6, 
+    "[=Branch2]": 7,
+    "[#Branch2]": 8,
+    "[O]": 9,
+    "[N]": 10,
+    "[=N]": 11,
+    "[=C]": 12,
+    "[#C]": 13,
+    "[S]": 14,
+    "[P]": 15
+}
+
+_PRESET_INDEX_ALPHABETS = {
+    "default": dict(_DEFAULT_INDEX_ALPHABET),
+}
+
+_current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
+
+INDEX_ALPHABET = tuple(_current_index_alphabet)
+INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
+
+def get_preset_index_alphabets(name: str) -> Dict[str, int]:
+
+    if name not in _PRESET_INDEX_ALPHABETS:
+        raise ValueError("unrecognized preset name '{}'".format(name))
+    return dict(_PRESET_INDEX_ALPHABETS[name])
+
+def get_current_index_alphabet() -> Dict[str, int]:
+
+    global _current_index_alphabet
+    return dict(_current_index_alphabet)
+
+
+def set_index_alphabet(
+        index_alphabet: Union[str, Dict[str, int]] = "default"
+) -> None:
+
+    global _current_index_alphabet
+
+    if isinstance(index_alphabet, str):
+        _current_constraints = get_preset_index_alphabets(index_alphabet)
+
+    elif isinstance(index_alphabet, dict):
+
+        for key, value in index_alphabet.items():
+            
+            #NEED CODE TO DETERMINE IF SYMBOL IS VALID SELFIES SYMBOL
+                
+            if not (isinstance(value, int) and value >= 0 and value <= 16):
+                err_msg = "invalid value at " \
+                          "index_alphabet['{}'] = {}".format(key, value)
+                raise ValueError(err_msg)
+                
+
+        _current_index_alphabet = dict(index_alphabet)
+
+    else:
+        raise ValueError("index_alphabet must be a str or dict")
