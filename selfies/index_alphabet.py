@@ -32,9 +32,9 @@ _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
 INDEX_ALPHABET = tuple(_current_index_alphabet)
 INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
 
-def get_preset_index_alphabets(name: str) -> Dict[str, int]:
+def get_preset_index_alphabet(name: str) -> Dict[str, int]:
     """Returns the preset index alphabet with the given name.
-    :param name: the preset name: ``default``.
+    :param name: the preset name: ``default`` or XXX or XXX.
     :return: the preset index alphabet with the specified name, represented as
         a dictionary which maps tokens (the keys) to their index values (the values).
     """
