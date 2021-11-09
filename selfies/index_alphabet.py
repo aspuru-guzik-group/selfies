@@ -53,28 +53,6 @@ def get_current_index_alphabet() -> Dict[str, int]:
     global _current_index_alphabet
     return dict(_current_index_alphabet)
 
-
-
-SELFIES_ATOM_PATTERN = re.compile(
-    r"^[\[]"  # opening square bracket [
-    r"([=#/\\]?)"  # bond char
-    r"(\d*)"  # isotope number (optional, e.g. 123, 26)
-    r"([A-Z][a-z]?)"  # element symbol
-    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
-    r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3)
-    r"((?:[+-][1-9]+)?)"  # charge (optional, e.g. +1)
-    r"[]]$"  # closing square bracket ]
-)
-
-SELFIES_SPECIAL_TOKENS = set()
-for i in range(1, 4):
-    SELFIES_SPECIAL_TOKENS.add("[Ring{}]".format(i))
-    SELFIES_SPECIAL_TOKENS.add("[=Ring{}]".format(i))
-    SELFIES_SPECIAL_TOKENS.add("[Branch{}]".format(i))
-    SELFIES_SPECIAL_TOKENS.add("[=Branch{}]".format(i))
-    SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
-
-
 def set_index_alphabet(
         index_alphabet: Union[str, Dict[str, int]] = "default"
 ) -> None:
@@ -92,6 +70,25 @@ def set_index_alphabet(
     global _current_index_alphabet
     global INDEX_ALPHABET
     global INDEX_CODE
+    
+    SELFIES_ATOM_PATTERN = re.compile(
+    r"^[\[]"  # opening square bracket [
+    r"([=#/\\]?)"  # bond char
+    r"(\d*)"  # isotope number (optional, e.g. 123, 26)
+    r"([A-Z][a-z]?)"  # element symbol
+    r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
+    r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3)
+    r"((?:[+-][1-9]+)?)"  # charge (optional, e.g. +1)
+    r"[]]$"  # closing square bracket ]
+    )
+
+    SELFIES_SPECIAL_TOKENS = set()
+    for i in range(1, 4):
+        SELFIES_SPECIAL_TOKENS.add("[Ring{}]".format(i))
+        SELFIES_SPECIAL_TOKENS.add("[=Ring{}]".format(i))
+        SELFIES_SPECIAL_TOKENS.add("[Branch{}]".format(i))
+        SELFIES_SPECIAL_TOKENS.add("[=Branch{}]".format(i))
+        SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
 
     if isinstance(index_alphabet, str):
         _current_constraints = get_preset_index_alphabets(index_alphabet)
@@ -121,7 +118,6 @@ def set_index_alphabet(
                 err_msg = "invalid key '{}' in index_alphabet".format(key)
                 raise ValueError(err_msg)
                 
-
         _current_index_alphabet = dict(index_alphabet)
         INDEX_ALPHABET = tuple(_current_index_alphabet)
         INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
