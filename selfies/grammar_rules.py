@@ -7,9 +7,7 @@ from selfies.constants import (
     ELEMENTS,
     ORGANIC_SUBSET
 )
-
 from selfies.index_alphabet import get_current_index_alphabet
-
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
 
