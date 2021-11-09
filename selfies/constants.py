@@ -22,17 +22,3 @@ AROMATIC_VALENCES = {
 }
 
 AROMATIC_SUBSET = set(e.lower() for e in AROMATIC_VALENCES)
-
-# =============================================================================
-# SELFIES-specific constants
-# =============================================================================
-
-
-INDEX_ALPHABET = (
-    "[C]", "[Ring1]", "[Ring2]",
-    "[Branch1]", "[=Branch1]", "[#Branch1]",
-    "[Branch2]", "[=Branch2]", "[#Branch2]",
-    "[O]", "[N]", "[=N]", "[=C]", "[#C]", "[S]", "[P]"
-)
-
-INDEX_CODE = {c: i for i, c in enumerate(INDEX_ALPHABET)}
