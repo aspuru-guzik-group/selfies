@@ -157,7 +157,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
     :return: a subset of all SELFIES symbols that are semantically constrained.
     """
     
-    INDEX_ALPHABET = tuple(get_current_index_alphabet())
+    index_alphabet = tuple(get_current_index_alphabet())
 
     alphabet_subset = set()
     bonds = {"": 1, "=": 2, "#": 3}
@@ -177,7 +177,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
         alphabet_subset.add("[=Branch{}]".format(i))
         alphabet_subset.add("[#Branch{}]".format(i))
 
-    alphabet_subset.update(INDEX_ALPHABET)
+    alphabet_subset.update(index_alphabet)
 
     return alphabet_subset
 
