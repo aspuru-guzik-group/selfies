@@ -51,6 +51,11 @@ from .bond_constraints import (
     get_semantic_robust_alphabet,
     set_semantic_constraints
 )
+from .index_alphabet import (
+    get_preset_index_alphabet,
+    get_current_index_alphabet,
+    set_index_alphabet,
+)
 from .decoder import decoder
 from .encoder import encoder
 from .exceptions import DecoderError, EncoderError
