@@ -25,7 +25,7 @@ For comments, bug reports or feature ideas, please send an email to
 mario.krenn@utoronto.ca and alan@aspuru.com.
 """
 
-__version__ = "2.0.0.1"
+__version__ = "2.0.0"
 
 __all__ = [
     "encoder",
@@ -34,6 +34,9 @@ __all__ = [
     "get_semantic_robust_alphabet",
     "get_semantic_constraints",
     "set_semantic_constraints",
+    "get_preset_index_alphabet",
+    "get_current_index_alphabet",
+    "set_index_alphabet",
     "len_selfies",
     "split_selfies",
     "get_alphabet_from_selfies",
