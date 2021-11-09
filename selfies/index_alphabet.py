@@ -40,17 +40,6 @@ def get_preset_index_alphabet(name: str) -> Dict[str, int]:
         raise ValueError("unrecognized preset name '{}'".format(name))
     return dict(_PRESET_INDEX_ALPHABETS[name])
 
-@functools.lru_cache()
-def get_current_index_alphabet() -> Dict[str, int]:
-    """Returns the semantic constraints that :mod:`selfies` is currently
-    operating on.
-    :return: the current semantic constraints, represented as a dictionary
-        which maps tokens (the keys) to their index values (the values).
-    """
-
-    global _current_index_alphabet
-    return dict(_current_index_alphabet)
-
 
 def set_index_alphabet(
         index_alphabet: Union[str, Dict[str, int]] = "default"
@@ -119,4 +108,18 @@ def set_index_alphabet(
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
+        
+    # clear cache since we changed index alphabet
     get_current_index_alphabet.cache_clear()
+
+    
+@functools.lru_cache()
+def get_current_index_alphabet() -> Dict[str, int]:
+    """Returns the semantic constraints that :mod:`selfies` is currently
+    operating on.
+    :return: the current semantic constraints, represented as a dictionary
+        which maps tokens (the keys) to their index values (the values).
+    """
+
+    global _current_index_alphabet
+    return dict(_current_index_alphabet)
