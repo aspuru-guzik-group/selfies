@@ -126,7 +126,7 @@ def update_index_alphabet(
         
         
 def get_index_from_selfies(*symbols: List[str]) -> int:
-    index_alphabet = tuple(sorted(_current_index_alphabet.values()))
+    index_alphabet = tuple(_current_index_alphabet.values())
     index_code = {c: i for i, c in enumerate(index_alphabet)}
     index = 0
     for i, c in enumerate(reversed(symbols)):
@@ -136,7 +136,7 @@ def get_index_from_selfies(*symbols: List[str]) -> int:
 
 def get_selfies_from_index(index: int) -> List[str]:
     
-    index_alphabet = tuple(sorted(_current_index_alphabet.values()))
+    index_alphabet = tuple(_current_index_alphabet.values())
     
     if index < 0:
         raise IndexError()
