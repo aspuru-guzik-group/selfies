@@ -36,7 +36,7 @@ __all__ = [
     "set_semantic_constraints",
     "get_preset_index_alphabet",
     "get_index_alphabet",
-    "set_index_alphabet",
+    "update_index_alphabet",
     "len_selfies",
     "split_selfies",
     "get_alphabet_from_selfies",
@@ -57,7 +57,7 @@ from .bond_constraints import (
 from .index_alphabet import (
     get_preset_index_alphabet,
     get_index_alphabet,
-    set_index_alphabet,
+    update_index_alphabet,
 )
 from .decoder import decoder
 from .encoder import encoder
