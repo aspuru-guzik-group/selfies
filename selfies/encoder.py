@@ -1,5 +1,5 @@
 from selfies.exceptions import EncoderError, SMILESParserError
-from selfies.grammar_rules import get_selfies_from_index
+from selfies.index_alphabet import get_selfies_from_index
 from selfies.utils.linked_list import SinglyLinkedList
 from selfies.utils.smiles_utils import (
     atom_to_smiles,
