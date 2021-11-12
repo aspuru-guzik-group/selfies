@@ -1,7 +1,7 @@
 import functools
 import re
 from itertools import product
-from typing import Dict, Set, Union
+from typing import List, Dict, Set, Union
 
 
 _DEFAULT_INDEX_ALPHABET = {
