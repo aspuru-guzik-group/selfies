@@ -109,7 +109,7 @@ def update_index_alphabet(
             
             # error checking for index values
             if key not in [i for i in range(16)]:
-                err_msg = "invalid index value '{}' in index_alphabet".format(key)
+                err_msg = "Invalid index value '{}' in index_alphabet".format(key)
                 raise ValueError(err_msg)
             
             # error checking for index symbols
@@ -120,7 +120,7 @@ def update_index_alphabet(
             if value in SELFIES_SPECIAL_TOKENS:
                 valid = True
             if not valid:
-                err_msg = "Duplicate index symbol '{}' in index_alphabet".format(value)
+                err_msg = "Invalid index symbol '{}' in index_alphabet".format(value)
                 raise ValueError(err_msg)
                 
         _current_index_alphabet = _updated_index_alphabet
