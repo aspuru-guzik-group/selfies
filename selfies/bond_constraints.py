@@ -3,7 +3,7 @@ from itertools import product
 from typing import Dict, Set, Union
 
 from selfies.constants import ELEMENTS
-from selfies.index_alphabet import get_current_index_alphabet
+from selfies.index_alphabet import get_index_alphabet
 
 _DEFAULT_CONSTRAINTS = {
     "H": 1, "F": 1, "Cl": 1, "Br": 1, "I": 1,
@@ -157,7 +157,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
     :return: a subset of all SELFIES symbols that are semantically constrained.
     """
     
-    index_alphabet = tuple(get_current_index_alphabet())
+    index_alphabet = tuple(get_index_alphabet())
 
     alphabet_subset = set()
     bonds = {"": 1, "=": 2, "#": 3}
