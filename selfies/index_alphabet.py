@@ -28,6 +28,8 @@ _PRESET_INDEX_ALPHABETS = {
 }
 
 _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
+_current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+_current_index_code = {c: i for i, c in enumerate(_current_index_symbols)}
 
 def get_preset_index_alphabet(name: str) -> Dict[int, str]:
     """Returns the preset index alphabet with the given name.
@@ -120,32 +122,29 @@ def update_index_alphabet(
                 raise ValueError(err_msg)
                 
         _current_index_alphabet = _updated_index_alphabet
+        _current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+        _current_index_code = {c: i for i, c in enumerate(_current_index_symbols)}
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
         
         
 def get_index_from_selfies(*symbols: List[str]) -> int:
-    index_alphabet = tuple(_current_index_alphabet.values())
-    index_code = {c: i for i, c in enumerate(index_alphabet)}
     index = 0
     for i, c in enumerate(reversed(symbols)):
-        index += index_code.get(c, 0) * (len(index_code) ** i)
+        index += _current_index_code.get(c, 0) * (len(_current_index_code) ** i)
     return index
 
 
 def get_selfies_from_index(index: int) -> List[str]:
-    
-    index_alphabet = tuple(_current_index_alphabet.values())
-    
     if index < 0:
         raise IndexError()
     elif index == 0:
-        return [index_alphabet[0]]
+        return [_current_index_symbols[0]]
 
     symbols = []
-    base = len(index_alphabet)
+    base = len(_current_index_symbols)
     while index:
-        symbols.append(index_alphabet[index % base])
+        symbols.append(_current_index_symbols[index % base])
         index //= base
     return symbols[::-1]
