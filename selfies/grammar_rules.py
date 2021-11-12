@@ -7,7 +7,6 @@ from selfies.constants import (
     ELEMENTS,
     ORGANIC_SUBSET
 )
-from selfies.index_alphabet import get_index_alphabet
 from selfies.mol_graph import Atom
 from selfies.utils.smiles_utils import smiles_to_bond
 
@@ -74,32 +73,6 @@ def next_ring_state(
     bonds_left = state - bond_order
     next_state = None if (bonds_left == 0) else bonds_left
     return bond_order, next_state
-
-
-def get_index_from_selfies(*symbols: List[str]) -> int:
-    index_alphabet = tuple(get_index_alphabet())
-    index_code = {c: i for i, c in enumerate(index_alphabet)}
-    index = 0
-    for i, c in enumerate(reversed(symbols)):
-        index += index_code.get(c, 0) * (len(index_code) ** i)
-    return index
-
-
-def get_selfies_from_index(index: int) -> List[str]:
-    
-    index_alphabet = tuple(get_index_alphabet())
-    
-    if index < 0:
-        raise IndexError()
-    elif index == 0:
-        return [index_alphabet[0]]
-
-    symbols = []
-    base = len(index_alphabet)
-    while index:
-        symbols.append(index_alphabet[index % base])
-        index //= base
-    return symbols[::-1]
 
 
 # =============================================================================
