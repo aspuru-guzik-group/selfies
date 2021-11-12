@@ -157,7 +157,7 @@ def get_semantic_robust_alphabet() -> Set[str]:
     :return: a subset of all SELFIES symbols that are semantically constrained.
     """
     
-    index_alphabet = tuple(sorted(get_index_alphabet()))
+    index_alphabet = tuple(get_index_alphabet().values())
 
     alphabet_subset = set()
     bonds = {"": 1, "=": 2, "#": 3}
