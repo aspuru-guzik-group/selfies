@@ -28,8 +28,8 @@ _PRESET_INDEX_ALPHABETS = {
 }
 
 _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
+_current_index_alphabet_reversed = {_current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)}
 _current_index_alphabet_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
-_current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
 def get_preset_index_alphabet(name: str) -> Dict[int, str]:
     """Returns the preset index alphabet with the given name.
@@ -126,8 +126,8 @@ def update_index_alphabet(
                 raise ValueError(err_msg)
                 
         _current_index_alphabet = _updated_index_alphabet
+        _current_index_alphabet_reversed = {_current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)}
         _current_index_alphabet_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
-        _current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
