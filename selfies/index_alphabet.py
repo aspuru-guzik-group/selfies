@@ -5,22 +5,22 @@ from typing import Dict, Set, Union
 
 
 _DEFAULT_INDEX_ALPHABET = {
-    "[C]": 0, 
-    "[Ring1]": 1, 
-    "[Ring2]": 2, 
-    "[Branch1]": 3, 
-    "[=Branch1]": 4, 
-    "[#Branch1]": 5, 
-    "[Branch2]": 6, 
-    "[=Branch2]": 7,
-    "[#Branch2]": 8,
-    "[O]": 9,
-    "[N]": 10,
-    "[=N]": 11,
-    "[=C]": 12,
-    "[#C]": 13,
-    "[S]": 14,
-    "[P]": 15
+    0: "[C]", 
+    1: "[Ring1]", 
+    2: "[Ring2]", 
+    3: "[Branch1]", 
+    4: "[=Branch1]", 
+    5: "[#Branch1]", 
+    6: "[Branch2]", 
+    7: "[=Branch2]",
+    8: "[#Branch2]",
+    9: "[O]",
+    10: "[N]",
+    11: "[=N]",
+    12: "[=C]",
+    13: "[#C]",
+    14: "[S]",
+    15: "[P]"
 }
 
 _PRESET_INDEX_ALPHABETS = {
@@ -29,11 +29,11 @@ _PRESET_INDEX_ALPHABETS = {
 
 _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
 
-def get_preset_index_alphabet(name: str) -> Dict[str, int]:
+def get_preset_index_alphabet(name: str) -> Dict[int, str]:
     """Returns the preset index alphabet with the given name.
     :param name: the preset name: ``default`` or XXX or XXX.
     :return: the preset index alphabet with the specified name, represented as
-        a dictionary which maps tokens (the keys) to their index values (the values).
+        a dictionary which maps index values (the keys) to tokens (the values).
     """
 
     if name not in _PRESET_INDEX_ALPHABETS:
@@ -41,26 +41,26 @@ def get_preset_index_alphabet(name: str) -> Dict[str, int]:
     return dict(_PRESET_INDEX_ALPHABETS[name])
 
 
-def get_index_alphabet() -> Dict[str, int]:
+def get_index_alphabet() -> Dict[int, str]:
     """Returns the semantic constraints that :mod:`selfies` is currently
     operating on.
     :return: the current semantic constraints, represented as a dictionary
-        which maps tokens (the keys) to their index values (the values).
+        which maps index values (the keys) to tokens (the values).
     """
 
     global _current_index_alphabet
     return dict(_current_index_alphabet)
 
 
-def set_index_alphabet(
-        index_alphabet: Union[str, Dict[str, int]] = "default"
+def update_index_alphabet(
+        index_alphabet: Union[str, Dict[int, str]] = "default"
 ) -> None:
     """Updates the index alphabet that :mod:`selfies` operates on.
     If the input is a string, the new index alphabet is taken to be
     the preset named ``index_alphabet``
     (see :func:`selfies.get_preset_index_alphabet`).
-    Otherwise, the input is a dictionary representing the new index alphabet.
-    This dictionary maps tokens (the keys) to index values (the values).
+    Otherwise, the input is a dictionary representing updates to the index alphabet.
+    This dictionary maps index values (the keys) to tokens (the values).
     :param index_alphabet: the name of a preset, or a dictionary
         representing the new index alphabet.
     :return: ``None``.
@@ -92,30 +92,60 @@ def set_index_alphabet(
 
     elif isinstance(index_alphabet, dict):
         
-        # error check for dictionary length
-        if not len(index_alphabet) == 16:
-            err_msg = "invalid length '{}' for index_alphabet".format(len(index_alphabet))
-            raise ValueError(err_msg)
+        _updated_index_alphabet = _current_index_alphabet.copy()
+        _updated_index_alphabet.update(index_alphabet)
         
-        # error checking for values
-        if not list(set(index_alphabet.values())) == [i for i in range(16)]:
-            err_msg = "invalid index values in index_alphabet"
+        # error checking for duplicate index symbols
+        if not len(set(_updated_index_alphabet.values())) == 16:
+            l = list(_updated_index_alphabet.values())
+            err_msg = "Duplicate index symbol(s) '{}' in index_alphabet".format(list(set([x for x in l if l.count(x) > 1])))
             raise ValueError(err_msg)
 
-        for key, value in index_alphabet.items():
+        for key, value in _updated_index_alphabet.items():
             
-            # error checking for keys
+            # error checking for index values
+            if key not in [i for i in range(16)]:
+                err_msg = "invalid index value '{}' in index_alphabet".format(key)
+                raise ValueError(err_msg)
+            
+            # error checking for index symbols
             valid = False
-            m = SELFIES_ATOM_PATTERN.match(key)
+            m = SELFIES_ATOM_PATTERN.match(value)
             if m is not None:
                 valid = True
-            if key in SELFIES_SPECIAL_TOKENS:
+            if value in SELFIES_SPECIAL_TOKENS:
                 valid = True
             if not valid:
-                err_msg = "invalid key '{}' in index_alphabet".format(key)
+                err_msg = "Duplicate index symbol '{}' in index_alphabet".format(value)
                 raise ValueError(err_msg)
                 
-        _current_index_alphabet = dict(index_alphabet)
+        _current_index_alphabet = _updated_index_alphabet
 
     else:
         raise ValueError("index_alphabet must be a str or dict")
+        
+        
+def get_index_from_selfies(*symbols: List[str]) -> int:
+    index_alphabet = tuple(sorted(_current_index_alphabet))
+    index_code = {c: i for i, c in enumerate(index_alphabet)}
+    index = 0
+    for i, c in enumerate(reversed(symbols)):
+        index += index_code.get(c, 0) * (len(index_code) ** i)
+    return index
+
+
+def get_selfies_from_index(index: int) -> List[str]:
+    
+    index_alphabet = tuple(sorted(_current_index_alphabet))
+    
+    if index < 0:
+        raise IndexError()
+    elif index == 0:
+        return [index_alphabet[0]]
+
+    symbols = []
+    base = len(index_alphabet)
+    while index:
+        symbols.append(index_alphabet[index % base])
+        index //= base
+    return symbols[::-1]
