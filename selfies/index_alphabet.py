@@ -41,7 +41,7 @@ def get_preset_index_alphabet(name: str) -> Dict[str, int]:
     return dict(_PRESET_INDEX_ALPHABETS[name])
 
 
-def get_current_index_alphabet() -> Dict[str, int]:
+def get_index_alphabet() -> Dict[str, int]:
     """Returns the semantic constraints that :mod:`selfies` is currently
     operating on.
     :return: the current semantic constraints, represented as a dictionary
