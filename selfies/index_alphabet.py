@@ -134,7 +134,7 @@ def update_index_alphabet(
 def get_index_from_selfies(*symbols: List[str]) -> int:
     index = 0
     for i, c in enumerate(reversed(symbols)):
-        index += _current_index_alphabet.get(i, 0) * (len(_current_index_alphabet) ** c)
+        index += _current_index_alphabet.get(c, 0) * (len(_current_index_alphabet) ** i)
     return index
 
 
