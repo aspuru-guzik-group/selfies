@@ -100,12 +100,6 @@ def update_index_alphabet(
         
         _updated_index_alphabet = _current_index_alphabet.copy()
         _updated_index_alphabet.update(index_alphabet)
-        
-        # error checking for duplicate index symbols
-        if not len(set(_updated_index_alphabet.values())) == 16:
-            l = list(_updated_index_alphabet.values())
-            err_msg = "Duplicate index symbol(s) '{}' in index_alphabet".format(list(set([x for x in l if l.count(x) > 1])))
-            raise ValueError(err_msg)
 
         for key, value in _updated_index_alphabet.items():
             
@@ -124,6 +118,12 @@ def update_index_alphabet(
             if not valid:
                 err_msg = "Invalid index symbol '{}' in index_alphabet".format(value)
                 raise ValueError(err_msg)
+                
+        # error checking for duplicate index symbols
+        if not len(set(_updated_index_alphabet.values())) == 16:
+            l = list(_updated_index_alphabet.values())
+            err_msg = "Duplicate index symbol(s) '{}' in index_alphabet".format(list(set([x for x in l if l.count(x) > 1])))
+            raise ValueError(err_msg) 
                 
         _current_index_alphabet = _updated_index_alphabet
         _current_index_alphabet_reversed = {_current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)}
