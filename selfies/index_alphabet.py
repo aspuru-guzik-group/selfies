@@ -93,6 +93,8 @@ def update_index_alphabet(
 
     if isinstance(index_alphabet, str):
         _current_index_alphabet = get_preset_index_alphabet(index_alphabet)
+        _current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+        _current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
     elif isinstance(index_alphabet, dict):
         
