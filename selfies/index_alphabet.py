@@ -28,7 +28,7 @@ _PRESET_INDEX_ALPHABETS = {
 }
 
 _current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
-_current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+_current_index_alphabet_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
 _current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
 def get_preset_index_alphabet(name: str) -> Dict[int, str]:
@@ -69,7 +69,7 @@ def update_index_alphabet(
     """
 
     global _current_index_alphabet
-    global _current_index_symbols
+    global _current_index_alphabet_symbols
     global _current_index_alphabet_reversed
     
     SELFIES_ATOM_PATTERN = re.compile(
@@ -93,7 +93,7 @@ def update_index_alphabet(
 
     if isinstance(index_alphabet, str):
         _current_index_alphabet = get_preset_index_alphabet(index_alphabet)
-        _current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+        _current_index_alphabet_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
         _current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
     elif isinstance(index_alphabet, dict):
@@ -126,7 +126,7 @@ def update_index_alphabet(
                 raise ValueError(err_msg)
                 
         _current_index_alphabet = _updated_index_alphabet
-        _current_index_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
+        _current_index_alphabet_symbols = tuple([symbol for index_value, symbol in sorted(_current_index_alphabet.items())])
         _current_index_alphabet_reversed = {c: i for i, c in enumerate(_current_index_symbols)}
 
     else:
@@ -144,11 +144,11 @@ def get_selfies_from_index(index: int) -> List[str]:
     if index < 0:
         raise IndexError()
     elif index == 0:
-        return [_current_index_symbols[0]]
+        return [_current_index_alphabet_symbols[0]]
 
     symbols = []
-    base = len(_current_index_symbols)
+    base = len(_current_index_alphabet_symbols)
     while index:
-        symbols.append(_current_index_symbols[index % base])
+        symbols.append(_current_index_alphabet_symbols[index % base])
         index //= base
     return symbols[::-1]
