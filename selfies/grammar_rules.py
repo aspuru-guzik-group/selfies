@@ -1,7 +1,7 @@
 import functools
 import itertools
 import re
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 from selfies.constants import (
     ELEMENTS,
