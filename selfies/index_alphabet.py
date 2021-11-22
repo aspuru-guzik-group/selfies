@@ -128,9 +128,9 @@ def update_index_alphabet(
 
         # error checking for duplicate index symbols
         if not len(set(_updated_index_alphabet.values())) == 16:
-            l = list(_updated_index_alphabet.values())
+            symbol_list = list(_updated_index_alphabet.values())
             err_msg = "Duplicate index symbol(s) '{}' in index_alphabet_updates".format(
-                list(set([x for x in l if l.count(x) > 1]))
+                list(set([x for x in symbol_list if symbol_list.count(x) > 1]))
             )
             raise ValueError(err_msg)
 
