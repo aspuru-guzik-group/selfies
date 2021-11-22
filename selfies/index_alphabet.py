@@ -99,7 +99,7 @@ def update_index_alphabet(
         _index_alphabet_reversed = {
             _index_alphabet.get(c): c for i, c in enumerate(_index_alphabet)
         }
-        _index_alphabet = tuple(
+        _index_alphabet_symbols = tuple(
             [symbol for index_value, symbol in sorted(_index_alphabet.items())]
         )
 
