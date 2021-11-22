@@ -25,12 +25,12 @@ _PRESET_INDEX_ALPHABETS = {
     "default": dict(_DEFAULT_INDEX_ALPHABET),
 }
 
-_current_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
-_current_index_alphabet_reversed = {
-    _current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)
+_index_alphabet = _PRESET_INDEX_ALPHABETS["default"]
+_index_alphabet_symbols = {
+    _index_alphabet.get(c): c for i, c in enumerate(_index_alphabet)
 }
-_current_index_alphabet_symbols = tuple(
-    [symbol for index_value, symbol in sorted(_current_index_alphabet.items())]
+_index_alphabet_reversed = tuple(
+    [symbol for index_value, symbol in sorted(_index_alphabet.items())]
 )
 
 
@@ -53,27 +53,27 @@ def get_index_alphabet() -> Dict[int, str]:
         which maps index values (the keys) to tokens (the values).
     """
 
-    global _current_index_alphabet
-    return dict(_current_index_alphabet)
+    global _index_alphabet
+    return dict(_index_alphabet)
 
 
 def update_index_alphabet(
-        index_alphabet: Union[str, Dict[int, str]] = "default"
+        index_alphabet_updates: Union[str, Dict[int, str]] = "default"
 ) -> None:
     """Updates the index alphabet that :mod:`selfies` operates on.
     If the input is a string, the new index alphabet is taken to be
-    the preset named ``index_alphabet``
+    the preset named ``index_alphabet_updates``
     (see :func:`selfies.get_preset_index_alphabet`).
     Otherwise, the input is a dictionary with updates for the index alphabet.
     This dictionary maps index values (the keys) to tokens (the values).
-    :param index_alphabet: the name of a preset, or a dictionary
+    :param index_alphabet_updates: the name of a preset, or a dictionary
         representing the new index alphabet.
     :return: ``None``.
     """
 
-    global _current_index_alphabet
-    global _current_index_alphabet_symbols
-    global _current_index_alphabet_reversed
+    global _index_alphabet
+    global _index_alphabet_symbols
+    global _index_alphabet_reversed
 
     SELFIES_ATOM_PATTERN = re.compile(
         r"^[\[]"  # opening square bracket [
@@ -94,25 +94,25 @@ def update_index_alphabet(
         SELFIES_SPECIAL_TOKENS.add("[=Branch{}]".format(i))
         SELFIES_SPECIAL_TOKENS.add("[#Branch{}]".format(i))
 
-    if isinstance(index_alphabet, str):
-        _current_index_alphabet = get_preset_index_alphabet(index_alphabet)
-        _current_index_alphabet_reversed = {
-            _current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)
+    if isinstance(index_alphabet_updates, str):
+        _index_alphabet = get_preset_index_alphabet(index_alphabet_updates)
+        _index_alphabet_reversed = {
+            _index_alphabet.get(c): c for i, c in enumerate(_index_alphabet)
         }
-        _current_index_alphabet_symbols = tuple(
-            [symbol for index_value, symbol in sorted(_current_index_alphabet.items())]
+        _index_alphabet = tuple(
+            [symbol for index_value, symbol in sorted(_index_alphabet.items())]
         )
 
-    elif isinstance(index_alphabet, dict):
+    elif isinstance(index_alphabet_updates, dict):
 
-        _updated_index_alphabet = _current_index_alphabet.copy()
-        _updated_index_alphabet.update(index_alphabet)
+        _updated_index_alphabet = _index_alphabet.copy()
+        _updated_index_alphabet.update(index_alphabet_updates)
 
         for key, value in _updated_index_alphabet.items():
 
             # error checking for index values
             if key not in [i for i in range(16)]:
-                err_msg = "Invalid index value '{}' in index_alphabet".format(key)
+                err_msg = "Invalid index value '{}' in index_alphabet_updates".format(key)
                 raise ValueError(err_msg)
 
             # error checking for index symbols
@@ -123,23 +123,23 @@ def update_index_alphabet(
             if value in SELFIES_SPECIAL_TOKENS:
                 valid = True
             if not valid:
-                err_msg = "Invalid index symbol '{}' in index_alphabet".format(value)
+                err_msg = "Invalid index symbol '{}' in index_alphabet_updates".format(value)
                 raise ValueError(err_msg)
 
         # error checking for duplicate index symbols
         if not len(set(_updated_index_alphabet.values())) == 16:
             l = list(_updated_index_alphabet.values())
-            err_msg = "Duplicate index symbol(s) '{}' in index_alphabet".format(
+            err_msg = "Duplicate index symbol(s) '{}' in index_alphabet_updates".format(
                 list(set([x for x in l if l.count(x) > 1]))
             )
             raise ValueError(err_msg)
 
-        _current_index_alphabet = _updated_index_alphabet
-        _current_index_alphabet_reversed = {
-            _current_index_alphabet.get(c): c for i, c in enumerate(_current_index_alphabet)
+        _index_alphabet = _updated_index_alphabet
+        _index_alphabet_reversed = {
+            _index_alphabet.get(c): c for i, c in enumerate(_index_alphabet)
         }
-        _current_index_alphabet_symbols = tuple(
-            [symbol for index_value, symbol in sorted(_current_index_alphabet.items())]
+        _index_alphabet_symbols = tuple(
+            [symbol for index_value, symbol in sorted(_index_alphabet.items())]
         )
 
     else:
@@ -149,7 +149,7 @@ def update_index_alphabet(
 def get_index_from_selfies(*symbols: List[str]) -> int:
     index = 0
     for i, c in enumerate(reversed(symbols)):
-        index += _current_index_alphabet_reversed.get(c, 0) * (len(_current_index_alphabet_reversed) ** i)
+        index += _index_alphabet_reversed.get(c, 0) * (16 ** i)
     return index
 
 
@@ -157,11 +157,11 @@ def get_selfies_from_index(index: int) -> List[str]:
     if index < 0:
         raise IndexError()
     elif index == 0:
-        return [_current_index_alphabet_symbols[0]]
+        return [_index_alphabet_symbols[0]]
 
     symbols = []
-    base = len(_current_index_alphabet_symbols)
+    base = len(_index_alphabet_symbols)
     while index:
-        symbols.append(_current_index_alphabet_symbols[index % base])
+        symbols.append(_index_alphabet_symbols[index % base])
         index //= base
     return symbols[::-1]
