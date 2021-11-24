@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Tuple
 
 from selfies.bond_constraints import get_bonding_capacity
 from selfies.constants import AROMATIC_VALENCES
@@ -78,6 +78,7 @@ class MolecularGraph:
         self._bond_counts = list()  # stores number of bonds an atom has made
         self._ring_bond_flags = list()  # stores if an atom makes a ring bond
         self._delocal_subgraph = dict()  # delocalization subgraph
+        self._attribution = dict() # attribution of how each atom/bond was added
 
     def __len__(self):
         return len(self._atoms)
@@ -89,6 +90,11 @@ class MolecularGraph:
 
     def has_out_ring_bond(self, src: int) -> bool:
         return self._ring_bond_flags[src]
+
+    def get_attribution(self, o: Union[DirectedBond, Atom]) -> List[Tuple[int, str]]:
+        if o in self._attribution:
+            return self._attribution[o]
+        return None
 
     def get_roots(self) -> List[int]:
         return self._roots
@@ -108,7 +114,7 @@ class MolecularGraph:
     def get_bond_count(self, idx: int) -> int:
         return self._bond_counts[idx]
 
-    def add_atom(self, atom: Atom, mark_root: bool = False) -> None:
+    def add_atom(self, atom: Atom, mark_root: bool = False) -> Atom:
         atom.index = len(self)
 
         if mark_root:
@@ -119,11 +125,15 @@ class MolecularGraph:
         self._ring_bond_flags.append(False)
         if atom.is_aromatic:
             self._delocal_subgraph[atom.index] = list()
+        return atom
+
+    def add_attribution(self, o: Union[DirectedBond, Atom], attr: List[Tuple[int, str]]) -> None:
+        self._attribution[o] = attr
 
     def add_bond(
             self, src: int, dst: int,
             order: Union[int, float], stereo: str
-    ) -> None:
+    ) -> DirectedBond:
         assert src < dst
 
         bond = DirectedBond(src, dst, order, stereo, False)
@@ -134,6 +144,7 @@ class MolecularGraph:
         if order == 1.5:
             self._delocal_subgraph.setdefault(src, []).append(dst)
             self._delocal_subgraph.setdefault(dst, []).append(src)
+        return bond
 
     def add_placeholder_bond(self, src: int) -> int:
         out_edges = self._adj_list[src]

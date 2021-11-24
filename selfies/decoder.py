@@ -50,7 +50,7 @@ def decoder(selfies: str, compatible: bool = False) -> str:
     rings = []
     for s in selfies.split("."):
         _derive_mol_from_symbols(
-            symbol_iter=_tokenize_selfies(s, compatible),
+            symbol_iter=enumerate(_tokenize_selfies(s, compatible)),
             mol=mol,
             selfies=selfies,
             max_derive=float("inf"),
@@ -83,16 +83,18 @@ def _tokenize_selfies(selfies, compatible):
 
 def _derive_mol_from_symbols(
         symbol_iter, mol, selfies, max_derive,
-        init_state, root_atom, rings
+        init_state, root_atom, rings, _attribute_stack = None
 ):
     n_derived = 0
     state = init_state
     prev_atom = root_atom
+    if _attribute_stack is None:
+        _attribute_stack = []
 
     while (state is not None) and (n_derived < max_derive):
 
         try:  # retrieve next symbol
-            symbol = next(symbol_iter)
+            index, symbol = next(symbol_iter)
             n_derived += 1
         except StopIteration:
             break
@@ -113,7 +115,7 @@ def _derive_mol_from_symbols(
                 Q = _read_index_from_selfies(symbol_iter, n_symbols=n)
                 n_derived += n + _derive_mol_from_symbols(
                     symbol_iter, mol, selfies, (Q + 1),
-                    init_state=binit_state, root_atom=prev_atom, rings=rings
+                    init_state=binit_state, root_atom=prev_atom, rings=rings, _attribute_stack = _attribute_stack + [index, symbol]
                 )
 
         # Case 2: Ring symbol (e.g. [Ring2])
@@ -151,11 +153,14 @@ def _derive_mol_from_symbols(
             bond_order, next_state = next_atom_state(bond_order, cap, state)
             if bond_order == 0:
                 if state == 0:
-                    mol.add_atom(atom, True)
+                    o = mol.add_atom(atom, True)
+                    mol.add_attribution(o, _attribute_stack + [(index, symbol)])
             else:
-                mol.add_atom(atom)
+                o = mol.add_atom(atom)
+                mol.add_attribution(o, _attribute_stack + [(index, symbol)])
                 src, dst = prev_atom.index, atom.index
-                mol.add_bond(src=src, dst=dst, order=bond_order, stereo=stereo)
+                o = mol.add_bond(src=src, dst=dst, order=bond_order, stereo=stereo)
+                mol.add_attribution(o, _attribute_stack + [(index, symbol)])
             prev_atom = atom
 
         if next_state is None:
@@ -183,7 +188,7 @@ def _read_index_from_selfies(symbol_iter, n_symbols):
     index_symbols = []
     for _ in range(n_symbols):
         try:
-            index_symbols.append(next(symbol_iter))
+            index_symbols.append(next(symbol_iter)[-1])
         except StopIteration:
             index_symbols.append(None)
     return get_index_from_selfies(*index_symbols)
