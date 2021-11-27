@@ -133,3 +133,17 @@ def test_malformed_selfies_decoder():
 
 def random_choices(population, k):  # random.choices was new in Python v3.6
     return [random.choice(population) for _ in range(k)]
+
+
+def test_decoder_attribution():
+    sm, am = sf.decoder(
+        "[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]", attribute=True)
+    print(am)
+
+    # check that P lined up
+    for ta in am:
+        if ta[0] == 'P':
+            for i, v in ta[1]:
+                if v == '[P]':
+                    return
+    raise ValueError('Failed to find P in attribution map')
