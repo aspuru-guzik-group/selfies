@@ -8,7 +8,7 @@ from selfies.utils.smiles_utils import (
 )
 
 
-def encoder(smiles: str, strict: bool = True) -> str:
+def encoder(smiles: str, strict: bool = True, attribute: bool = False) -> str:
     """Translates a SMILES string into its corresponding SELFIES string.
 
     This translation is deterministic and does not depend on the
@@ -33,7 +33,10 @@ def encoder(smiles: str, strict: bool = True) -> str:
     :param strict: if ``True``, this function will check that the
         input SMILES string obeys the semantic constraints.
         Defaults to ``True``.
-    :return: a SELFIES string translated from the input SMILES string.
+    :param attribute: if an attribution should be returned
+    :return: a SELFIES string translated from the input SMILES string if
+             attribute is ``False``, otherwise a tuple is returned of
+             SELFIES string and attribution list.
     :raises EncoderError:  if the input SMILES string is invalid,
         cannot be kekulized, or violates the semantic constraints with
         ``strict=True``.
@@ -79,10 +82,13 @@ def encoder(smiles: str, strict: bool = True) -> str:
             atom.invert_chirality()
 
     fragments = []
+    attribution_map = []
     for root in mol.get_roots():
-        derived = list(_fragment_to_selfies(mol, None, root))
+        derived = list(_fragment_to_selfies(
+            mol, None, root, attribution_map))
         fragments.append("".join(derived))
-    return ".".join(fragments)
+    result = ".".join(fragments), attribution_map
+    return result if attribute else result[0]
 
 
 def _check_bond_constraints(mol, smiles):
@@ -130,13 +136,15 @@ def _should_invert_chirality(mol, atom):
     return count % 2 != 0  # if odd permutation, should invert chirality
 
 
-def _fragment_to_selfies(mol, bond_into_root, root):
+def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
     derived = SinglyLinkedList()
 
     bond_into_curr, curr = bond_into_root, root
     while True:
         curr_atom = mol.get_atom(curr)
-        derived.append(_atom_to_selfies(bond_into_curr, curr_atom))
+        token = _atom_to_selfies(bond_into_curr, curr_atom)
+        derived.append(token)
+        attribution_map.append((token, mol.get_attribution(curr_atom)))
 
         out_bonds = mol.get_out_dirbonds(curr)
         for i, bond in enumerate(out_bonds):
@@ -154,14 +162,19 @@ def _fragment_to_selfies(mol, bond_into_root, root):
                 )
 
                 derived.append(ring_symbol)
+                attribution_map.append(
+                    (ring_symbol, mol.get_attribution(bond)))
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
+                    attribution_map.append(
+                        (symbol, mol.get_attribution(bond)))
 
             elif i == len(out_bonds) - 1:
                 bond_into_curr, curr = bond, bond.dst
 
             else:
-                branch = _fragment_to_selfies(mol, bond, bond.dst)
+                branch = _fragment_to_selfies(
+                    mol, bond, bond.dst, attribution_map)
                 Q_as_symbols = get_selfies_from_index(len(branch) - 1)
                 branch_symbol = "[{}Branch{}]".format(
                     _bond_to_selfies(bond, show_stereo=False),
@@ -169,8 +182,12 @@ def _fragment_to_selfies(mol, bond_into_root, root):
                 )
 
                 derived.append(branch_symbol)
+                attribution_map.append(
+                    (branch_symbol, mol.get_attribution(bond)))
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
+                    attribution_map.append(
+                        (symbol, mol.get_attribution(bond)))
                 derived.extend(branch)
 
         # end of chain

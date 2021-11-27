@@ -138,8 +138,6 @@ def random_choices(population, k):  # random.choices was new in Python v3.6
 def test_decoder_attribution():
     sm, am = sf.decoder(
         "[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]", attribute=True)
-    print(am)
-
     # check that P lined up
     for ta in am:
         if ta[0] == 'P':
@@ -147,3 +145,16 @@ def test_decoder_attribution():
                 if v == '[P]':
                     return
     raise ValueError('Failed to find P in attribution map')
+
+
+def test_encoder_attribution():
+    s, am = sf.encoder(
+        "C1([O-])C=CC=C1Cl", attribute=True)
+    print(am)
+    # check that Cl lined up
+    for ta in am:
+        if ta[0] == '[Cl]':
+            for i, v in ta[1]:
+                if v == 'Cl':
+                    return
+    raise ValueError('Failed to find Cl in attribution map')

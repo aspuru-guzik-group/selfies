@@ -37,18 +37,23 @@ class SMILESToken:
     def __init__(
             self,
             bond_idx: Optional[int],
-            start_idx: int, end_idx: int, token_type: SMILESTokenTypes
+            start_idx: int, end_idx: int, token_type: SMILESTokenTypes,
+            token: str
     ):
         self.bond_idx = bond_idx
         self.start_idx = start_idx
         self.end_idx = end_idx
         self.token_type = token_type
+        self.token = token
 
     def extract_bond_char(self, smiles):
         return None if (self.bond_idx is None) else smiles[self.bond_idx]
 
     def extract_symbol(self, smiles):
         return smiles[self.start_idx:self.end_idx]
+
+    def __str__(self):
+        return self.token
 
 
 def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
@@ -62,7 +67,7 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
     while i < len(smiles):
 
         if smiles[i] == ".":
-            yield SMILESToken(None, i, i + 1, SMILESTokenTypes.DOT)
+            yield SMILESToken(None, i, i + 1, SMILESTokenTypes.DOT, smiles[i])
             i += 1
             continue
 
@@ -77,30 +82,36 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 
         elif smiles[i].isalpha():  # organic subset elements
             if smiles[i: i + 2] in ("Br", "Cl"):  # two-letter elements
-                token = SMILESToken(bond_idx, i, i + 2, SMILESTokenTypes.ATOM)
+                token = SMILESToken(bond_idx, i, i + 2,
+                                    SMILESTokenTypes.ATOM, smiles[i: i + 2])
             else:  # one-letter elements (e.g. C, N, ...)
-                token = SMILESToken(bond_idx, i, i + 1, SMILESTokenTypes.ATOM)
+                token = SMILESToken(bond_idx, i, i + 1,
+                                    SMILESTokenTypes.ATOM, smiles[i:i + 1])
 
         elif smiles[i] == "[":  # atoms encased in brackets (e.g. [NH])
             r_idx = smiles.find("]", i + 1)
             if r_idx == -1:
                 raise SMILESParserError(smiles, "hanging bracket [", i)
-            token = SMILESToken(bond_idx, i, r_idx + 1, SMILESTokenTypes.ATOM)
+            token = SMILESToken(bond_idx, i, r_idx + 1,
+                                SMILESTokenTypes.ATOM, smiles[i:r_idx + 1])
 
         elif smiles[i] in ("(", ")"):  # open and closed branch brackets
             if bond_idx is not None:
                 raise SMILESParserError(smiles, "hanging_bond", bond_idx)
-            token = SMILESToken(None, i, i + 1, SMILESTokenTypes.BRANCH)
+            token = SMILESToken(
+                None, i, i + 1, SMILESTokenTypes.BRANCH, smiles[i:i+1])
 
         elif smiles[i].isdigit():  # one-digit ring number
-            token = SMILESToken(bond_idx, i, i + 1, SMILESTokenTypes.RING)
+            token = SMILESToken(bond_idx, i, i + 1,
+                                SMILESTokenTypes.RING, smiles[i:i+1])
 
         elif smiles[i] == "%":  # two-digit ring number (e.g. %12)
             rnum = smiles[i + 1: i + 3]
             if not (rnum.isnumeric() and len(rnum) == 2):
                 err_msg = "invalid ring number '%{}'".format(rnum)
                 raise SMILESParserError(smiles, err_msg, i)
-            token = SMILESToken(bond_idx, i, i + 3, SMILESTokenTypes.RING)
+            token = SMILESToken(bond_idx, i, i + 3,
+                                SMILESTokenTypes.RING, smiles[i:i+3])
 
         else:
             err_msg = "unrecognized symbol '{}'".format(smiles[i])
@@ -199,12 +210,13 @@ def smiles_to_mol(smiles: str) -> MolecularGraph:
 
     mol = MolecularGraph()
     tokens = deque(tokenize_smiles(smiles))
+    i = 0
     while tokens:
-        _derive_mol_from_tokens(mol, smiles, tokens)
+        i = _derive_mol_from_tokens(mol, smiles, tokens, i)
     return mol
 
 
-def _derive_mol_from_tokens(mol, smiles, tokens):
+def _derive_mol_from_tokens(mol, smiles, tokens, i):
     tok = None
     prev_stack = deque()  # keep track of previous atom on the current chain
     branch_stack = deque()  # keep track of open branches
@@ -214,6 +226,7 @@ def _derive_mol_from_tokens(mol, smiles, tokens):
     prev_stack.append(tok)
     while tokens:
         tok = tokens.popleft()
+        i += 1
         bond_char = tok.extract_bond_char(smiles)
         symbol, symbol_type = tok.extract_symbol(smiles), tok.token_type
         prev_atom = prev_stack[-1]
@@ -227,7 +240,7 @@ def _derive_mol_from_tokens(mol, smiles, tokens):
                 err_msg = "invalid atom symbol '{}'".format(symbol)
                 raise SMILESParserError(smiles, err_msg, tok.start_idx)
 
-            curr = _attach_atom(mol, bond_char, curr, prev_atom)
+            curr = _attach_atom(mol, bond_char, curr, prev_atom, i, tok)
             prev_stack.pop()
             prev_stack.append(curr)
             chain_start = False
@@ -276,18 +289,20 @@ def _derive_mol_from_tokens(mol, smiles, tokens):
         rnum, (tok, _, _) = list(ring_log.items())[-1]
         err_msg = "hanging ring number '{}'".format(rnum)
         raise SMILESParserError(smiles, err_msg, tok.start_idx)
+    return i
 
 
-def _attach_atom(mol, bond_char, atom, prev_atom):
+def _attach_atom(mol, bond_char, atom, prev_atom, i, tok):
     is_root = (prev_atom is None)
-    mol.add_atom(atom, mark_root=is_root)
-
+    o = mol.add_atom(atom, mark_root=is_root)
+    mol.add_attribution(o, [(i, str(tok))])
     if not is_root:
         src, dst = prev_atom.index, atom.index
         order, stereo = smiles_to_bond(bond_char)
         if prev_atom.is_aromatic and atom.is_aromatic and (bond_char is None):
             order = 1.5  # handle implicit aromatic bonds, e.g. cc
-        mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
+        o = mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
+        mol.add_attribution(o, [(i, str(tok))])
     return atom
 
 
