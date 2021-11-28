@@ -36,19 +36,19 @@ pip install selfies
 ```
 
 To check if the correct version of ``selfies`` is installed, use
-the following pip command. 
+the following pip command.
 
 ```bash
 pip show selfies
 ```
 
-To upgrade to the latest release of ``selfies`` if you are using an 
-older version, use the following pip command. Please see the 
-[CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md) 
-to review the changes between versions of `selfies`, before upgrading: 
+To upgrade to the latest release of ``selfies`` if you are using an
+older version, use the following pip command. Please see the
+[CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md)
+to review the changes between versions of `selfies`, before upgrading:
 
 ```bash
-pip install selfies --upgrade 
+pip install selfies --upgrade
 ```
 
 
@@ -57,20 +57,20 @@ pip install selfies --upgrade
 ### Overview
 
 Please refer to the [documentation](https://selfiesv2.readthedocs.io/en/latest/),
-which contains a thorough tutorial  for getting started with ``selfies`` 
+which contains a thorough tutorial  for getting started with ``selfies``
 and detailed descriptions of the functions
 that ``selfies`` provides. We summarize some key functions below.
 
-| Function | Description |
-| -------- | ----------- |
-| ``selfies.encoder`` | Translates a SMILES string into its corresponding SELFIES string. |
-| ``selfies.decoder`` | Translates a SELFIES string into its corresponding SMILES string. |
-| ``selfies.set_semantic_constraints`` | Configures the semantic constraints that ``selfies`` operates on. |
-| ``selfies.len_selfies`` | Returns the number of symbols in a SELFIES string. |
-| ``selfies.split_selfies`` | Tokenizes a SELFIES string into its individual symbols. |
-| ``selfies.get_alphabet_from_selfies`` | Constructs an alphabet from an iterable of SELFIES strings. |
-| ``selfies.selfies_to_encoding`` | Converts a SELFIES string into its label and/or one-hot encoding. |
-| ``selfies.encoding_to_selfies`` | Converts a label or one-hot encoding into a SELFIES string. |
+| Function                              | Description                                                       |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| ``selfies.encoder``                   | Translates a SMILES string into its corresponding SELFIES string. |
+| ``selfies.decoder``                   | Translates a SELFIES string into its corresponding SMILES string. |
+| ``selfies.set_semantic_constraints``  | Configures the semantic constraints that ``selfies`` operates on. |
+| ``selfies.len_selfies``               | Returns the number of symbols in a SELFIES string.                |
+| ``selfies.split_selfies``             | Tokenizes a SELFIES string into its individual symbols.           |
+| ``selfies.get_alphabet_from_selfies`` | Constructs an alphabet from an iterable of SELFIES strings.       |
+| ``selfies.selfies_to_encoding``       | Converts a SELFIES string into its label and/or one-hot encoding. |
+| ``selfies.encoding_to_selfies``       | Converts a label or one-hot encoding into a SELFIES string.       |
 
 
 ### Examples
@@ -97,11 +97,48 @@ symbols_benzene = list(sf.split_selfies(benzene_sf))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[=Branch1]']
 ```
 
+#### Explaining Translation:
+
+You can get an "attribution" list that traces the connection between input and output tokens. For example let's see which tokens in the SELFIES string ``[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]`` are responsible for the output SMILES tokens.
+
+```python
+selfies = "[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]"
+smiles, attr = sf.decoder(
+    selfies, attribute=True)
+print('SELFIES', selfies)
+print('SMILES', smiles)
+print('Attribution:')
+for smiles_token, a in attr:
+    print(smiles_token)
+    if a:
+        for j, selfies_token in a:
+            print(f'\t{j}:{selfies_token}')
+# output
+SELFIES [C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]
+SMILES C1NC(P)CC1
+Attribution:
+C
+	0:[C]
+N
+	1:[N]
+C
+	2:[C]
+P
+	3:[Branch1]
+	5:[P]
+C
+	6:[C]
+C
+	7:[C]
+```
+
+``attr`` is a list of tuples containing the output token (e.g., ``P``) and the SELFIES tokens and indices that led to it. This works for both encoding and decoding. For finer control of tracking the translation (like tracking rings), you can access attributions in the underlying molecular graph.
+
 #### Customizing SELFIES:
 
 In this example, we relax the semantic constraints of ``selfies`` to allow
 for hypervalences (caution: hypervalence rules are much less understood
-than octet rules. Some molecules containing hypervalences are important, 
+than octet rules. Some molecules containing hypervalences are important,
 but generally, it is not known which molecules are stable and reasonable).
 
 ```python
@@ -118,7 +155,7 @@ relaxed_derived_smi = sf.decoder(hypervalent_sf)
 
 #### Integer and one-hot encoding SELFIES:
 
-In this example, we first build an alphabet from a dataset of SELFIES strings, 
+In this example, we first build an alphabet from a dataset of SELFIES strings,
 and then convert a SELFIES string into its padded encoding. Note that we use the
 ``[nop]`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
 symbol to pad our SELFIES, which is a special SELFIES symbol that is always
@@ -157,13 +194,13 @@ genetic algorithm to achieve state-of-the-art performance for inverse design,
 with the [code here](https://github.com/aspuru-guzik-group/GA).
 * SELFIES allows for [highly efficient exploration and interpolation of the chemical space](https://chemrxiv.org/articles/preprint/Beyond_Generative_Models_Superfast_Traversal_Optimization_Novelty_Exploration_and_Discovery_STONED_Algorithm_for_Molecules_using_SELFIES/13383266), with a [deterministic algorithms, see code](https://github.com/aspuru-guzik-group/stoned-selfies).
 * We use SELFIES for [Deep Molecular dreaming](https://arxiv.org/abs/2012.09712), a new generative model inspired by interpretable neural networks in computational vision. See the [code of PASITHEA here](https://github.com/aspuru-guzik-group/Pasithea).
-* Kohulan Rajan, Achim Zielesny, Christoph Steinbeck show in two papers that SELFIES outperforms other representations in [img2string](https://link.springer.com/article/10.1186/s13321-020-00469-w) and [string2string](https://chemrxiv.org/articles/preprint/STOUT_SMILES_to_IUPAC_Names_Using_Neural_Machine_Translation/13469202/1) translation tasks, see the codes of [DECIMER](https://github.com/Kohulan/DECIMER-Image-to-SMILES) and [STOUT](https://github.com/Kohulan/Smiles-TO-iUpac-Translator). 
-* An improvement to the old genetic algorithm, the authors have also released [JANUS](https://arxiv.org/abs/2106.04011), which allows for more efficient optimization in the chemical space. JANUS makes use of [STONED-SELFIES](https://pubs.rsc.org/en/content/articlepdf/2021/sc/d1sc00231g) and a neural network for efficient sampling. 
+* Kohulan Rajan, Achim Zielesny, Christoph Steinbeck show in two papers that SELFIES outperforms other representations in [img2string](https://link.springer.com/article/10.1186/s13321-020-00469-w) and [string2string](https://chemrxiv.org/articles/preprint/STOUT_SMILES_to_IUPAC_Names_Using_Neural_Machine_Translation/13469202/1) translation tasks, see the codes of [DECIMER](https://github.com/Kohulan/DECIMER-Image-to-SMILES) and [STOUT](https://github.com/Kohulan/Smiles-TO-iUpac-Translator).
+* An improvement to the old genetic algorithm, the authors have also released [JANUS](https://arxiv.org/abs/2106.04011), which allows for more efficient optimization in the chemical space. JANUS makes use of [STONED-SELFIES](https://pubs.rsc.org/en/content/articlepdf/2021/sc/d1sc00231g) and a neural network for efficient sampling.
 
 ## Tests
 `selfies` uses `pytest` with `tox` as its testing framework.
 All tests can be found in  the `tests/` directory. To run the test suite for
-SELFIES, install ``tox`` and run:  
+SELFIES, install ``tox`` and run:
 
 ```bash
 tox -- --trials=10000 --dataset_samples=10000
@@ -177,9 +214,9 @@ By default, `selfies` is tested against a random subset
  * 50K molecules from a dataset of [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
  * 160K+ molecules from various [MoleculeNet](http://moleculenet.ai/datasets-1) datasets
  * 36M+ molecules from the [eMolecules Database](https://www.emolecules.com/info/products-data-downloads.html).
-   Due to its large size, this dataset is not included on the repository. To run tests 
-   on it, please download the dataset into the ``tests/test_sets`` directory 
-   and run the ``tests/run_on_large_dataset.py`` script. 
+   Due to its large size, this dataset is not included on the repository. To run tests
+   on it, please download the dataset into the ``tests/test_sets`` directory
+   and run the ``tests/run_on_large_dataset.py`` script.
 
 ## Version History
 See [CHANGELOG](https://github.com/aspuru-guzik-group/selfies/blob/master/CHANGELOG.md).

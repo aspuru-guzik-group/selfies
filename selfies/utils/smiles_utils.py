@@ -420,6 +420,8 @@ def mol_to_smiles(
         _derive_smiles_from_fragment(
             derived, mol, root, ring_log, attribution_map)
         fragments.append("".join(derived))
+    # trim attribution map of empty tokens
+    attribution_map = [(t, a) for t, a in attribution_map if t != '']
     result = ".".join(fragments), attribution_map
     return result if attribute else result[0]
 
