@@ -46,6 +46,47 @@ def split_selfies(selfies: str) -> Iterator[str]:
             left_idx += 1
 
 
+def split_selfies_strict(selfies: str) -> Iterator[str]:
+    """Tokenizes a SELFIES string into its individual symbols with strict rules, 
+    typically slower than split_selfies function.
+
+    :param selfies: a SELFIES string.
+    :return: the symbols of the SELFIES string one-by-one with order preserved.
+
+    :Example:
+
+    >>> import selfies as sf
+    >>> list(sf.split_selfies_strict("[C][=C][F].[C]"))
+    ['[C]', '[=C]', '[F]', '.', '[C]']
+    """
+
+    syntax_err = "malformed SELIFES, misplaced or missing brackets"
+    save = False
+
+    for char in selfies:
+
+        if char not in "[ ]" and save:
+            symbol += char
+
+        elif char == "[" and not save:
+            symbol = ""
+            save = True
+
+        elif char == "]" and save:
+            save = False
+            if symbol != "nop":  # skip [nop]
+                yield "[" + symbol + "]"
+
+        elif char == "." and not save:
+            yield "."
+
+        else:
+            raise ValueError(syntax_err)
+
+    if save:
+        raise ValueError(syntax_err)
+
+
 def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
     """Constructs an alphabet from an iterable of SELFIES strings.
 

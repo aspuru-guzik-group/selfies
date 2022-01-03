@@ -78,6 +78,11 @@ def test_split_selfies(dataset):
         assert list(sf.split_selfies(entry.selfies)) == entry.symbols
 
 
+def test_split_selfies_strict(dataset):
+    for entry in dataset[0]:
+        assert list(sf.split_selfies_strict(entry.selfies)) == entry.symbols
+
+
 def test_get_alphabet_from_selfies(dataset):
     entries, (vocab_stoi, _, _) = dataset
 

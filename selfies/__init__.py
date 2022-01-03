@@ -36,6 +36,7 @@ __all__ = [
     "set_semantic_constraints",
     "len_selfies",
     "split_selfies",
+    "split_selfies_strict",
     "get_alphabet_from_selfies",
     "selfies_to_encoding",
     "batch_selfies_to_flat_hot",
@@ -63,5 +64,6 @@ from .utils.encoding_utils import (
 from .utils.selfies_utils import (
     get_alphabet_from_selfies,
     len_selfies,
-    split_selfies
+    split_selfies,
+    split_selfies_strict
 )

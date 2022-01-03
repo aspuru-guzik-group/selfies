@@ -12,11 +12,11 @@ from selfies.grammar_rules import (
     process_ring_symbol
 )
 from selfies.mol_graph import MolecularGraph
-from selfies.utils.selfies_utils import split_selfies
+from selfies.utils.selfies_utils import split_selfies, split_selfies_strict
 from selfies.utils.smiles_utils import mol_to_smiles
 
 
-def decoder(selfies: str, compatible: bool = False) -> str:
+def decoder(selfies: str, compatible: bool = False, strict: bool = False) -> str:
     """Translates a SELFIES string into its corresponding SMILES string.
 
     This translation is deterministic but depends on the current semantic
@@ -50,7 +50,7 @@ def decoder(selfies: str, compatible: bool = False) -> str:
     rings = []
     for s in selfies.split("."):
         _derive_mol_from_symbols(
-            symbol_iter=_tokenize_selfies(s, compatible),
+            symbol_iter=_tokenize_selfies(s, compatible, strict),
             mol=mol,
             selfies=selfies,
             max_derive=float("inf"),
@@ -62,9 +62,12 @@ def decoder(selfies: str, compatible: bool = False) -> str:
     return mol_to_smiles(mol)
 
 
-def _tokenize_selfies(selfies, compatible):
+def _tokenize_selfies(selfies, compatible, strict):
     if isinstance(selfies, str):
-        symbol_iter = split_selfies(selfies)
+        if strict:
+            symbol_iter = split_selfies_strict(selfies)
+        else: 
+            symbol_iter = split_selfies(selfies)
     elif isinstance(selfies, list):
         symbol_iter = selfies
     else:

@@ -131,5 +131,10 @@ def test_malformed_selfies_decoder():
         sf.decoder("[O][=C][O][C][C][C][C][O][N][Branch2_3")
 
 
+def test_malformed_selfies_decoder_strict():
+    with pytest.raises(sf.DecoderError):
+        sf.decoder("[O][=C][O][C][C][C][C][O][N][Branch2_3", strict=True)
+
+
 def random_choices(population, k):  # random.choices was new in Python v3.6
     return [random.choice(population) for _ in range(k)]
