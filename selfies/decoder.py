@@ -16,7 +16,9 @@ from selfies.utils.selfies_utils import split_selfies, split_selfies_strict
 from selfies.utils.smiles_utils import mol_to_smiles
 
 
-def decoder(selfies: str, compatible: bool = False, strict: bool = False) -> str:
+def decoder(
+    selfies: str, compatible: bool = False, strict: bool = False
+) -> str:
     """Translates a SELFIES string into its corresponding SMILES string.
 
     This translation is deterministic but depends on the current semantic
@@ -66,7 +68,7 @@ def _tokenize_selfies(selfies, compatible, strict):
     if isinstance(selfies, str):
         if strict:
             symbol_iter = split_selfies_strict(selfies)
-        else: 
+        else:
             symbol_iter = split_selfies(selfies)
     elif isinstance(selfies, list):
         symbol_iter = selfies
