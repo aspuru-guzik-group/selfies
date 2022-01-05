@@ -47,7 +47,7 @@ def split_selfies(selfies: str) -> Iterator[str]:
 
 
 def split_selfies_strict(selfies: str) -> Iterator[str]:
-    """Tokenizes a SELFIES string into its individual symbols with strict rules, 
+    """Tokenizes a SELFIES string into its individual symbols with strict rules,
     typically slower than split_selfies function.
 
     :param selfies: a SELFIES string.
@@ -62,6 +62,7 @@ def split_selfies_strict(selfies: str) -> Iterator[str]:
 
     syntax_err = "malformed SELIFES, misplaced or missing brackets"
     save = False
+    symbol = ""
 
     for char in selfies:
 
