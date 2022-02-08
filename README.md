@@ -132,7 +132,7 @@ C
 	7:[C]
 ```
 
-``attr`` is a list of tuples containing the output token (e.g., ``P``) and the SELFIES tokens and indices that led to it. This works for both encoding and decoding. For finer control of tracking the translation (like tracking rings), you can access attributions in the underlying molecular graph.
+``attr`` is a list of tuples containing the output token and the SELFIES tokens and indices that led to it. For example, the ``P`` appearing in the output SMILES at that location is a result of both the ``[Branch1]`` token at position 3 and the ``[P]`` token at index 5. This works for both encoding and decoding. For finer control of tracking the translation (like tracking rings), you can access attributions in the underlying molecular graph with ``get_attribution``.
 
 #### Customizing SELFIES:
 
