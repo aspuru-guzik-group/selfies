@@ -163,16 +163,19 @@ def _derive_mol_from_symbols(
                 if state == 0:
                     o = mol.add_atom(atom, True)
                     mol.add_attribution(
-                        o,  _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
+                        o,  _attribute_stack + [(index, symbol)]
+                        if _attribute_stack is not None else None)
             else:
                 o = mol.add_atom(atom)
                 mol.add_attribution(
-                    o, _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
+                    o, _attribute_stack + [(index, symbol)]
+                    if _attribute_stack is not None else None)
                 src, dst = prev_atom.index, atom.index
                 o = mol.add_bond(src=src, dst=dst,
                                  order=bond_order, stereo=stereo)
                 mol.add_attribution(
-                    o, _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
+                    o, _attribute_stack + [(index, symbol)]
+                    if _attribute_stack is not None else None)
             prev_atom = atom
 
         if next_state is None:
