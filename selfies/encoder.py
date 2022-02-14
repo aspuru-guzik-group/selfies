@@ -1,6 +1,5 @@
 from selfies.exceptions import EncoderError, SMILESParserError
 from selfies.grammar_rules import get_selfies_from_index
-from selfies.utils.linked_list import SinglyLinkedList
 from selfies.utils.smiles_utils import (
     atom_to_smiles,
     bond_to_smiles,
@@ -61,7 +60,7 @@ def encoder(smiles: str, strict: bool = True, attribute: bool = False) -> str:
     """
 
     try:
-        mol = smiles_to_mol(smiles)
+        mol = smiles_to_mol(smiles, attributable=attribute)
     except SMILESParserError as err:
         err_msg = "failed to parse input\n\tSMILES: {}".format(smiles)
         raise EncoderError(err_msg) from err
@@ -139,7 +138,7 @@ def _should_invert_chirality(mol, atom):
 
 
 def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
-    derived = SinglyLinkedList()
+    derived = []
 
     bond_into_curr, curr = bond_into_root, root
     while True:

@@ -52,7 +52,7 @@ def decoder(
               "major releases. We recommend using SELFIES that are up to date."
         warnings.warn(msg, stacklevel=2)
 
-    mol = MolecularGraph()
+    mol = MolecularGraph(attributable=attribute)
 
     rings = []
     for s in selfies.split("."):
@@ -63,7 +63,8 @@ def decoder(
             max_derive=float("inf"),
             init_state=0,
             root_atom=None,
-            rings=rings
+            rings=rings,
+            _attribute_stack=[] if attribute else None
         )
     _form_rings_bilocally(mol, rings)
     return mol_to_smiles(mol, attribute)
@@ -90,13 +91,11 @@ def _tokenize_selfies(selfies, compatible):
 
 def _derive_mol_from_symbols(
         symbol_iter, mol, selfies, max_derive,
-        init_state, root_atom, rings, _attribute_stack=None
+        init_state, root_atom, rings, _attribute_stack
 ):
     n_derived = 0
     state = init_state
     prev_atom = root_atom
-    if _attribute_stack is None:
-        _attribute_stack = []
 
     while (state is not None) and (n_derived < max_derive):
 
@@ -124,7 +123,7 @@ def _derive_mol_from_symbols(
                     symbol_iter, mol, selfies, (Q + 1),
                     init_state=binit_state, root_atom=prev_atom, rings=rings,
                     _attribute_stack=_attribute_stack +
-                    [(index, symbol)]
+                    [(index, symbol)] if _attribute_stack is not None else None
                 )
 
         # Case 2: Ring symbol (e.g. [Ring2])
@@ -164,14 +163,16 @@ def _derive_mol_from_symbols(
                 if state == 0:
                     o = mol.add_atom(atom, True)
                     mol.add_attribution(
-                        o, _attribute_stack + [(index, symbol)])
+                        o,  _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
             else:
                 o = mol.add_atom(atom)
-                mol.add_attribution(o, _attribute_stack + [(index, symbol)])
+                mol.add_attribution(
+                    o, _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
                 src, dst = prev_atom.index, atom.index
                 o = mol.add_bond(src=src, dst=dst,
                                  order=bond_order, stereo=stereo)
-                mol.add_attribution(o, _attribute_stack + [(index, symbol)])
+                mol.add_attribution(
+                    o, _attribute_stack + [(index, symbol)] if _attribute_stack is not None else None)
             prev_atom = atom
 
         if next_state is None:

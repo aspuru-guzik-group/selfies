@@ -197,10 +197,11 @@ def smiles_to_bond(
     return order, stereo
 
 
-def smiles_to_mol(smiles: str) -> MolecularGraph:
+def smiles_to_mol(smiles: str, attributable: bool) -> MolecularGraph:
     """Reads a molecular graph from a SMILES string.
 
     :param smiles: the input SMILES string.
+    :param attributable: if molecular graph needs to include attributions
     :return: a molecular graph that the input SMILES string represents.
     :raises SMILESParserError: if the input SMILES is invalid.
     """
@@ -208,7 +209,7 @@ def smiles_to_mol(smiles: str) -> MolecularGraph:
     if smiles == "":
         raise SMILESParserError(smiles, "empty SMILES", 0)
 
-    mol = MolecularGraph()
+    mol = MolecularGraph(attributable=attributable)
     tokens = deque(tokenize_smiles(smiles))
     i = 0
     while tokens:
