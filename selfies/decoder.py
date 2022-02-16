@@ -1,4 +1,5 @@
 import warnings
+from typing import List, Union, Tuple
 
 from selfies.compatibility import modernize_symbol
 from selfies.exceptions import DecoderError
@@ -16,7 +17,11 @@ from selfies.utils.selfies_utils import split_selfies
 from selfies.utils.smiles_utils import mol_to_smiles
 
 
-def decoder(selfies: str, compatible: bool = False) -> str:
+def decoder(
+        selfies: str,
+        compatible: bool = False,
+        attribute: bool = False) ->\
+        Union[str, Tuple[str, List[Tuple[str,  List[Tuple[int, str]]]]]]:
     """Translates a SELFIES string into its corresponding SMILES string.
 
     This translation is deterministic but depends on the current semantic
@@ -30,6 +35,8 @@ def decoder(selfies: str, compatible: bool = False) -> str:
         function may behave differently than in previous major relases,
         and should not be treated as backard compatible.
         Defaults to ``False``.
+    :param attribute: if ``True``, an attribution map connecting selfies
+        tokens to smiles tokens is output.
     :return: a SMILES string derived from the input SELFIES string.
     :raises DecoderError: if the input SELFIES string is malformed.
 
@@ -45,21 +52,22 @@ def decoder(selfies: str, compatible: bool = False) -> str:
               "major releases. We recommend using SELFIES that are up to date."
         warnings.warn(msg, stacklevel=2)
 
-    mol = MolecularGraph()
+    mol = MolecularGraph(attributable=attribute)
 
     rings = []
     for s in selfies.split("."):
         _derive_mol_from_symbols(
-            symbol_iter=_tokenize_selfies(s, compatible),
+            symbol_iter=enumerate(_tokenize_selfies(s, compatible)),
             mol=mol,
             selfies=selfies,
             max_derive=float("inf"),
             init_state=0,
             root_atom=None,
-            rings=rings
+            rings=rings,
+            _attribute_stack=[] if attribute else None
         )
     _form_rings_bilocally(mol, rings)
-    return mol_to_smiles(mol)
+    return mol_to_smiles(mol, attribute)
 
 
 def _tokenize_selfies(selfies, compatible):
@@ -83,7 +91,7 @@ def _tokenize_selfies(selfies, compatible):
 
 def _derive_mol_from_symbols(
         symbol_iter, mol, selfies, max_derive,
-        init_state, root_atom, rings
+        init_state, root_atom, rings, _attribute_stack
 ):
     n_derived = 0
     state = init_state
@@ -92,7 +100,7 @@ def _derive_mol_from_symbols(
     while (state is not None) and (n_derived < max_derive):
 
         try:  # retrieve next symbol
-            symbol = next(symbol_iter)
+            index, symbol = next(symbol_iter)
             n_derived += 1
         except StopIteration:
             break
@@ -113,7 +121,9 @@ def _derive_mol_from_symbols(
                 Q = _read_index_from_selfies(symbol_iter, n_symbols=n)
                 n_derived += n + _derive_mol_from_symbols(
                     symbol_iter, mol, selfies, (Q + 1),
-                    init_state=binit_state, root_atom=prev_atom, rings=rings
+                    init_state=binit_state, root_atom=prev_atom, rings=rings,
+                    _attribute_stack=_attribute_stack +
+                    [(index, symbol)] if _attribute_stack is not None else None
                 )
 
         # Case 2: Ring symbol (e.g. [Ring2])
@@ -151,11 +161,21 @@ def _derive_mol_from_symbols(
             bond_order, next_state = next_atom_state(bond_order, cap, state)
             if bond_order == 0:
                 if state == 0:
-                    mol.add_atom(atom, True)
+                    o = mol.add_atom(atom, True)
+                    mol.add_attribution(
+                        o,  _attribute_stack + [(index, symbol)]
+                        if _attribute_stack is not None else None)
             else:
-                mol.add_atom(atom)
+                o = mol.add_atom(atom)
+                mol.add_attribution(
+                    o, _attribute_stack + [(index, symbol)]
+                    if _attribute_stack is not None else None)
                 src, dst = prev_atom.index, atom.index
-                mol.add_bond(src=src, dst=dst, order=bond_order, stereo=stereo)
+                o = mol.add_bond(src=src, dst=dst,
+                                 order=bond_order, stereo=stereo)
+                mol.add_attribution(
+                    o, _attribute_stack + [(index, symbol)]
+                    if _attribute_stack is not None else None)
             prev_atom = atom
 
         if next_state is None:
@@ -183,7 +203,7 @@ def _read_index_from_selfies(symbol_iter, n_symbols):
     index_symbols = []
     for _ in range(n_symbols):
         try:
-            index_symbols.append(next(symbol_iter))
+            index_symbols.append(next(symbol_iter)[-1])
         except StopIteration:
             index_symbols.append(None)
     return get_index_from_selfies(*index_symbols)
