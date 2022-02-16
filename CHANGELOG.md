@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.0
+## v2.1.0 - [to be announced shortly]
 
 ### Added:
 - optional attribution to map encoder/decoder output string back to input string (Issue #48)
