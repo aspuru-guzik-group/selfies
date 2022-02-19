@@ -227,7 +227,6 @@ def _derive_mol_from_tokens(mol, smiles, tokens, i):
     prev_stack.append(tok)
     while tokens:
         tok = tokens.popleft()
-        i += 1
         bond_char = tok.extract_bond_char(smiles)
         symbol, symbol_type = tok.extract_symbol(smiles), tok.token_type
         prev_atom = prev_stack[-1]
@@ -241,7 +240,7 @@ def _derive_mol_from_tokens(mol, smiles, tokens, i):
                 err_msg = "invalid atom symbol '{}'".format(symbol)
                 raise SMILESParserError(smiles, err_msg, tok.start_idx)
 
-            curr = _attach_atom(mol, bond_char, curr, prev_atom, i, tok)
+            curr, i = _attach_atom(mol, bond_char, curr, prev_atom, i, tok)
             prev_stack.pop()
             prev_stack.append(curr)
             chain_start = False
@@ -277,6 +276,7 @@ def _derive_mol_from_tokens(mol, smiles, tokens, i):
         else:
             # should not happen
             raise Exception("invalid symbol type")
+        i += 1
 
     if len(mol) == 0:
         err_idx = (len(smiles) if (tok is None) else tok.start_idx) - 1
@@ -295,6 +295,8 @@ def _derive_mol_from_tokens(mol, smiles, tokens, i):
 
 def _attach_atom(mol, bond_char, atom, prev_atom, i, tok):
     is_root = (prev_atom is None)
+    if bond_char:
+        i += 1
     o = mol.add_atom(atom, mark_root=is_root)
     mol.add_attribution(o, [(i, str(tok))])
     if not is_root:
@@ -304,7 +306,7 @@ def _attach_atom(mol, bond_char, atom, prev_atom, i, tok):
             order = 1.5  # handle implicit aromatic bonds, e.g. cc
         o = mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
         mol.add_attribution(o, [(i, str(tok))])
-    return atom
+    return atom, i
 
 
 def _make_ring_bonds(mol, smiles, ltoken, latom, lpos, rtoken, ratom):
