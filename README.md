@@ -97,7 +97,59 @@ symbols_benzene = list(sf.split_selfies(benzene_sf))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[=Branch1]']
 ```
 
-#### Explaining Translation:
+
+#### Integer and one-hot encoding SELFIES:
+
+In this example, we first build an alphabet from a dataset of SELFIES strings,
+and then convert a SELFIES string into its padded encoding. Note that we use the
+``[nop]`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
+symbol to pad our SELFIES, which is a special SELFIES symbol that is always
+ignored and skipped over by ``selfies.decoder``, making it a useful
+padding character.
+
+```python
+import selfies as sf
+
+dataset = ["[C][O][C]", "[F][C][F]", "[O][=O]", "[C][C][O][C][C]"]
+alphabet = sf.get_alphabet_from_selfies(dataset)
+alphabet.add("[nop]")  # [nop] is a special padding symbol
+alphabet = list(sorted(alphabet))  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
+
+pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5
+symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
+
+dimethyl_ether = dataset[0]  # [C][O][C]
+
+label, one_hot = sf.selfies_to_encoding(
+   selfies=dimethyl_ether,
+   vocab_stoi=symbol_to_idx,
+   pad_to_len=pad_to_len,
+   enc_type="both"
+)
+# label = [1, 3, 1, 4, 4]
+# one_hot = [[0, 1, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 0, 0, 0, 1]]
+```
+
+#### Customizing SELFIES:
+
+In this example, we relax the semantic constraints of ``selfies`` to allow
+for hypervalences (caution: hypervalence rules are much less understood
+than octet rules. Some molecules containing hypervalences are important,
+but generally, it is not known which molecules are stable and reasonable).
+
+```python
+import selfies as sf
+
+hypervalent_sf = sf.encoder('O=I(O)(O)(O)(O)O', strict=False)  # orthoperiodic acid
+standard_derived_smi = sf.decoder(hypervalent_sf)
+# OI (the default constraints for I allows for only 1 bond)
+
+sf.set_semantic_constraints("hypervalent")
+relaxed_derived_smi = sf.decoder(hypervalent_sf)
+# O=I(O)(O)(O)(O)O (the hypervalent constraints for I allows for 7 bonds)
+```
+
+#### Explaining Translation (beta):
 
 You can get an "attribution" list that traces the connection between input and output tokens. For example let's see which tokens in the SELFIES string ``[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]`` are responsible for the output SMILES tokens.
 
@@ -134,56 +186,6 @@ C
 
 ``attr`` is a list of tuples containing the output token and the SELFIES tokens and indices that led to it. For example, the ``P`` appearing in the output SMILES at that location is a result of both the ``[Branch1]`` token at position 3 and the ``[P]`` token at index 5. This works for both encoding and decoding. For finer control of tracking the translation (like tracking rings), you can access attributions in the underlying molecular graph with ``get_attribution``.
 
-#### Customizing SELFIES:
-
-In this example, we relax the semantic constraints of ``selfies`` to allow
-for hypervalences (caution: hypervalence rules are much less understood
-than octet rules. Some molecules containing hypervalences are important,
-but generally, it is not known which molecules are stable and reasonable).
-
-```python
-import selfies as sf
-
-hypervalent_sf = sf.encoder('O=I(O)(O)(O)(O)O', strict=False)  # orthoperiodic acid
-standard_derived_smi = sf.decoder(hypervalent_sf)
-# OI (the default constraints for I allows for only 1 bond)
-
-sf.set_semantic_constraints("hypervalent")
-relaxed_derived_smi = sf.decoder(hypervalent_sf)
-# O=I(O)(O)(O)(O)O (the hypervalent constraints for I allows for 7 bonds)
-```
-
-#### Integer and one-hot encoding SELFIES:
-
-In this example, we first build an alphabet from a dataset of SELFIES strings,
-and then convert a SELFIES string into its padded encoding. Note that we use the
-``[nop]`` ([no operation](https://en.wikipedia.org/wiki/NOP_(code) ))
-symbol to pad our SELFIES, which is a special SELFIES symbol that is always
-ignored and skipped over by ``selfies.decoder``, making it a useful
-padding character.
-
-```python
-import selfies as sf
-
-dataset = ["[C][O][C]", "[F][C][F]", "[O][=O]", "[C][C][O][C][C]"]
-alphabet = sf.get_alphabet_from_selfies(dataset)
-alphabet.add("[nop]")  # [nop] is a special padding symbol
-alphabet = list(sorted(alphabet))  # ['[=O]', '[C]', '[F]', '[O]', '[nop]']
-
-pad_to_len = max(sf.len_selfies(s) for s in dataset)  # 5
-symbol_to_idx = {s: i for i, s in enumerate(alphabet)}
-
-dimethyl_ether = dataset[0]  # [C][O][C]
-
-label, one_hot = sf.selfies_to_encoding(
-   selfies=dimethyl_ether,
-   vocab_stoi=symbol_to_idx,
-   pad_to_len=pad_to_len,
-   enc_type="both"
-)
-# label = [1, 3, 1, 4, 4]
-# one_hot = [[0, 1, 0, 0, 0], [0, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 0, 0, 0, 1]]
-```
 
 ### More Usages and Examples
 
