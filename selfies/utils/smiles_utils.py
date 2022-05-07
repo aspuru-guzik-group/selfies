@@ -5,7 +5,8 @@ from typing import Iterator, Optional, Tuple, Union, List
 
 from selfies.constants import AROMATIC_SUBSET, ELEMENTS, ORGANIC_SUBSET
 from selfies.exceptions import SMILESParserError
-from selfies.mol_graph import Atom, Attribution, AttributionMap, DirectedBond, MolecularGraph
+from selfies.mol_graph import Atom, Attribution, \
+    AttributionMap, DirectedBond, MolecularGraph
 
 SMILES_BRACKETED_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
@@ -441,7 +442,8 @@ def _derive_smiles_from_fragment(
     token = atom_to_smiles(curr_atom)
     derived.append(token)
     attribution_maps.append(AttributionMap(
-        len(derived) - 1 + attribution_index, token, mol.get_attribution(curr_atom)))
+        len(derived) - 1 + attribution_index,
+        token, mol.get_attribution(curr_atom)))
 
     out_bonds = mol.get_out_dirbonds(curr)
     for i, bond in enumerate(out_bonds):
@@ -449,7 +451,8 @@ def _derive_smiles_from_fragment(
             token = bond_to_smiles(bond)
             derived.append(token)
             attribution_maps.append(AttributionMap(
-                len(derived) - 1 + attribution_index, token, mol.get_attribution(bond)))
+                len(derived) - 1 + attribution_index,
+                token, mol.get_attribution(bond)))
             ends = (min(bond.src, bond.dst), max(bond.src, bond.dst))
             rnum = ring_log.setdefault(ends, len(ring_log) + 1)
             if rnum >= 10:
@@ -463,9 +466,11 @@ def _derive_smiles_from_fragment(
             token = bond_to_smiles(bond)
             derived.append(token)
             attribution_maps.append(AttributionMap(
-                len(derived) - 1 + attribution_index, token, mol.get_attribution(bond)))
+                len(derived) - 1 + attribution_index,
+                token, mol.get_attribution(bond)))
             _derive_smiles_from_fragment(
-                derived, mol, bond.dst, ring_log, attribution_maps, attribution_index)
+                derived, mol, bond.dst, ring_log,
+                attribution_maps, attribution_index)
             if i < len(out_bonds) - 1:
                 derived.append(")")
     return attribution_maps

@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Union
 from dataclasses import dataclass, field
 
 from selfies.bond_constraints import get_bonding_capacity
@@ -20,7 +20,8 @@ class Attribution:
 
 @dataclass
 class AttributionMap:
-    """A mapping from input to single output token showing which input tokens created the output token.
+    """A mapping from input to single output token showing which
+    input tokens created the output token.
     """
     #: Index of output token
     index: int
