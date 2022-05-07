@@ -10,16 +10,23 @@ from selfies.utils.matching_utils import find_perfect_matching
 
 @dataclass
 class Attribution:
+    """A dataclass that contains token string and its index.
+    """
+    #: token index
     index: int
+    #: token string
     token: str
 
 
 @dataclass
 class AttributionMap:
-    """A mapping from input to output token showing which input tokens created the output token.
+    """A mapping from input to single output token showing which input tokens created the output token.
     """
+    #: Index of output token
     index: int
+    #: Output token
     token: str
+    #: List of input tokens that created the output token
     attribution: List[Attribution] = field(default_factory=list)
 
 
@@ -153,7 +160,10 @@ class MolecularGraph:
             attr: List[Attribution]
     ) -> None:
         if self._attributable:
-            self._attribution[o] = attr
+            if o in self._attribution:
+                self._attribution[o].extend(attr)
+            else:
+                self._attribution[o] = attr
 
     def add_bond(
             self, src: int, dst: int,
