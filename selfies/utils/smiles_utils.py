@@ -5,7 +5,7 @@ from typing import Iterator, Optional, Tuple, Union, List
 
 from selfies.constants import AROMATIC_SUBSET, ELEMENTS, ORGANIC_SUBSET
 from selfies.exceptions import SMILESParserError
-from selfies.mol_graph import Atom, DirectedBond, MolecularGraph
+from selfies.mol_graph import Atom, Attribution, AttributionMap, DirectedBond, MolecularGraph
 
 SMILES_BRACKETED_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
@@ -298,14 +298,14 @@ def _attach_atom(mol, bond_char, atom, prev_atom, i, tok):
     if bond_char:
         i += 1
     o = mol.add_atom(atom, mark_root=is_root)
-    mol.add_attribution(o, [(i, str(tok))])
+    mol.add_attribution(o, [Attribution(i, str(tok))])
     if not is_root:
         src, dst = prev_atom.index, atom.index
         order, stereo = smiles_to_bond(bond_char)
         if prev_atom.is_aromatic and atom.is_aromatic and (bond_char is None):
             order = 1.5  # handle implicit aromatic bonds, e.g. cc
         o = mol.add_bond(src=src, dst=dst, order=order, stereo=stereo)
-        mol.add_attribution(o, [(i, str(tok))])
+        mol.add_attribution(o, [Attribution(i, str(tok))])
     return atom, i
 
 
@@ -416,16 +416,16 @@ def mol_to_smiles(
     assert mol.is_kekulized()
 
     fragments = []
-    attribution_map = []
+    attribution_maps = []
     ring_log = dict()
     for root in mol.get_roots():
         derived = []
         _derive_smiles_from_fragment(
-            derived, mol, root, ring_log, attribution_map)
+            derived, mol, root, ring_log, attribution_maps)
         fragments.append("".join(derived))
     # trim attribution map of empty tokens
-    attribution_map = [(t, a) for t, a in attribution_map if t != '']
-    result = ".".join(fragments), attribution_map
+    attribution_maps = [a for a in attribution_maps if a.token]
+    result = ".".join(fragments), attribution_maps
     return result if attribute else result[0]
 
 
@@ -434,18 +434,20 @@ def _derive_smiles_from_fragment(
         mol,
         root,
         ring_log,
-        attribution_map):
+        attribution_maps):
     curr_atom, curr = mol.get_atom(root), root
     token = atom_to_smiles(curr_atom)
     derived.append(token)
-    attribution_map.append((token, mol.get_attribution(curr_atom)))
+    attribution_maps.append(AttributionMap(len(
+        derived) - 1, token, mol.get_attribution(curr_atom)))
 
     out_bonds = mol.get_out_dirbonds(curr)
     for i, bond in enumerate(out_bonds):
         if bond.ring_bond:
             token = bond_to_smiles(bond)
             derived.append(token)
-            attribution_map.append((token, mol.get_attribution(bond)))
+            attribution_maps.append(AttributionMap(len(
+                derived) - 1, token, mol.get_attribution(bond)))
             ends = (min(bond.src, bond.dst), max(bond.src, bond.dst))
             rnum = ring_log.setdefault(ends, len(ring_log) + 1)
             if rnum >= 10:
@@ -458,10 +460,11 @@ def _derive_smiles_from_fragment(
 
             token = bond_to_smiles(bond)
             derived.append(token)
-            attribution_map.append((token, mol.get_attribution(bond)))
+            attribution_maps.append(AttributionMap(len(
+                derived) - 1, token, mol.get_attribution(bond)))
             _derive_smiles_from_fragment(
-                derived, mol, bond.dst, ring_log, attribution_map)
+                derived, mol, bond.dst, ring_log, attribution_maps)
 
             if i < len(out_bonds) - 1:
                 derived.append(")")
-    return attribution_map
+    return attribution_maps

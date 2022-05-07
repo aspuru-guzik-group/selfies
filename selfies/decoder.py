@@ -12,7 +12,7 @@ from selfies.grammar_rules import (
     process_branch_symbol,
     process_ring_symbol
 )
-from selfies.mol_graph import MolecularGraph
+from selfies.mol_graph import MolecularGraph, Attribution
 from selfies.utils.selfies_utils import split_selfies
 from selfies.utils.smiles_utils import mol_to_smiles
 
@@ -123,7 +123,8 @@ def _derive_mol_from_symbols(
                     symbol_iter, mol, selfies, (Q + 1),
                     init_state=binit_state, root_atom=prev_atom, rings=rings,
                     _attribute_stack=_attribute_stack +
-                    [(index, symbol)] if _attribute_stack is not None else None
+                    [Attribution(index, symbol)
+                     ] if _attribute_stack is not None else None
                 )
 
         # Case 2: Ring symbol (e.g. [Ring2])
@@ -163,18 +164,18 @@ def _derive_mol_from_symbols(
                 if state == 0:
                     o = mol.add_atom(atom, True)
                     mol.add_attribution(
-                        o,  _attribute_stack + [(index, symbol)]
+                        o,  _attribute_stack + [Attribution(index, symbol)]
                         if _attribute_stack is not None else None)
             else:
                 o = mol.add_atom(atom)
                 mol.add_attribution(
-                    o, _attribute_stack + [(index, symbol)]
+                    o, _attribute_stack + [Attribution(index, symbol)]
                     if _attribute_stack is not None else None)
                 src, dst = prev_atom.index, atom.index
                 o = mol.add_bond(src=src, dst=dst,
                                  order=bond_order, stereo=stereo)
                 mol.add_attribution(
-                    o, _attribute_stack + [(index, symbol)]
+                    o, _attribute_stack + [Attribution(index, symbol)]
                     if _attribute_stack is not None else None)
             prev_atom = atom
 

@@ -6,6 +6,8 @@ from selfies.utils.smiles_utils import (
     smiles_to_mol
 )
 
+from selfies.mol_graph import AttributionMap
+
 
 def encoder(smiles: str, strict: bool = True, attribute: bool = False) -> str:
     """Translates a SMILES string into its corresponding SELFIES string.
@@ -81,14 +83,14 @@ def encoder(smiles: str, strict: bool = True, attribute: bool = False) -> str:
             atom.invert_chirality()
 
     fragments = []
-    attribution_map = []
+    attribution_maps = []
     for root in mol.get_roots():
         derived = list(_fragment_to_selfies(
-            mol, None, root, attribution_map))
+            mol, None, root, attribution_maps))
         fragments.append("".join(derived))
     # trim attribution map of empty tokens
-    attribution_map = [(t, a) for t, a in attribution_map if t != '']
-    result = ".".join(fragments), attribution_map
+    attribution_maps = [a for a in attribution_maps if a.token]
+    result = ".".join(fragments), attribution_maps
     return result if attribute else result[0]
 
 
@@ -137,7 +139,7 @@ def _should_invert_chirality(mol, atom):
     return count % 2 != 0  # if odd permutation, should invert chirality
 
 
-def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
+def _fragment_to_selfies(mol, bond_into_root, root, attribution_maps):
     derived = []
 
     bond_into_curr, curr = bond_into_root, root
@@ -145,7 +147,8 @@ def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
         curr_atom = mol.get_atom(curr)
         token = _atom_to_selfies(bond_into_curr, curr_atom)
         derived.append(token)
-        attribution_map.append((token, mol.get_attribution(curr_atom)))
+        attribution_maps.append(AttributionMap(
+            len(derived) - 1, token, mol.get_attribution(curr_atom)))
 
         out_bonds = mol.get_out_dirbonds(curr)
         for i, bond in enumerate(out_bonds):
@@ -163,19 +166,19 @@ def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
                 )
 
                 derived.append(ring_symbol)
-                attribution_map.append(
-                    (ring_symbol, mol.get_attribution(bond)))
+                attribution_maps.append(AttributionMap(
+                    len(derived) - 1, ring_symbol, mol.get_attribution(bond)))
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
-                    attribution_map.append(
-                        (symbol, mol.get_attribution(bond)))
+                    attribution_maps.append(AttributionMap(
+                        len(derived) - 1, symbol, mol.get_attribution(bond)))
 
             elif i == len(out_bonds) - 1:
                 bond_into_curr, curr = bond, bond.dst
 
             else:
                 branch = _fragment_to_selfies(
-                    mol, bond, bond.dst, attribution_map)
+                    mol, bond, bond.dst, attribution_maps)
                 Q_as_symbols = get_selfies_from_index(len(branch) - 1)
                 branch_symbol = "[{}Branch{}]".format(
                     _bond_to_selfies(bond, show_stereo=False),
@@ -183,12 +186,12 @@ def _fragment_to_selfies(mol, bond_into_root, root, attribution_map):
                 )
 
                 derived.append(branch_symbol)
-                attribution_map.append(
-                    (branch_symbol, mol.get_attribution(bond)))
+                attribution_maps.append(AttributionMap(
+                    len(derived) - 1, branch_symbol, mol.get_attribution(bond)))
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
-                    attribution_map.append(
-                        (symbol, mol.get_attribution(bond)))
+                    attribution_maps.append(AttributionMap(
+                        len(derived) - 1, symbol, mol.get_attribution(bond)))
                 derived.extend(branch)
 
         # end of chain
