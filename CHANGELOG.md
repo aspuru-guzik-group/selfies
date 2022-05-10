@@ -2,6 +2,9 @@
 
 ## v2.1.0 - [to be announced shortly]
 
+### Changed:
+- Dropped support for Python 3.5-3.6 and will continue to support only current Python versions.
+
 ### Added:
 - optional attribution to map encoder/decoder output string back to input string (Issue #48)
 
