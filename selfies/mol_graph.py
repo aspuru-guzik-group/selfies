@@ -1,10 +1,34 @@
 import functools
 import itertools
-from typing import List, Optional, Union, Tuple
+from typing import List, Optional, Union
+from dataclasses import dataclass, field
 
 from selfies.bond_constraints import get_bonding_capacity
 from selfies.constants import AROMATIC_VALENCES
 from selfies.utils.matching_utils import find_perfect_matching
+
+
+@dataclass
+class Attribution:
+    """A dataclass that contains token string and its index.
+    """
+    #: token index
+    index: int
+    #: token string
+    token: str
+
+
+@dataclass
+class AttributionMap:
+    """A mapping from input to single output token showing which
+    input tokens created the output token.
+    """
+    #: Index of output token
+    index: int
+    #: Output token
+    token: str
+    #: List of input tokens that created the output token
+    attribution: List[Attribution] = field(default_factory=list)
 
 
 class Atom:
@@ -95,7 +119,7 @@ class MolecularGraph:
     def get_attribution(
         self,
         o: Union[DirectedBond, Atom]
-    ) -> List[Tuple[int, str]]:
+    ) -> List[Attribution]:
         if self._attributable and o in self._attribution:
             return self._attribution[o]
         return None
@@ -134,10 +158,13 @@ class MolecularGraph:
     def add_attribution(
             self,
             o: Union[DirectedBond, Atom],
-            attr: List[Tuple[int, str]]
+            attr: List[Attribution]
     ) -> None:
         if self._attributable:
-            self._attribution[o] = attr
+            if o in self._attribution:
+                self._attribution[o].extend(attr)
+            else:
+                self._attribution[o] = attr
 
     def add_bond(
             self, src: int, dst: int,

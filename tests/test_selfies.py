@@ -140,9 +140,9 @@ def test_decoder_attribution():
         "[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]", attribute=True)
     # check that P lined up
     for ta in am:
-        if ta[0] == 'P':
-            for i, v in ta[1]:
-                if v == '[P]':
+        if ta.token == 'P':
+            for a in ta.attribution:
+                if a.token == '[P]':
                     return
     raise ValueError('Failed to find P in attribution map')
 
@@ -151,13 +151,11 @@ def test_encoder_attribution():
     smiles = "C1([O-])C=CC=C1Cl"
     indices = [0, 3, 3, 3, 5, 7, 8, 10, None, None, 12]
     s, am = sf.encoder(smiles, attribute=True)
-    # check that Cl lined up
     for i, ta in enumerate(am):
-        if ta[1]:
-            assert indices[i] == ta[1][0][0], \
+        if ta.attribution:
+            assert indices[i] == ta.attribution[0].index, \
                 f'found {ta[1]}; should be {indices[i]}'
-        if ta[0] == '[Cl]':
-            for i, v in ta[1]:
-                if v == 'Cl':
-                    return
-    raise ValueError('Failed to find Cl in attribution map')
+        if ta.token == '[Cl]':
+            assert 'Cl' in [
+                a.token for a in ta.attribution],\
+                'Failed to find Cl in attribution map'
