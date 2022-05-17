@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.0 - [to be announced shortly]
+## v2.1.0 - 17.05.2022
 
 ### Changed:
 - Dropped support for Python 3.5-3.6 and will continue to support only current Python versions.
