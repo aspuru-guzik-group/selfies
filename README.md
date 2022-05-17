@@ -160,11 +160,8 @@ smiles, attr = sf.decoder(
 print('SELFIES', selfies)
 print('SMILES', smiles)
 print('Attribution:')
-for smiles_token, a in attr:
+for smiles_token in attr:
     print(smiles_token)
-    if a:
-        for j, selfies_token in a:
-            print(f'\t{j}:{selfies_token}')
 
 # output
 SELFIES [C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]
