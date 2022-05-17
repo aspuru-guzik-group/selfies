@@ -149,7 +149,7 @@ relaxed_derived_smi = sf.decoder(hypervalent_sf)
 # O=I(O)(O)(O)(O)O (the hypervalent constraints for I allows for 7 bonds)
 ```
 
-#### Explaining Translation (beta):
+#### Explaining Translation:
 
 You can get an "attribution" list that traces the connection between input and output tokens. For example let's see which tokens in the SELFIES string ``[C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]`` are responsible for the output SMILES tokens.
 
