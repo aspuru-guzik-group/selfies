@@ -184,6 +184,10 @@ def _fragment_to_selfies(mol, bond_into_root, root,
                 bond_into_curr, curr = bond, bond.dst
 
             else:
+                # start, end are so we can go back and
+                # correct offset from branch symbol in
+                # branch tokens
+                start = len(attribution_maps)
                 branch = _fragment_to_selfies(
                     mol, bond, bond.dst, attribution_maps, len(derived))
                 Q_as_symbols = get_selfies_from_index(len(branch) - 1)
@@ -191,22 +195,26 @@ def _fragment_to_selfies(mol, bond_into_root, root,
                     _bond_to_selfies(bond, show_stereo=False),
                     len(Q_as_symbols)
                 )
-
-                derived.append(branch_symbol)
-                attribution_maps.append(AttributionMap(
-                    len(derived) - 1 + attribution_index,
-                    branch_symbol, mol.get_attribution(bond)))
+                end = len(attribution_maps)
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
                     attribution_maps.append(AttributionMap(
                         len(derived) - 1 + attribution_index,
                         symbol, mol.get_attribution(bond)))
+
+                # account for branch symbol because it is inserted after
+                for i in range(start, end):
+                    attribution_maps[i].index += len(Q_as_symbols) + 1
+                derived.append(branch_symbol)
+                attribution_maps.append(AttributionMap(
+                    len(derived) - 1 + attribution_index,
+                    branch_symbol, mol.get_attribution(bond)))
+
                 derived.extend(branch)
 
         # end of chain
         if (not out_bonds) or out_bonds[-1].ring_bond:
             break
-
     return derived
 
 

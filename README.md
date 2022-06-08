@@ -168,11 +168,11 @@ SELFIES [C][N][C][Branch1][C][P][C][C][Ring1][=Branch1]
 SMILES C1NC(P)CC1
 Attribution:
 AttributionMap(index=0, token='C', attribution=[Attribution(index=0, token='[C]')])
-AttributionMap(index=4, token='N', attribution=[Attribution(index=1, token='[N]')])
-AttributionMap(index=6, token='C', attribution=[Attribution(index=2, token='[C]')])
-AttributionMap(index=9, token='P', attribution=[Attribution(index=3, token='[Branch1]'), Attribution(index=5, token='[P]')])
-AttributionMap(index=12, token='C', attribution=[Attribution(index=6, token='[C]')])
-AttributionMap(index=14, token='C', attribution=[Attribution(index=7, token='[C]')])
+AttributionMap(index=2, token='N', attribution=[Attribution(index=1, token='[N]')])
+AttributionMap(index=3, token='C', attribution=[Attribution(index=2, token='[C]')])
+AttributionMap(index=5, token='P', attribution=[Attribution(index=3, token='[Branch1]'), Attribution(index=5, token='[P]')])
+AttributionMap(index=7, token='C', attribution=[Attribution(index=6, token='[C]')])
+AttributionMap(index=8, token='C', attribution=[Attribution(index=7, token='[C]')])
 ```
 
 ``attr`` is a list of `AttributionMap`s containing the output token, its index, and input tokens that led to it. For example, the ``P`` appearing in the output SMILES at that location is a result of both the ``[Branch1]`` token at position 3 and the ``[P]`` token at index 5. This works for both encoding and decoding. For finer control of tracking the translation (like tracking rings), you can access attributions in the underlying molecular graph with ``get_attribution``.
