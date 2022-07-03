@@ -105,7 +105,7 @@ A key property of SELFIES is the possibility to create valid random molecules in
 import selfies as sf
 import random
 
-alphabet=sf.get_semantic_robust_alphabet() # Get's the alphabet of robust symbols
+alphabet=sf.get_semantic_robust_alphabet() # Gets the alphabet of robust symbols
 rnd_selfies=''.join(random.sample(list(alphabet), 9))
 rnd_smiles=sf.decoder(rnd_selfies)
 print(rnd_smiles)
