@@ -13,6 +13,7 @@
 _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-Guzik_\
 [*Machine Learning: Science and Technology* **1**, 045024 (2020)](https://iopscience.iop.org/article/10.1088/2632-2153/aba947), [extensive blog post January 2021](https://aspuru.substack.com/p/molecular-graph-representations-and).\
 [Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).\
+[A community paper with 31 authors on SELFIES and the future of molecular string representations](https://arxiv.org/abs/2204.00056).\
 [Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)\
 Major contributors of v1.0.n: _[Alston Lo](https://github.com/alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_\
 Main developer of v2.0.0: _[Alston Lo](https://github.com/alstonlo)_\
@@ -97,6 +98,19 @@ symbols_benzene = list(sf.split_selfies(benzene_sf))
 # ['[C]', '[=C]', '[C]', '[=C]', '[C]', '[=C]', '[Ring1]', '[=Branch1]']
 ```
 
+#### Very simple creation of random valid molecules:
+A key property of SELFIES is the possibility to create valid random molecules in a very simple way -- inspired by a tweet by [Rajarshi Guha](https://twitter.com/rguha/status/1543601839983284224):
+
+```python
+import selfies as sf
+import random
+
+alphabet=sf.get_semantic_robust_alphabet() # Gets the alphabet of robust symbols
+rnd_selfies=''.join(random.sample(list(alphabet), 9))
+rnd_smiles=sf.decoder(rnd_selfies)
+print(rnd_smiles)
+```
+These simple lines gives crazy molecules, but all are valid. Can be used as a start for more advanced filtering techniques or for machine learning models.
 
 #### Integer and one-hot encoding SELFIES:
 
