@@ -196,6 +196,8 @@ def _fragment_to_selfies(mol, bond_into_root, root,
                     len(Q_as_symbols)
                 )
                 end = len(attribution_maps)
+
+                derived.append(branch_symbol)
                 for symbol in Q_as_symbols:
                     derived.append(symbol)
                     attribution_maps.append(AttributionMap(
@@ -203,9 +205,8 @@ def _fragment_to_selfies(mol, bond_into_root, root,
                         symbol, mol.get_attribution(bond)))
 
                 # account for branch symbol because it is inserted after
-                for i in range(start, end):
-                    attribution_maps[i].index += len(Q_as_symbols) + 1
-                derived.append(branch_symbol)
+                for j in range(start, end):
+                    attribution_maps[j].index += len(Q_as_symbols) + 1
                 attribution_maps.append(AttributionMap(
                     len(derived) - 1 + attribution_index,
                     branch_symbol, mol.get_attribution(bond)))
