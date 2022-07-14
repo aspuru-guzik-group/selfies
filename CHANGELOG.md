@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.1.1 - TBD
+## v2.1.1 - 14.05.2022
 - Fixed index bug in attribution 
 
 ## v2.1.0 - 17.05.2022
