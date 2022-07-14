@@ -424,12 +424,16 @@ def mol_to_smiles(
         derived = []
         _derive_smiles_from_fragment(
             derived, mol, root, ring_log, attribution_maps, attribution_index)
-        attribution_index += len(derived)
+        attribution_index += _strlen(derived)
         fragments.append("".join(derived))
     # trim attribution map of empty tokens
     attribution_maps = [a for a in attribution_maps if a.token]
     result = ".".join(fragments), attribution_maps
     return result if attribute else result[0]
+
+
+def _strlen(slist: List[str]) -> int:
+    return len(''.join(slist))
 
 
 def _derive_smiles_from_fragment(
@@ -442,7 +446,7 @@ def _derive_smiles_from_fragment(
     token = atom_to_smiles(curr_atom)
     derived.append(token)
     attribution_maps.append(AttributionMap(
-        len(derived) - 1 + attribution_index,
+        _strlen(derived) - 1 + attribution_index,
         token, mol.get_attribution(curr_atom)))
 
     out_bonds = mol.get_out_dirbonds(curr)
@@ -451,7 +455,7 @@ def _derive_smiles_from_fragment(
             token = bond_to_smiles(bond)
             derived.append(token)
             attribution_maps.append(AttributionMap(
-                len(derived) - 1 + attribution_index,
+                _strlen(derived) - 1 + attribution_index,
                 token, mol.get_attribution(bond)))
             ends = (min(bond.src, bond.dst), max(bond.src, bond.dst))
             rnum = ring_log.setdefault(ends, len(ring_log) + 1)
@@ -466,7 +470,7 @@ def _derive_smiles_from_fragment(
             token = bond_to_smiles(bond)
             derived.append(token)
             attribution_maps.append(AttributionMap(
-                len(derived) - 1 + attribution_index,
+                _strlen(derived) - 1 + attribution_index,
                 token, mol.get_attribution(bond)))
             _derive_smiles_from_fragment(
                 derived, mol, bond.dst, ring_log,
