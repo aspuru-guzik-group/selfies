@@ -15,6 +15,7 @@ _Mario Krenn, Florian Haese, AkshatKumar Nigam, Pascal Friederich, Alan Aspuru-G
 [Talk on youtube about SELFIES](https://www.youtube.com/watch?v=CaIyUmfGXDk).\
 [A community paper with 31 authors on SELFIES and the future of molecular string representations](https://arxiv.org/abs/2204.00056).\
 [Blog explaining SELFIES in Japanese language](https://blacktanktop.hatenablog.com/entry/2021/08/12/115613)\
+**[Code-Paper in February 2023](https://arxiv.org/abs/2302.03620)**\
 Major contributors of v1.0.n: _[Alston Lo](https://github.com/alstonlo) and [Seyone Chithrananda](https://github.com/seyonechithrananda)_\
 Main developer of v2.0.0: _[Alston Lo](https://github.com/alstonlo)_\
 Chemistry Advisor: [Robert Pollice](https://scholar.google.at/citations?user=JR2N3JIAAAAJ)
