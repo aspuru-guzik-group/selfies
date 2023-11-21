@@ -47,21 +47,18 @@ def selfies_to_encoding(
         selfies += "[nop]" * (pad_to_len - len_selfies(selfies))
 
     # integer encode
-    char_list = split_selfies(selfies)
-
-    try:
-        integer_encoded = [vocab_stoi[char] for char in char_list]
-    except KeyError as e:
-        if e.args[0] == ".":
+    integer_encoded = []
+    for char in split_selfies(selfies):
+        if (char == ".") and ("." not in vocab_stoi):
             raise KeyError(
                 "The SELFIES string contains two unconnected molecules "
                 "(given by the '.' character), but vocab_stoi does not "
                 "contain the '.' key. Please add it to the vocabulary "
                 "or separate the molecules."
             )
-        raise KeyError(e.args[0])
-        
 
+        integer_encoded.append(vocab_stoi[char])
+        
     if enc_type == "label":
         return integer_encoded
 
