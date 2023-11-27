@@ -107,12 +107,13 @@ SELFIES_ATOM_PATTERN = re.compile(
     r"^[\[]"  # opening square bracket [
     r"([=#/\\]?)"  # bond char
     r"(\d*)"  # isotope number (optional, e.g. 123, 26)
-    r"([A-Z][a-z]?)"  # element symbol
+    r"([A-Z][a-z]?|\*)"  # element symbol or wildcard
     r"([@]{0,2})"  # chiral_tag (optional, only @ and @@ supported)
     r"((?:[H]\d)?)"  # H count (optional, e.g. H1, H3)
     r"((?:[+-][1-9]+)?)"  # charge (optional, e.g. +1)
     r"[]]$"  # closing square bracket ]
 )
+
 
 
 def _process_atom_selfies_no_cache(symbol):

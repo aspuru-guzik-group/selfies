@@ -66,6 +66,11 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 
     i = 0
     while i < len(smiles):
+        # 添加这部分来处理 * 符号
+        if smiles[i] == "*" or smiles[i:i+3] == "[*]":
+            yield SMILESToken(None, i, i + 1, SMILESTokenTypes.ATOM, "*")
+            i += 1
+            continue
 
         if smiles[i] == ".":
             yield SMILESToken(None, i, i + 1, SMILESTokenTypes.DOT, smiles[i])
@@ -127,12 +132,16 @@ def tokenize_smiles(smiles: str) -> Iterator[SMILESToken]:
 # =============================================================================
 
 
+
+
 def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
     """Reads an atom from its SMILES representation.
 
     :param atom_symbol: a SMILES atom symbol.
     :return: the atom that the input symbol represents.
     """
+    if atom_symbol == "*":
+        return Atom("*", False)
 
     if atom_symbol[0] == "[" and atom_symbol[-1] == "]":
         pass  # continue below
@@ -181,6 +190,7 @@ def smiles_to_atom(atom_symbol: str) -> Optional[Atom]:
         h_count=h_count,
         charge=charge
     )
+
 
 
 def smiles_to_bond(
@@ -358,6 +368,8 @@ def atom_to_smiles(atom: Atom, brackets: bool = True) -> str:
     :return: a SMILES symbol representing the input atom.
     """
     assert not atom.is_aromatic
+    if atom.element == '*':
+        return '*'
 
     specs = (atom.isotope, atom.chirality, atom.h_count, atom.charge)
     if specs == (None, None, None, 0):
@@ -443,12 +455,17 @@ def _derive_smiles_from_fragment(
         ring_log,
         attribution_maps, attribution_index=0):
     curr_atom, curr = mol.get_atom(root), root
-    token = atom_to_smiles(curr_atom)
+    
+    if curr_atom.is_wildcard:  # 使用新增属性进行判断
+        token = "*"
+    else:
+        token = atom_to_smiles(curr_atom)
+
+    # token = atom_to_smiles(curr_atom)
     derived.append(token)
     attribution_maps.append(AttributionMap(
         _strlen(derived) - 1 + attribution_index,
         token, mol.get_attribution(curr_atom)))
-
     out_bonds = mol.get_out_dirbonds(curr)
     for i, bond in enumerate(out_bonds):
         if bond.ring_bond:
