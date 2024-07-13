@@ -154,9 +154,19 @@ def _derive_mol_from_symbols(
         elif "eps" in symbol:
             next_state = 0 if (state == 0) else None
 
-        # Case 4: regular symbol (e.g. [N], [=C], [F])
-        else:
+        # Case 4: [*]
+        elif symbol == "*":
+            atom = mol.add_wildcard_atom()  # add wildcard atom
+            mol.add_attribution(
+                atom, attribute_stack +
+                [Attribution(index + attribution_index, symbol)]
+                if attribute_stack is not None else None
+            )
+            prev_atom = atom
+            next_state = 0
 
+        # Case 5: regular symbol (e.g. [N], [=C], [F])
+        else:
             output = process_atom_symbol(symbol)
             if output is None:
                 _raise_decoder_error(selfies, symbol)
@@ -185,6 +195,7 @@ def _derive_mol_from_symbols(
                     [Attribution(index + attribution_index, symbol)]
                     if attribute_stack is not None else None)
             prev_atom = atom
+    
 
         if next_state is None:
             break

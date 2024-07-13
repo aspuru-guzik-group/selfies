@@ -42,7 +42,8 @@ class Atom:
             isotope: Optional[int] = None,
             chirality: Optional[str] = None,
             h_count: Optional[int] = None,
-            charge: int = 0
+            charge: int = 0,
+            is_wildcard: bool = False
     ):
         self.index = None
         self.element = element
@@ -51,7 +52,8 @@ class Atom:
         self.chirality = chirality
         self.h_count = h_count
         self.charge = charge
-
+        self.is_wildcard = is_wildcard
+        
     @property
     @functools.lru_cache()
     def bonding_capacity(self):
@@ -142,6 +144,8 @@ class MolecularGraph:
     def get_bond_count(self, idx: int) -> int:
         return self._bond_counts[idx]
 
+
+
     def add_atom(self, atom: Atom, mark_root: bool = False) -> Atom:
         atom.index = len(self)
 
@@ -154,6 +158,14 @@ class MolecularGraph:
         if atom.is_aromatic:
             self._delocal_subgraph[atom.index] = list()
         return atom
+    
+
+    def add_wildcard_atom(self, mark_root: bool = False) -> Atom:
+        wildcard_atom = Atom(element='*', is_aromatic=False, is_wildcard=True, h_count=0, charge=0)  # add is_wildcard=True
+        added_atom = self.add_atom(wildcard_atom, mark_root)
+        return added_atom
+
+
 
     def add_attribution(
             self,

@@ -47,7 +47,7 @@ def encoder(smiles: str, strict: bool = True, attribute: bool = False) -> str:
     >>> import selfies as sf
     >>> sf.encoder("C=CF")
     '[C][=C][F]'
-
+atom
     .. note:: This function does not currently support SMILES with:
 
         *   The wildcard symbol ``*``.
@@ -240,3 +240,4 @@ def _atom_to_selfies(bond, atom):
     assert not atom.is_aromatic
     bond_char = "" if (bond is None) else _bond_to_selfies(bond)
     return "[{}{}]".format(bond_char, atom_to_smiles(atom, brackets=False))
+
