@@ -329,3 +329,12 @@ def test_old_symbols():
         sf.decoder(long_s, compatible=True)
     except Exception:
         assert False
+
+def test_large_selfies_decoding():
+    """Test that we can decode extremely large SELFIES strings (used to cause a RecursionError)
+    """
+
+    large_selfies = "[C]" * 1024
+    expected_smiles = "C" * 1024
+
+    assert decode_eq(large_selfies, expected_smiles)
