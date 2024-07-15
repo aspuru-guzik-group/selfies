@@ -442,39 +442,49 @@ def _derive_smiles_from_fragment(
         root,
         ring_log,
         attribution_maps, attribution_index=0):
-    curr_atom, curr = mol.get_atom(root), root
-    token = atom_to_smiles(curr_atom)
-    derived.append(token)
-    attribution_maps.append(AttributionMap(
-        _strlen(derived) - 1 + attribution_index,
-        token, mol.get_attribution(curr_atom)))
+    stack = [(root, 0, len(mol.get_out_dirbonds(root)), False)]
 
-    out_bonds = mol.get_out_dirbonds(curr)
-    for i, bond in enumerate(out_bonds):
-        if bond.ring_bond:
-            token = bond_to_smiles(bond)
+    while stack:
+        curr, bond_index, total_bonds, needs_closing = stack[-1]
+        curr_atom = mol.get_atom(curr)
+
+        if bond_index == 0:
+            token = atom_to_smiles(curr_atom)
             derived.append(token)
             attribution_maps.append(AttributionMap(
                 _strlen(derived) - 1 + attribution_index,
-                token, mol.get_attribution(bond)))
-            ends = (min(bond.src, bond.dst), max(bond.src, bond.dst))
-            rnum = ring_log.setdefault(ends, len(ring_log) + 1)
-            if rnum >= 10:
-                derived.append("%")
-            derived.append(str(rnum))
+                token, mol.get_attribution(curr_atom)))
 
+        out_bonds = mol.get_out_dirbonds(curr)
+
+        if bond_index < total_bonds:
+            bond = out_bonds[bond_index]
+            bond_attribution = mol.get_attribution(bond)
+            stack[-1] = (curr, bond_index + 1, total_bonds, needs_closing)
+
+            if bond.ring_bond:
+                token = bond_to_smiles(bond)
+                derived.append(token)
+                attribution_maps.append(AttributionMap(
+                    _strlen(derived) - 1 + attribution_index,
+                    token, bond_attribution))
+                ends = (min(bond.src, bond.dst), max(bond.src, bond.dst))
+                rnum = ring_log.setdefault(ends, len(ring_log) + 1)
+                if rnum >= 10:
+                    derived.append("%")
+                derived.append(str(rnum))
+            else:
+                if bond_index < total_bonds - 1:
+                    derived.append("(")
+
+                token = bond_to_smiles(bond)
+                derived.append(token)
+                attribution_maps.append(AttributionMap(
+                    _strlen(derived) - 1 + attribution_index,
+                    token, bond_attribution))
+                stack.append((bond.dst, 0, len(mol.get_out_dirbonds(bond.dst)), bond_index < total_bonds - 1))
         else:
-            if i < len(out_bonds) - 1:
-                derived.append("(")
-
-            token = bond_to_smiles(bond)
-            derived.append(token)
-            attribution_maps.append(AttributionMap(
-                _strlen(derived) - 1 + attribution_index,
-                token, mol.get_attribution(bond)))
-            _derive_smiles_from_fragment(
-                derived, mol, bond.dst, ring_log,
-                attribution_maps, attribution_index)
-            if i < len(out_bonds) - 1:
+            stack.pop()
+            if needs_closing:
                 derived.append(")")
     return attribution_maps
