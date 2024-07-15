@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.1.2 - 15.07.2024
+- Fixed recursion bug for very long molecules (thanks haydn-jones)
+- Added warning when dot-symbol (".") exists in peculiar cases (thanks vandrw)
+
 ## v2.1.1 - 14.07.2022
 - Fixed index bug in attribution 
 
