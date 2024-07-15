@@ -157,5 +157,5 @@ def test_encoder_attribution():
                 f'found {ta[1]}; should be {indices[i]}'
         if ta.token == '[Cl]':
             assert 'Cl' in [
-                a.token for a in ta.attribution],\
+                a.token for a in ta.attribution], \
                 'Failed to find Cl in attribution map'
