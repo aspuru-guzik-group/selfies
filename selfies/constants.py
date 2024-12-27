@@ -21,6 +21,13 @@ AROMATIC_VALENCES = {
     "O": (2, 4), "S": (2, 4), "Se": (2, 4), "Te": (2, 4)
 }
 
+VALENCE_ELECTRONS = {
+    "B": 3, "Al": 3,
+    "C": 4, "Si": 4,
+    "N": 5, "P": 5, "As": 5,
+    "O": 6, "S": 6, "Se": 6, "Te": 6
+}
+
 AROMATIC_SUBSET = set(e.lower() for e in AROMATIC_VALENCES)
 
 # =============================================================================

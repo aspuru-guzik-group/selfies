@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from dataclasses import dataclass, field
 
 from selfies.bond_constraints import get_bonding_capacity
-from selfies.constants import AROMATIC_VALENCES
+from selfies.constants import AROMATIC_VALENCES, VALENCE_ELECTRONS
 from selfies.utils.matching_utils import find_perfect_matching
 
 
@@ -254,7 +254,7 @@ class MolecularGraph:
 
         ds = self._delocal_subgraph
         kept_nodes = set(itertools.filterfalse(self._prune_from_ds, ds))
-
+        
         # relabel kept DS nodes to be 0, 1, 2, ...
         label_to_node = list(sorted(kept_nodes))
         node_to_label = {v: i for i, v in enumerate(label_to_node)}
@@ -265,7 +265,7 @@ class MolecularGraph:
             label = node_to_label[node]
             for adj in filter(lambda v: v in kept_nodes, ds[node]):
                 pruned_ds[label].append(node_to_label[adj])
-
+        
         matching = find_perfect_matching(pruned_ds)
         if matching is None:
             return False
@@ -288,18 +288,27 @@ class MolecularGraph:
         adj_nodes = self._delocal_subgraph[node]
         if not adj_nodes:
             return True  # aromatic atom with no aromatic bonds
-
+        
         atom = self._atoms[node]
         valences = AROMATIC_VALENCES[atom.element]
-
+        
         # each bond in DS has order 1.5 - we treat them as single bonds
         used_electrons = int(self._bond_counts[node] - 0.5 * len(adj_nodes))
-
+        
         if atom.h_count is None:  # account for implicit Hs
             assert atom.charge == 0
             return any(used_electrons == v for v in valences)
         else:
             valence = valences[-1] - atom.charge
             used_electrons += atom.h_count
-            free_electrons = valence - used_electrons
-            return not ((free_electrons >= 0) and (free_electrons % 2 != 0))
+            bound_electrons = (max(0, atom.charge) + atom.h_count 
+                               + int(self._bond_counts[node]) 
+                               + int(2 * (self._bond_counts[node] % 1)))
+            radical_electrons = (max(0, VALENCE_ELECTRONS[atom.element] 
+                                 - bound_electrons) % 2)
+            free_electrons = valence - used_electrons - radical_electrons
+            
+            if any(used_electrons == v - atom.charge for v in valences):
+                return True
+            else:
+                return not ((free_electrons >= 0) and (free_electrons % 2 != 0))

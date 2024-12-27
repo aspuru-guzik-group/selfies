@@ -8,6 +8,12 @@ def decode_eq(selfies, smiles):
     return s == smiles
 
 
+def roundtrip_eq(smiles_in, smiles_out):
+    sel = sf.encoder(smiles_in)
+    smi = sf.decoder(sel)
+    return smi == smiles_out
+
+
 def test_branch_and_ring_at_state_X0():
     """Tests SELFIES with branches and rings at state X0 (i.e. at the
     very beginning of a SELFIES). These symbols should be skipped.
@@ -330,6 +336,7 @@ def test_old_symbols():
     except Exception:
         assert False
 
+
 def test_large_selfies_decoding():
     """Test that we can decode extremely large SELFIES strings (used to cause a RecursionError)
     """
@@ -338,3 +345,18 @@ def test_large_selfies_decoding():
     expected_smiles = "C" * 1024
 
     assert decode_eq(large_selfies, expected_smiles)
+
+
+def test_radical_kekulization():
+    """Tests kekulization of aromatic systems with radicals and charges.
+    """
+    
+    assert roundtrip_eq("c1ccc[c]c1", "C1=CC=C[CH0]=C1")
+    assert roundtrip_eq("c1[c]n1(C)", "C1=[CH0]N1C")
+    assert roundtrip_eq("c1[C][n+]1(C)", "C=1[CH0][N+1]=1C")
+    assert roundtrip_eq("c1nnn[n-]1", "C1=NN=N[N-1]1")
+    assert roundtrip_eq("c1ccn[c-](C)[n+]1=O", "C1=CC=N[C-1](C)[N+1]1=O")
+    assert roundtrip_eq("c1ccs[n+]1c2ccccc2", "C=1C=CS[N+1]=1C2=CC=CC=C2")
+    assert roundtrip_eq("c1ccs[nH+]1", "C=1C=CS[NH1+1]=1")
+    
+    
