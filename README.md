@@ -221,7 +221,7 @@ By default, `selfies` is tested against a random subset
  * 130K molecules from [QM9](https://www.nature.com/articles/sdata201422)
  * 250K molecules from [ZINC](https://en.wikipedia.org/wiki/ZINC_database)
  * 50K molecules from a dataset of [non-fullerene acceptors for organic solar cells](https://www.sciencedirect.com/science/article/pii/S2542435117301307)
- * 160K+ molecules from various [MoleculeNet](http://moleculenet.ai/datasets-1) datasets
+ * 160K+ molecules from various [MoleculeNet](https://moleculenet.org/datasets-1) datasets
  * 36M+ molecules from the [eMolecules Database](https://www.emolecules.com/info/products-data-downloads.html).
    Due to its large size, this dataset is not included on the repository. To run tests
    on it, please download the dataset into the ``tests/test_sets`` directory
