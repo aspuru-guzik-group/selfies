@@ -342,5 +342,5 @@ def test_large_selfies_decoding():
 def test_novel_charged_symbols():
     """Test decoding of updated constraints for charged atoms (update in 2.2.0)."""
     assert decode_eq("[N][#C+1][#NH1][#C@H1]", "N#[C+1]")
-    assert decode_eq("[O+1][=P+1][#P-1][#C@@]", "[O+1]=[P+1]=[P-1]=[C@@]")
+    assert decode_eq("[O+1][=P+1][#P-1][#C@@]", "[O+1]=[P+1]=[P-1]#[C@@]")
     assert decode_eq("[=C-1][#S+1][#B]", "[C-1]#[S+1]=B")
