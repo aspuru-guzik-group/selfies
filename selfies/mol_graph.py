@@ -301,11 +301,17 @@ class MolecularGraph:
         else:
             valence = valences[-1] - atom.charge
             used_electrons += atom.h_count
+            
+            # count the total number of bound electrons of each atom
             bound_electrons = (max(0, atom.charge) + atom.h_count 
                                + int(self._bond_counts[node]) 
                                + int(2 * (self._bond_counts[node] % 1)))
+            
+            # calculate the number of unpaired electrons of each atom
             radical_electrons = (max(0, VALENCE_ELECTRONS[atom.element] 
                                  - bound_electrons) % 2)
+            
+            # unpaired electrons do not contribute to the aromatic system
             free_electrons = valence - used_electrons - radical_electrons
             
             if any(used_electrons == v - atom.charge for v in valences):
