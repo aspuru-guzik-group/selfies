@@ -59,7 +59,7 @@ pip install selfies --upgrade
 
 ### Overview
 
-Please refer to the [documentation](https://selfiesv2.readthedocs.io/en/latest/),
+Please refer to the [documentation in our code-paper](https://pubs.rsc.org/en/content/articlelanding/2023/DD/D3DD00044C),
 which contains a thorough tutorial  for getting started with ``selfies``
 and detailed descriptions of the functions
 that ``selfies`` provides. We summarize some key functions below.
