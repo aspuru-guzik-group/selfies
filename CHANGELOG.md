@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.0 - 06.01.2025
+- Fixed bug in the kekulization of molecules with radicals (thanks Olabisi-Aishat-Bello for reporting, thanks Robert Pollice for fixing)
+- Fixed constraints for validity of molecules with changed C, P or S, to align with validity-definition of RDKit.
+  
 ## v2.1.2 - 15.07.2024
 - Fixed recursion bug for very long molecules (thanks haydn-jones)
 - Added warning when dot-symbol (".") exists in peculiar cases (thanks vandrw)
