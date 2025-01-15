@@ -1,6 +1,6 @@
 # Changelog
 
-## v2.2.0 - 06.01.2025
+## v2.2.0 - 15.01.2025
 - Fixed bug in the kekulization of molecules with radicals (thanks Olabisi-Aishat-Bello for reporting, thanks Robert Pollice for fixing)
 - Fixed constraints for validity of molecules with changed C, P or S, to align with validity-definition of RDKit.
   
