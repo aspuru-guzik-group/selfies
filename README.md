@@ -195,6 +195,7 @@ AttributionMap(index=8, token='C', attribution=[Attribution(index=7, token='[C]'
 
 ### More Usages and Examples
 
+* Ethan J. French _et al_ [derived molecular structures from IR Spectra](https://doi.org/10.26434/chemrxiv-2025-n4q84) using SELFIES and showed it outperformed SMILES 
 * More examples can be found in the ``examples/`` directory, including a
 [variational autoencoder that runs on the SELFIES](https://github.com/aspuru-guzik-group/selfies/tree/master/examples/vae_example) language.
 * This [ICLR2020 paper](https://arxiv.org/abs/1909.11655) used SELFIES in a
