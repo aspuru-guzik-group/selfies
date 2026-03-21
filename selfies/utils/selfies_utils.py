@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Iterable, Iterator, Set
 
 
@@ -29,21 +30,15 @@ def split_selfies(selfies: str) -> Iterator[str]:
     >>> list(sf.split_selfies("[C][=C][F].[C]"))
     ['[C]', '[=C]', '[F]', '.', '[C]']
     """
-
-    left_idx = selfies.find("[")
-
-    while 0 <= left_idx < len(selfies):
-        right_idx = selfies.find("]", left_idx + 1)
-        if right_idx == -1:
-            raise ValueError("malformed SELFIES string, hanging '[' bracket")
-
-        next_symbol = selfies[left_idx: right_idx + 1]
-        yield next_symbol
-
-        left_idx = right_idx + 1
-        if selfies[left_idx: left_idx + 1] == ".":
-            yield "."
-            left_idx += 1
+    splitted_on_dots = selfies.split(".")
+    splitted_on_brackets = [s[1: -1].split("][") for s in splitted_on_dots]
+    if "[" in splitted_on_brackets[-1][-1]:
+        raise ValueError("malformed SELFIES string, hanging '[' bracket")
+    symbols = ([f"[{x}]" for x in xs] for xs in splitted_on_brackets)
+    interleaved = (
+        x if i == 0 else ["."] + x for i, x in enumerate(symbols)
+    )
+    return chain.from_iterable(interleaved)
 
 
 def get_alphabet_from_selfies(selfies_iter: Iterable[str]) -> Set[str]:
