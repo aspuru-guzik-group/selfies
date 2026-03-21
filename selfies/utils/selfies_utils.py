@@ -34,7 +34,7 @@ def split_selfies(selfies: str) -> Iterator[str]:
     splitted_on_brackets = [s[1: -1].split("][") for s in splitted_on_dots]
     if "[" in splitted_on_brackets[-1][-1]:
         raise ValueError("malformed SELFIES string, hanging '[' bracket")
-    symbols = ([f"[{x}]" for x in xs] for xs in splitted_on_brackets)
+    symbols = ([f"[{x}]" for x in xs if x] for xs in splitted_on_brackets)
     interleaved = (
         x if i == 0 else ["."] + x for i, x in enumerate(symbols)
     )
